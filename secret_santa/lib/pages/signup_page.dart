@@ -1,21 +1,22 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:secret_santa/components/auth_password_textfield.dart';
 import 'package:secret_santa/components/auth_textfield.dart';
-import 'package:secret_santa/pages/signup_page.dart';
+import 'package:secret_santa/pages/login_page.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignupPageState extends State<SignupPage> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+  final nameController = TextEditingController();
+  final firstNameController = TextEditingController();
 
   @override
   void dispose() {
@@ -55,17 +56,29 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.only(left: 30.0, right: 30.0),
               child: Column(
                 children: [
-                  const SizedBox(height: 150),
+                  const SizedBox(height: 75),
                   Form(
                     key: _formKey,
                     child: Column(
                       children: [
-                        Text("Connexion",
+                        Text("Inscription",
                             style: TextStyle(
                                 fontSize: 30,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.grey[800])),
                         const SizedBox(height: 50),
+                        AuthTextfield(
+                            controller: firstNameController,
+                            icon: const Icon(Icons.person),
+                            label: "Prénom"),
+                        const SizedBox(height: 25),
+
+                        // Name TextField
+                        AuthTextfield(
+                            controller: nameController,
+                            icon: const Icon(Icons.person),
+                            label: "Nom"),
+                        const SizedBox(height: 25),
 
                         // Email TextField
                         AuthTextfield(
@@ -78,6 +91,12 @@ class _LoginPageState extends State<LoginPage> {
                         AuthPasswordTextfield(
                             controller: passwordController,
                             label: "Mot de passe"),
+                        const SizedBox(height: 25),
+
+                        // Confirm Password TextField
+                        AuthPasswordTextfield(
+                            controller: confirmPasswordController,
+                            label: "Confirmer le mot de passe"),
                         const SizedBox(
                           height: 10.0,
                         ),
@@ -97,14 +116,14 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         FloatingActionButton.extended(
                           extendedPadding:
-                              const EdgeInsets.symmetric(horizontal: 95.0),
+                              const EdgeInsets.symmetric(horizontal: 111.0),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30.0),
                           ),
                           backgroundColor: const Color(0xFFB2EBF2),
                           onPressed: () => {},
                           label: Text(
-                            "Se connecter",
+                            "S'inscrire",
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18.0,
@@ -116,17 +135,17 @@ class _LoginPageState extends State<LoginPage> {
                           padding: const EdgeInsets.only(top: 15.0),
                           child: Row(
                             children: [
-                              const Text("Pas encore inscrit ? "),
+                              const Text("Déjà inscrit ? "),
                               GestureDetector(
                                 onTap: () => {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (context) => const SignupPage(),
+                                      builder: (context) => const LoginPage(),
                                     ),
                                   ),
                                 },
                                 child: const Text(
-                                  "S'inscrire",
+                                  "Se connecter",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               )
