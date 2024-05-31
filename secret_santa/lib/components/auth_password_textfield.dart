@@ -14,11 +14,11 @@ class AuthPasswordTextfield extends StatefulWidget {
 }
 
 class _AuthPasswordTextfieldState extends State<AuthPasswordTextfield> {
-  bool _isVisible = false;
+  bool _isVisible = true;
 
   @override
   void initState() {
-    _isVisible = false;
+    _isVisible = true;
     super.initState();
   }
 

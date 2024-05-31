@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "411582079759",
+    "project_id": "secretsanta-659bc",
+    "storage_bucket": "secretsanta-659bc.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:411582079759:android:7a4cc01e0f27634965d47a",
+        "android_client_info": {
+          "package_name": "com.example.secret_santa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6tBEH78DioRaC1mPTBDadxR42hdPUW4k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
