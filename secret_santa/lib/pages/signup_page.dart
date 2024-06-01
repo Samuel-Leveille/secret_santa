@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:secret_santa/components/auth_password_textfield.dart';
 import 'package:secret_santa/components/auth_textfield.dart';
 import 'package:secret_santa/firebase_auth/auth_services.dart';
+import 'package:secret_santa/pages/accueil_page.dart';
 import 'package:secret_santa/pages/login_page.dart';
 
 class SignupPage extends StatefulWidget {
@@ -166,12 +168,6 @@ class _SignupPageState extends State<SignupPage> {
     String password = passwordController.text;
     String confirmPassword = confirmPasswordController.text;
 
-    print(name);
-    print(firstName);
-    print(email);
-    print(password);
-    print(confirmPassword);
-
     if (name.isEmpty ||
         firstName.isEmpty ||
         email.isEmpty ||
@@ -216,7 +212,19 @@ class _SignupPageState extends State<SignupPage> {
     User? user = await _auth.signUpWithEmailAndPassword(email, password);
 
     if (user != null) {
-      // TODO : Push vers la page d'accueil
+      CollectionReference collRef =
+          FirebaseFirestore.instance.collection('users');
+      collRef.add({
+        'firstName': firstName,
+        'name': name,
+        'email': email,
+        'role': 'utilisateur'
+      });
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => const AccueilPage(),
+        ),
+      );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

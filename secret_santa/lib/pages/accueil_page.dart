@@ -1,6 +1,12 @@
+import 'dart:async';
+
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:secret_santa/firebase_auth/auth_services.dart';
+import 'package:secret_santa/pages/login_page.dart';
 
 class AccueilPage extends StatefulWidget {
   const AccueilPage({super.key});
@@ -10,13 +16,39 @@ class AccueilPage extends StatefulWidget {
 }
 
 class _AccueilPageState extends State<AccueilPage> {
+  final AuthServices _auth = AuthServices();
+
+  Future<void> signOut(BuildContext context) async {
+    try {
+      await _auth.signOut();
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const LoginPage()),
+      );
+    } catch (e) {
+      print("Some error occured with sign out : ${e.toString()}");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         alignment: Alignment.center,
-        child: const Center(
-          child: Text("Bienvenue sur la page d'accueil"),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("Bienvenue sur la page d'accueil"),
+              const SizedBox(
+                height: 20,
+              ),
+              FloatingActionButton(
+                  onPressed: () async {
+                    await signOut(context);
+                  },
+                  child: const Text("Logout")),
+            ],
+          ),
         ),
       ),
     );
