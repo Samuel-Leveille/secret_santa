@@ -17,6 +17,7 @@ class AccueilPage extends StatefulWidget {
 
 class _AccueilPageState extends State<AccueilPage> {
   final AuthServices _auth = AuthServices();
+  int _currentIndex = 0;
 
   Future<void> signOut(BuildContext context) async {
     try {
@@ -34,22 +35,52 @@ class _AccueilPageState extends State<AccueilPage> {
     return Scaffold(
       body: Container(
         alignment: Alignment.center,
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("Bienvenue sur la page d'accueil"),
-              const SizedBox(
-                height: 20,
-              ),
-              FloatingActionButton(
-                  onPressed: () async {
-                    await signOut(context);
-                  },
-                  child: const Text("Logout")),
-            ],
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("Bienvenue sur la page d'accueil"),
+                const SizedBox(
+                  height: 20,
+                ),
+                FloatingActionButton(
+                    onPressed: () async {
+                      await signOut(context);
+                    },
+                    child: const Text("Logout")),
+              ],
+            ),
           ),
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() {
+          _currentIndex = index;
+        }),
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.home),
+            label: "Accueil",
+            backgroundColor: Colors.blue[300],
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.person),
+            label: "Profil",
+            backgroundColor: Colors.blue[300],
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.people),
+            label: "Amis",
+            backgroundColor: Colors.blue[300],
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.chat),
+            label: "Clavardage",
+            backgroundColor: Colors.blue[300],
+          )
+        ],
       ),
     );
   }

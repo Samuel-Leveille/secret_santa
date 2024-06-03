@@ -60,99 +60,102 @@ class _SignupPageState extends State<SignupPage> {
               ]),
         ),
         child: SingleChildScrollView(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 30.0, right: 30.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 75),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        Text("Inscription",
-                            style: TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[800])),
-                        const SizedBox(height: 50),
+          child: SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 75),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          Text("Inscription",
+                              style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[800])),
+                          const SizedBox(height: 50),
 
-                        // Firstname TextField
-                        AuthTextfield(
-                            controller: firstNameController,
-                            icon: const Icon(Icons.person),
-                            label: "Prénom"),
-                        const SizedBox(height: 25),
+                          // Firstname TextField
+                          AuthTextfield(
+                              controller: firstNameController,
+                              icon: const Icon(Icons.person),
+                              label: "Prénom"),
+                          const SizedBox(height: 25),
 
-                        // Name TextField
-                        AuthTextfield(
-                            controller: nameController,
-                            icon: const Icon(Icons.person),
-                            label: "Nom"),
-                        const SizedBox(height: 25),
+                          // Name TextField
+                          AuthTextfield(
+                              controller: nameController,
+                              icon: const Icon(Icons.person),
+                              label: "Nom"),
+                          const SizedBox(height: 25),
 
-                        // Email TextField
-                        AuthTextfield(
-                            controller: emailController,
-                            icon: const Icon(Icons.email),
-                            label: "Courriel"),
-                        const SizedBox(height: 25),
+                          // Email TextField
+                          AuthTextfield(
+                              controller: emailController,
+                              icon: const Icon(Icons.email),
+                              label: "Courriel"),
+                          const SizedBox(height: 25),
 
-                        // Password TextField
-                        AuthPasswordTextfield(
-                            controller: passwordController,
-                            label: "Mot de passe"),
-                        const SizedBox(height: 25),
+                          // Password TextField
+                          AuthPasswordTextfield(
+                              controller: passwordController,
+                              label: "Mot de passe"),
+                          const SizedBox(height: 25),
 
-                        // Confirm Password TextField
-                        AuthPasswordTextfield(
-                            controller: confirmPasswordController,
-                            label: "Confirmer le mot de passe"),
-                        const SizedBox(
-                          height: 40.0,
-                        ),
-                        FloatingActionButton.extended(
-                          extendedPadding:
-                              const EdgeInsets.symmetric(horizontal: 111.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.0),
+                          // Confirm Password TextField
+                          AuthPasswordTextfield(
+                              controller: confirmPasswordController,
+                              label: "Confirmer le mot de passe"),
+                          const SizedBox(
+                            height: 40.0,
                           ),
-                          backgroundColor: const Color(0xFFB2EBF2),
-                          onPressed: _signUp,
-                          label: Text(
-                            "S'inscrire",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.0,
-                              color: Colors.grey[800],
+                          FloatingActionButton.extended(
+                            extendedPadding:
+                                const EdgeInsets.symmetric(horizontal: 111.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: const Color(0xFFB2EBF2),
+                            onPressed: _signUp,
+                            label: Text(
+                              "S'inscrire",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18.0,
+                                color: Colors.grey[800],
+                              ),
                             ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 15.0),
-                          child: Row(
-                            children: [
-                              const Text("Déjà inscrit ? "),
-                              GestureDetector(
-                                onTap: () => {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => const LoginPage(),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 15.0),
+                            child: Row(
+                              children: [
+                                const Text("Déjà inscrit ? "),
+                                GestureDetector(
+                                  onTap: () => {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => const LoginPage(),
+                                      ),
                                     ),
+                                  },
+                                  child: const Text(
+                                    "Se connecter",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
                                   ),
-                                },
-                                child: const Text(
-                                  "Se connecter",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              )
-                            ],
-                          ),
-                        )
-                      ],
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

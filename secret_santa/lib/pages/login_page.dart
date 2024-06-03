@@ -55,93 +55,98 @@ class _LoginPageState extends State<LoginPage> {
               ]),
         ),
         child: SingleChildScrollView(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.only(left: 30.0, right: 30.0),
-              child: Column(
-                children: [
-                  const SizedBox(height: 150),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        Text("Connexion",
-                            style: TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[800])),
-                        const SizedBox(height: 50),
+          child: SafeArea(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 30.0, right: 30.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 150),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          Text("Connexion",
+                              style: TextStyle(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[800])),
+                          const SizedBox(height: 50),
 
-                        // Email TextField
-                        AuthTextfield(
-                            controller: emailController,
-                            icon: const Icon(Icons.email),
-                            label: "Courriel"),
-                        const SizedBox(height: 25),
+                          // Email TextField
+                          AuthTextfield(
+                              controller: emailController,
+                              icon: const Icon(Icons.email),
+                              label: "Courriel"),
+                          const SizedBox(height: 25),
 
-                        // Password TextField
-                        AuthPasswordTextfield(
-                            controller: passwordController,
-                            label: "Mot de passe"),
-                        const SizedBox(
-                          height: 10.0,
-                        ),
-                        Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              GestureDetector(
-                                child: const Text(
-                                  "Mot de passe oublié ?",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                onTap: () => {},
-                              ),
-                            ]),
-                        const SizedBox(
-                          height: 40.0,
-                        ),
-                        FloatingActionButton.extended(
-                          extendedPadding:
-                              const EdgeInsets.symmetric(horizontal: 95.0),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.0),
+                          // Password TextField
+                          AuthPasswordTextfield(
+                              controller: passwordController,
+                              label: "Mot de passe"),
+                          const SizedBox(
+                            height: 10.0,
                           ),
-                          backgroundColor: const Color(0xFFB2EBF2),
-                          onPressed: _signIn,
-                          label: Text(
-                            "Se connecter",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18.0,
-                              color: Colors.grey[800],
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                GestureDetector(
+                                  child: const Text(
+                                    "Mot de passe oublié ?",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  onTap: () => {},
+                                ),
+                              ]),
+                          const SizedBox(
+                            height: 40.0,
+                          ),
+                          FloatingActionButton.extended(
+                            extendedPadding:
+                                const EdgeInsets.symmetric(horizontal: 95.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30.0),
+                            ),
+                            backgroundColor: const Color(0xFFB2EBF2),
+                            onPressed: _signIn,
+                            label: Text(
+                              "Se connecter",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18.0,
+                                color: Colors.grey[800],
+                              ),
                             ),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 15.0),
-                          child: Row(
-                            children: [
-                              const Text("Pas encore inscrit ? "),
-                              GestureDetector(
-                                onTap: () => {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => const SignupPage(),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 15.0),
+                            child: Row(
+                              children: [
+                                const Text("Pas encore inscrit ? "),
+                                GestureDetector(
+                                  onTap: () => {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const SignupPage(),
+                                      ),
                                     ),
+                                  },
+                                  child: const Text(
+                                    "S'inscrire",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
                                   ),
-                                },
-                                child: const Text(
-                                  "S'inscrire",
-                                  style: TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                              )
-                            ],
-                          ),
-                        )
-                      ],
+                                )
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
