@@ -17,7 +17,6 @@ class AccueilPage extends StatefulWidget {
 
 class _AccueilPageState extends State<AccueilPage> {
   final AuthServices _auth = AuthServices();
-  int _currentIndex = 0;
 
   Future<void> signOut(BuildContext context) async {
     try {
@@ -34,13 +33,14 @@ class _AccueilPageState extends State<AccueilPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        color: Colors.white,
         alignment: Alignment.center,
         child: SafeArea(
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("Bienvenue sur la page d'accueil"),
+                const Text("Accueil"),
                 const SizedBox(
                   height: 20,
                 ),
@@ -53,34 +53,6 @@ class _AccueilPageState extends State<AccueilPage> {
             ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() {
-          _currentIndex = index;
-        }),
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.home),
-            label: "Accueil",
-            backgroundColor: Colors.blue[300],
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.person),
-            label: "Profil",
-            backgroundColor: Colors.blue[300],
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.people),
-            label: "Amis",
-            backgroundColor: Colors.blue[300],
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.chat),
-            label: "Clavardage",
-            backgroundColor: Colors.blue[300],
-          )
-        ],
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:secret_santa/components/auth_textfield.dart';
 import 'package:secret_santa/firebase_auth/auth_services.dart';
 import 'package:secret_santa/pages/accueil_page.dart';
 import 'package:secret_santa/pages/login_page.dart';
+import 'package:secret_santa/pages/transition_page.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -167,7 +168,7 @@ class _SignupPageState extends State<SignupPage> {
   void _signUp() async {
     String name = nameController.text;
     String firstName = firstNameController.text;
-    String email = emailController.text;
+    String email = emailController.text.trim();
     String password = passwordController.text;
     String confirmPassword = confirmPasswordController.text;
 
@@ -225,9 +226,14 @@ class _SignupPageState extends State<SignupPage> {
       });
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => const AccueilPage(),
+          builder: (context) => const TransitionPage(),
         ),
       );
+      emailController.text = "";
+      passwordController.text = "";
+      confirmPasswordController.text = "";
+      nameController.text = "";
+      firstNameController.text = "";
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

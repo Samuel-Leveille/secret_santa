@@ -7,6 +7,7 @@ import 'package:secret_santa/components/auth_textfield.dart';
 import 'package:secret_santa/firebase_auth/auth_services.dart';
 import 'package:secret_santa/pages/accueil_page.dart';
 import 'package:secret_santa/pages/signup_page.dart';
+import 'package:secret_santa/pages/transition_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -156,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _signIn() async {
-    String email = emailController.text;
+    String email = emailController.text.trim();
     String password = passwordController.text;
 
     User? user = await _auth.signInWithEmailAndPassword(email, password);
@@ -164,9 +165,11 @@ class _LoginPageState extends State<LoginPage> {
     if (user != null) {
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => const AccueilPage(),
+          builder: (context) => const TransitionPage(),
         ),
       );
+      emailController.text = "";
+      passwordController.text = "";
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Erreur : la connexion a échouée")),
