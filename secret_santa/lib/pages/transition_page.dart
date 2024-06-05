@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:secret_santa/pages/bottom_bar.dart';
+import 'package:secret_santa/components/bottom_bar.dart';
 
 class TransitionPage extends StatefulWidget {
   const TransitionPage({super.key});

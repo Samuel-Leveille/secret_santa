@@ -222,7 +222,8 @@ class _SignupPageState extends State<SignupPage> {
         'firstName': firstName,
         'name': name,
         'email': email,
-        'role': 'utilisateur'
+        'role': 'utilisateur',
+        'profileImageUrl': ''
       });
       Navigator.of(context).push(
         MaterialPageRoute(
