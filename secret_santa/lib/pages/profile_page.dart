@@ -17,6 +17,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   Uint8List? _image;
+  String? _imageUrl;
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   String? _userId;
@@ -25,6 +26,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     getUserId();
     getProfilePicture();
+    print("image url : $_imageUrl");
     super.initState();
   }
 
@@ -49,15 +51,23 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> selectImageFromGallery() async {
-    print(_userId);
     if (_userId == null) {
       print('Aucun utilisateur connecté');
       return;
     }
-    Uint8List img = pickImage(ImageSource.gallery, _userId!);
-    setState(() {
-      _image = img;
-    });
+    try {
+      Uint8List? img = await pickImage(ImageSource.gallery, _userId!);
+      if (img != null) {
+        setState(() {
+          _image = img;
+        });
+        getProfilePicture();
+      } else {
+        print('No image selected.');
+      }
+    } catch (e) {
+      print('Error selecting image: $e');
+    }
   }
 
   Future<void> selectImageFromCamera() async {
@@ -65,24 +75,45 @@ class _ProfilePageState extends State<ProfilePage> {
       print('Aucun utilisateur connecté');
       return;
     }
-    Uint8List img = pickImage(ImageSource.camera, _userId!);
-    setState(() {
-      _image = img;
-    });
+    try {
+      Uint8List? img = await pickImage(ImageSource.camera, _userId!);
+      if (img != null) {
+        setState(() {
+          _image = img;
+        });
+        getProfilePicture();
+      } else {
+        print('No image selected.');
+      }
+    } catch (e) {
+      print('Error selecting image: $e');
+    }
   }
 
   Future<void> getProfilePicture() async {
-    final storageRef = FirebaseStorage.instance.ref();
-    final imageRef = storageRef.child("userProfileImage.jpg");
+    final user = _auth.currentUser;
+    if (user == null) {
+      print('Aucun utilisateur connecté');
+      return;
+    } else {
+      try {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .where('email', isEqualTo: user.email)
+            .get();
 
-    try {
-      final imageBytes = await imageRef.getData();
-      if (imageBytes == null) return;
-      setState(() {
-        _image = imageBytes;
-      });
-    } catch (e) {
-      print("Erreur: La photo de profil n'a pas été trouvée");
+        if (querySnapshot.docs.isNotEmpty) {
+          DocumentSnapshot userDoc = querySnapshot.docs.first;
+          print(userDoc.data());
+          print(userDoc.get('profileImageUrl'));
+          setState(() {
+            _imageUrl = userDoc.get('profileImageUrl');
+          });
+        }
+      } catch (e) {
+        print(
+            "Erreur avec l'optention de la photo de profil : ${e.toString()}");
+      }
     }
   }
 
@@ -125,7 +156,7 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Stack(
                 clipBehavior: Clip.none,
                 children: <Widget>[
-                  _image == null
+                  _imageUrl == null
                       ? Container(
                           width: 90,
                           height: 90,
@@ -143,9 +174,22 @@ class _ProfilePageState extends State<ProfilePage> {
                             size: 40,
                           ),
                         )
-                      : CircleAvatar(
-                          radius: 64,
-                          backgroundImage: MemoryImage(_image!),
+                      : Container(
+                          width: 90,
+                          height: 90,
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: Colors.white,
+                              boxShadow: const [
+                                BoxShadow(
+                                    color: Colors.grey,
+                                    blurRadius: 20,
+                                    offset: Offset(1, 1)),
+                              ]),
+                          child: CircleAvatar(
+                            radius: 45,
+                            backgroundImage: NetworkImage(_imageUrl!),
+                          ),
                         ),
                   Positioned(
                     top: 66,
