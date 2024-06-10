@@ -224,7 +224,8 @@ class _SignupPageState extends State<SignupPage> {
         'email': email,
         'role': 'utilisateur',
         'profileImageUrl': '',
-        'dateInscription': DateTime.now().toString()
+        'dateInscription': DateTime.now().toString(),
+        'biography': ''
       });
       Navigator.of(context).push(
         MaterialPageRoute(
