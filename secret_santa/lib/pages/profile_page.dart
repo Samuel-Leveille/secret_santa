@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:secret_santa/components/profile_data_field.dart';
 import 'package:secret_santa/utils/pick_image.dart';
 import 'package:secret_santa/utils/users_firestore_provider.dart';
 
@@ -63,15 +64,8 @@ class _ProfilePageState extends State<ProfilePage> {
       return;
     }
     try {
-      Uint8List? img = await pickImage(ImageSource.gallery, _userId!);
-      if (img != null) {
-        setState(() {
-          _image = img;
-        });
-        getProfilePicture();
-      } else {
-        print('No image selected.');
-      }
+      await pickImage(ImageSource.gallery, _userId!);
+      await getProfilePicture();
     } catch (e) {
       print('Error selecting image: $e');
     }
@@ -83,15 +77,8 @@ class _ProfilePageState extends State<ProfilePage> {
       return;
     }
     try {
-      Uint8List? img = await pickImage(ImageSource.camera, _userId!);
-      if (img != null) {
-        setState(() {
-          _image = img;
-        });
-        getProfilePicture();
-      } else {
-        print('No image selected.');
-      }
+      await pickImage(ImageSource.camera, _userId!);
+      await getProfilePicture();
     } catch (e) {
       print('Error selecting image: $e');
     }
@@ -108,7 +95,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Scaffold(
       body: Center(
         child: usersFirestoreProvider?.userData == null
-            ? CircularProgressIndicator()
+            ? const CircularProgressIndicator()
             : Stack(
                 clipBehavior: Clip.none,
                 children: <Widget>[
@@ -116,6 +103,48 @@ class _ProfilePageState extends State<ProfilePage> {
                     width: MediaQuery.of(context).size.width,
                     height: MediaQuery.of(context).size.height * 1,
                     color: Colors.white,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 40.0),
+                          child:
+                              Text(usersFirestoreProvider?.userData!['email']),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 50.0),
+                          child: Column(
+                            children: [
+                              ProfileDataField(
+                                width: 250,
+                                height: 50,
+                                content: usersFirestoreProvider
+                                        ?.userData!['firstName'] +
+                                    ' ' +
+                                    (usersFirestoreProvider?.userData!['name']),
+                                label: 'Nom',
+                                canModify: true,
+                              ),
+                              const SizedBox(
+                                height: 20,
+                              ),
+                              ProfileDataField(
+                                width: 250,
+                                height: 50,
+                                content: usersFirestoreProvider
+                                    ?.userData!['dateInscription']
+                                    .substring(0, 10),
+                                label: 'Date création du compte',
+                                canModify: false,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   Container(
                     width: MediaQuery.of(context).size.width,
@@ -193,9 +222,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                               decoration: BoxDecoration(
                                                 image: DecorationImage(
                                                     image: NetworkImage(
-                                                        usersFirestoreProvider
-                                                                ?.userData![
-                                                            'profileImageUrl']),
+                                                        _imageUrl!),
                                                     fit: BoxFit.cover),
                                                 borderRadius:
                                                     BorderRadius.circular(16),
@@ -207,9 +234,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     },
                                     child: CircleAvatar(
                                       radius: 45,
-                                      backgroundImage: NetworkImage(
-                                          usersFirestoreProvider
-                                              ?.userData!['profileImageUrl']),
+                                      backgroundImage: NetworkImage(_imageUrl!),
                                     ),
                                   ),
                                 ),
