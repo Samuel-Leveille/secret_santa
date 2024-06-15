@@ -28,14 +28,18 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
-    getUserId();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      usersFirestoreProvider =
+          Provider.of<UsersFirestoreProvider>(context, listen: false);
+      usersFirestoreProvider?.fetchUserData();
+      getUserId();
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    usersFirestoreProvider = Provider.of<UsersFirestoreProvider>(context);
     getProfilePicture();
   }
 
@@ -64,8 +68,10 @@ class _ProfilePageState extends State<ProfilePage> {
       return;
     }
     try {
-      await pickImage(ImageSource.gallery, _userId!);
-      await getProfilePicture();
+      final pickedImage = await pickImage(ImageSource.gallery);
+      if (pickedImage != null) {
+        await uploadImageAndUpdateUrl(pickedImage);
+      }
     } catch (e) {
       print('Error selecting image: $e');
     }
@@ -77,16 +83,39 @@ class _ProfilePageState extends State<ProfilePage> {
       return;
     }
     try {
-      await pickImage(ImageSource.camera, _userId!);
-      await getProfilePicture();
+      final pickedImage = await pickImage(ImageSource.camera);
+      if (pickedImage != null) {
+        await uploadImageAndUpdateUrl(pickedImage);
+      }
     } catch (e) {
       print('Error selecting image: $e');
     }
   }
 
-  Future<void> getProfilePicture() async {
+  Future<void> uploadImageAndUpdateUrl(Uint8List image) async {
+    final ref = FirebaseStorage.instance
+        .ref()
+        .child('profile_pictures')
+        .child('$_userId.jpg');
+    await ref.putData(image);
+    final url = await ref.getDownloadURL();
+
+    await _firestore.collection('users').doc(_userId).update({
+      'profileImageUrl': url,
+    });
+
     setState(() {
-      _imageUrl = usersFirestoreProvider?.userData!['profileImageUrl'];
+      _imageUrl = url;
+    });
+
+    await usersFirestoreProvider?.fetchUserData();
+  }
+
+  Future<void> getProfilePicture() async {
+    final provider =
+        Provider.of<UsersFirestoreProvider>(context, listen: false);
+    setState(() {
+      _imageUrl = provider.userData?['profileImageUrl'];
     });
   }
 
