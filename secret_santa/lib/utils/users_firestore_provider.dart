@@ -37,4 +37,46 @@ class UsersFirestoreProvider extends ChangeNotifier {
           "Erreur lors de l'optentions des données de l'utilisateur : ${e.toString()}");
     }
   }
+
+  Future<void> updateUserField(String fieldName, String fieldContent) async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        QuerySnapshot querySnapshot = await _firestore
+            .collection('users')
+            .where('email', isEqualTo: user.email)
+            .get();
+        for (var doc in querySnapshot.docs) {
+          await doc.reference.update({fieldName: fieldContent});
+        }
+        await fetchUserData();
+        notifyListeners();
+      }
+    } catch (e) {
+      print(
+          "La mise à jour des données de l'utilisateur a échouée : ${e.toString()}");
+    }
+  }
+
+  Future<void> updateTwoUserField(String fieldName1, String fieldContent1,
+      String fieldName2, String fieldContent2) async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        QuerySnapshot querySnapshot = await _firestore
+            .collection('users')
+            .where('email', isEqualTo: user.email)
+            .get();
+        for (var doc in querySnapshot.docs) {
+          await doc.reference.update({fieldName1: fieldContent1});
+          await doc.reference.update({fieldName2: fieldContent2});
+        }
+        await fetchUserData();
+        notifyListeners();
+      }
+    } catch (e) {
+      print(
+          "La mise à jour des données de l'utilisateur a échouée : ${e.toString()}");
+    }
+  }
 }
