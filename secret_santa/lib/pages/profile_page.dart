@@ -141,7 +141,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           children: [
                             Padding(
                               padding:
-                                  const EdgeInsets.only(bottom: 25.0, top: 60),
+                                  const EdgeInsets.only(bottom: 20.0, top: 60),
                               child: Text(
                                   usersFirestoreProvider.userData!['email']),
                             ),
@@ -153,7 +153,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: Column(
                                 children: [
                                   ProfileDataField(
-                                    width: 250,
+                                    width: 260,
                                     height: 50,
                                     content: usersFirestoreProvider
                                             .userData!['firstName'] +
@@ -167,8 +167,8 @@ class _ProfilePageState extends State<ProfilePage> {
                                     height: 20,
                                   ),
                                   ProfileDataField(
-                                    width: 250,
-                                    height: 100,
+                                    width: 260,
+                                    height: 125,
                                     content: usersFirestoreProvider
                                         .userData!['biography'],
                                     label: 'À propos de moi',
@@ -178,7 +178,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     height: 20,
                                   ),
                                   ProfileDataField(
-                                    width: 250,
+                                    width: 260,
                                     height: 50,
                                     content: usersFirestoreProvider
                                         .userData!['dateInscription']

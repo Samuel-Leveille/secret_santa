@@ -64,11 +64,17 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
               left: 0,
               top: 0,
               bottom: 0,
+              right: 0,
               child: Align(
                 alignment: Alignment.centerLeft,
-                child: Text(
-                  widget.content,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 10.0),
+                  child: SingleChildScrollView(
+                    child: Text(
+                      widget.content,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -88,7 +94,7 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
                                     width: MediaQuery.of(context).size.width *
                                         0.85,
                                     height: MediaQuery.of(context).size.height *
-                                        0.4,
+                                        0.3,
                                     decoration: BoxDecoration(
                                         color: Colors.white,
                                         borderRadius:
@@ -112,18 +118,25 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
                                                         textFirstNameController,
                                                     decoration: InputDecoration(
                                                       border: InputBorder.none,
-                                                      label: Text(
-                                                        isItFirstName == true
-                                                            ? "Prénom"
-                                                            : "Nom",
-                                                        style: TextStyle(
-                                                            color: Colors
-                                                                .grey[800],
-                                                            fontSize: 14),
+                                                      label: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                bottom: 30.0),
+                                                        child: Text(
+                                                          isItFirstName == true
+                                                              ? "Prénom"
+                                                              : "Nom",
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .grey[800],
+                                                              fontSize: 14),
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
+                                                const Divider(),
                                                 Expanded(
                                                   child: TextFormField(
                                                     expands: true,
@@ -132,16 +145,23 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
                                                         textNameController,
                                                     decoration: InputDecoration(
                                                       border: InputBorder.none,
-                                                      label: Text(
-                                                        widget.label,
-                                                        style: TextStyle(
-                                                            color: Colors
-                                                                .grey[800],
-                                                            fontSize: 14),
+                                                      label: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                bottom: 30.0),
+                                                        child: Text(
+                                                          widget.label,
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .grey[800],
+                                                              fontSize: 14),
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
+                                                const Divider(),
                                                 Row(
                                                   children: [
                                                     TextButton(
@@ -179,16 +199,23 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
                                                         textBioController,
                                                     decoration: InputDecoration(
                                                       border: InputBorder.none,
-                                                      label: Text(
-                                                        widget.label,
-                                                        style: TextStyle(
-                                                            color: Colors
-                                                                .grey[800],
-                                                            fontSize: 14),
+                                                      label: Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                bottom: 100.0),
+                                                        child: Text(
+                                                          widget.label,
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .grey[800],
+                                                              fontSize: 14),
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
                                                 ),
+                                                const Divider(),
                                                 Row(
                                                   children: [
                                                     TextButton(
