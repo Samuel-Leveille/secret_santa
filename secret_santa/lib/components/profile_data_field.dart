@@ -44,9 +44,12 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
     UsersFirestoreProvider usersFirestoreProvider =
         Provider.of<UsersFirestoreProvider>(context);
 
-    final textNameController = TextEditingController();
-    final textFirstNameController = TextEditingController();
-    final textBioController = TextEditingController();
+    final textNameController =
+        TextEditingController(text: usersFirestoreProvider.userData!['name']);
+    final textFirstNameController = TextEditingController(
+        text: usersFirestoreProvider.userData!['firstName']);
+    final textBioController = TextEditingController(
+        text: usersFirestoreProvider.userData!['biography']);
 
     return Container(
       width: widget.width,
@@ -112,6 +115,7 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
                                               children: [
                                                 Expanded(
                                                   child: TextFormField(
+                                                    autofocus: true,
                                                     expands: true,
                                                     maxLines: null,
                                                     controller:
@@ -193,6 +197,7 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
                                               children: [
                                                 Expanded(
                                                   child: TextFormField(
+                                                    autofocus: true,
                                                     expands: true,
                                                     maxLines: null,
                                                     controller:
