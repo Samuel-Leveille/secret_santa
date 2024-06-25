@@ -35,8 +35,8 @@ class _BottomBarState extends State<BottomBar> {
       body: _pages[_selectedPageIndex],
       bottomNavigationBar: CurvedNavigationBar(
         backgroundColor: Colors.white,
-        color: Colors.blue.shade200,
-        buttonBackgroundColor: Colors.blue[200]!,
+        color: const Color.fromARGB(255, 175, 216, 250),
+        buttonBackgroundColor: const Color.fromARGB(255, 175, 216, 250),
         height: 60,
         items: const <Widget>[
           Icon(Icons.home, size: 30),
