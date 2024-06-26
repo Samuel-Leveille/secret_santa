@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -12,6 +13,8 @@ class AddGroupPage extends StatefulWidget {
 class _AddGroupPageState extends State<AddGroupPage> {
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -136,21 +139,43 @@ class _AddGroupPageState extends State<AddGroupPage> {
     );
   }
 
-  void _createGroup() {
+  void _createGroup() async {
     String groupName = nameController.text;
     String groupDescription = descriptionController.text;
+    final User? user = _auth.currentUser;
+    final String groupId;
 
     if (groupName.isEmpty || groupDescription.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Veuillez remplir tous les champs")),
       );
       return;
-    } else {
-      CollectionReference collRef =
-          FirebaseFirestore.instance.collection('groups');
-      collRef.add({'name': groupName, 'description': groupDescription});
+    } else if (user != null) {
+      DocumentReference docRef = await _firestore.collection('groups').add({
+        'name': groupName,
+        'description': groupDescription,
+        'admin': user.email
+      });
       nameController.text = "";
       descriptionController.text = "";
+      groupId = docRef.id;
+      _addGroupToCurrentUser(user, groupId);
+    }
+  }
+
+  void _addGroupToCurrentUser(User user, String groupId) async {
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('users')
+        .where('email', isEqualTo: user.email)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      DocumentReference docRef = querySnapshot.docs.first.reference;
+      await docRef.update({
+        'groupsId': FieldValue.arrayUnion([groupId])
+      });
+    } else {
+      print("QuerySnapshot vide.");
     }
   }
 }
