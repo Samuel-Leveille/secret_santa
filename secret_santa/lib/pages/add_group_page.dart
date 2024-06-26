@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -9,11 +10,11 @@ class AddGroupPage extends StatefulWidget {
 }
 
 class _AddGroupPageState extends State<AddGroupPage> {
+  final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
-    final nameController = TextEditingController();
-    final descriptionController = TextEditingController();
-
     return Scaffold(
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -49,7 +50,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
                         child: Padding(
                           padding: const EdgeInsets.all(25.0),
                           child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
                               TextFormField(
                                 controller: nameController,
@@ -78,13 +79,17 @@ class _AddGroupPageState extends State<AddGroupPage> {
                                   ),
                                 ),
                               ),
+                              const SizedBox(
+                                height: 20,
+                              ),
                               TextFormField(
                                 keyboardType: TextInputType.multiline,
                                 minLines: 1,
-                                maxLines: 5,
+                                maxLines: 4,
+                                maxLength: 150,
                                 controller: descriptionController,
                                 decoration: InputDecoration(
-                                  labelText: 'Description du groupe',
+                                  labelText: 'Description',
                                   labelStyle: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w500,
@@ -117,7 +122,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
                       height: 50,
                     ),
                     FloatingActionButton.extended(
-                      onPressed: () {},
+                      onPressed: _createGroup,
                       backgroundColor: Colors.teal[50],
                       extendedPadding:
                           const EdgeInsets.only(left: 120, right: 120),
@@ -129,5 +134,23 @@ class _AddGroupPageState extends State<AddGroupPage> {
         ),
       ),
     );
+  }
+
+  void _createGroup() {
+    String groupName = nameController.text;
+    String groupDescription = descriptionController.text;
+
+    if (groupName.isEmpty || groupDescription.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Veuillez remplir tous les champs")),
+      );
+      return;
+    } else {
+      CollectionReference collRef =
+          FirebaseFirestore.instance.collection('groups');
+      collRef.add({'name': groupName, 'description': groupDescription});
+      nameController.text = "";
+      descriptionController.text = "";
+    }
   }
 }
