@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class FriendsPage extends StatefulWidget {
-  FriendsPage({super.key});
+  const FriendsPage({super.key});
 
   @override
   State<FriendsPage> createState() => _FriendsPageState();
@@ -43,6 +42,10 @@ class _FriendsPageState extends State<FriendsPage>
     _tabController?.dispose();
     _pageController?.dispose();
     super.dispose();
+  }
+
+  void refreshFriendRequests() {
+    fetchUserFriendRequests();
   }
 
   @override
@@ -124,9 +127,10 @@ class _FriendsPageState extends State<FriendsPage>
                     _tabController?.animateTo(index);
                   },
                   children: [
-                    Friends(),
+                    const Friends(),
                     Requests(
                       items: _items,
+                      onRequestHandled: refreshFriendRequests,
                     ),
                   ],
                 ),
@@ -186,6 +190,8 @@ class _FriendsPageState extends State<FriendsPage>
 }
 
 class Friends extends StatelessWidget {
+  const Friends({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const Center(
@@ -196,8 +202,10 @@ class Friends extends StatelessWidget {
 
 class Requests extends StatelessWidget {
   final List<String> items;
+  final VoidCallback onRequestHandled;
 
-  Requests({required this.items});
+  const Requests(
+      {super.key, required this.items, required this.onRequestHandled});
 
   @override
   Widget build(BuildContext context) {
@@ -225,22 +233,26 @@ class Requests extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.w500));
                   } else {
-                    return Expanded(
-                      child: Text(snapshot.data!,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w500)),
+                    return Row(
+                      children: [
+                        Expanded(
+                          child: Text(snapshot.data!,
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w500)),
+                        ),
+                      ],
                     );
                   }
                 },
               ),
-              trailing: Container(
+              trailing: SizedBox(
                 width: 70,
                 child: Row(
                   children: [
                     Expanded(
                         child: IconButton(
                       onPressed: () {
-                        // Logique pour accepter
+                        acceptFriendRequest(items[index]);
                       },
                       icon: const Icon(Icons.check),
                       iconSize: 30,
@@ -252,7 +264,7 @@ class Requests extends StatelessWidget {
                     Expanded(
                         child: IconButton(
                       onPressed: () {
-                        // Logique pour refuser
+                        refuseFriendRequest(items[index]);
                       },
                       icon: const Icon(Icons.close),
                       iconSize: 30,
@@ -283,5 +295,42 @@ class Requests extends StatelessWidget {
     }
 
     return name;
+  }
+
+  Future<void> acceptFriendRequest(String email) async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: currentUser!.email)
+        .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      DocumentReference docRef = querySnapshot.docs.first.reference;
+      docRef.update({
+        'friends': FieldValue.arrayUnion([email])
+      });
+      docRef.update({
+        'friendRequests': FieldValue.arrayRemove([email])
+      });
+      onRequestHandled();
+    } else {
+      print("Aucun utilisateur connecté");
+    }
+  }
+
+  Future<void> refuseFriendRequest(String email) async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: currentUser!.email)
+        .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      DocumentReference docRef = querySnapshot.docs.first.reference;
+      docRef.update({
+        'friendRequests': FieldValue.arrayRemove([email])
+      });
+      onRequestHandled();
+    } else {
+      print("Aucun utilisateur connecté");
+    }
   }
 }

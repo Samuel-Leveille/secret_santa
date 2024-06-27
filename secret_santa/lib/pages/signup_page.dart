@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:secret_santa/components/auth_password_textfield.dart';
 import 'package:secret_santa/components/auth_textfield.dart';
 import 'package:secret_santa/firebase_auth/auth_services.dart';
-import 'package:secret_santa/pages/accueil_page.dart';
 import 'package:secret_santa/pages/login_page.dart';
 import 'package:secret_santa/pages/transition_page.dart';
 
@@ -187,7 +186,7 @@ class _SignupPageState extends State<SignupPage> {
     // Vérification du format de l'e-mail
     Pattern pattern =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    RegExp regex = new RegExp(pattern as String);
+    RegExp regex = RegExp(pattern as String);
     if (!regex.hasMatch(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Entrez une adresse courriel valide")),
@@ -198,7 +197,7 @@ class _SignupPageState extends State<SignupPage> {
     // Vérification de la complexité du mot de passe
     Pattern passwordPattern =
         r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$';
-    RegExp passwordRegex = new RegExp(passwordPattern as String);
+    RegExp passwordRegex = RegExp(passwordPattern as String);
     if (!passwordRegex.hasMatch(password)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

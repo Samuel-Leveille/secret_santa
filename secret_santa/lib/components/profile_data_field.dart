@@ -1,8 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:secret_santa/components/auth_textfield.dart';
-import 'package:secret_santa/pages/profile_page.dart';
 import 'package:secret_santa/utils/users_firestore_provider.dart';
 
 class ProfileDataField extends StatefulWidget {
@@ -51,7 +48,7 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
     final textBioController = TextEditingController(
         text: usersFirestoreProvider.userData!['biography']);
 
-    return Container(
+    return SizedBox(
       width: widget.width,
       height: widget.height,
       child: InputDecorator(

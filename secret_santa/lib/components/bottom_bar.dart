@@ -19,7 +19,7 @@ class _BottomBarState extends State<BottomBar> {
     const AccueilPage(),
     const ProfilePage(),
     const AddGroupPage(),
-    FriendsPage(),
+    const FriendsPage(),
     const ChatPage(),
   ];
 
