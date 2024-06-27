@@ -17,6 +17,7 @@ class _FriendsPageState extends State<FriendsPage>
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
   List<String> _items = [];
+  List<String> _friends = [];
 
   @override
   void initState() {
@@ -34,6 +35,7 @@ class _FriendsPageState extends State<FriendsPage>
       }
     });
 
+    fetchUserFriends();
     fetchUserFriendRequests();
   }
 
@@ -127,7 +129,7 @@ class _FriendsPageState extends State<FriendsPage>
                     _tabController?.animateTo(index);
                   },
                   children: [
-                    const Friends(),
+                    Friends(friends: _friends),
                     Requests(
                       items: _items,
                       onRequestHandled: refreshFriendRequests,
@@ -154,6 +156,22 @@ class _FriendsPageState extends State<FriendsPage>
           []);
       setState(() {
         _items = items;
+      });
+    }
+  }
+
+  Future<void> fetchUserFriends() async {
+    User? user = _auth.currentUser;
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('users')
+        .where('email', isEqualTo: user?.email)
+        .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      final List<String> friends = List<String>.from((querySnapshot.docs.first
+              .data() as Map<String, dynamic>)['friends'] ??
+          []);
+      setState(() {
+        _friends = friends;
       });
     }
   }
@@ -190,13 +208,97 @@ class _FriendsPageState extends State<FriendsPage>
 }
 
 class Friends extends StatelessWidget {
-  const Friends({super.key});
+  final List<String> friends;
+  const Friends({super.key, required this.friends});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Liste des amis', style: TextStyle(fontSize: 24)),
-    );
+    return Expanded(
+        child: friends.isNotEmpty
+            ? ListView.builder(
+                itemCount: friends.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 16.0),
+                    child: Card(
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: ListTile(
+                        leading: FutureBuilder<String>(
+                          future: getUserName(friends[index]),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<String> snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const CircleAvatar(
+                                backgroundColor: Colors.blueAccent,
+                                // Afficher un indicateur de chargement ou un placeholder
+                                child: Text(
+                                  "",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              );
+                            } else if (snapshot.hasError) {
+                              // Gérer l'erreur
+                              return const CircleAvatar(
+                                backgroundColor: Colors.redAccent,
+                                child: Icon(Icons.error, color: Colors.white),
+                              );
+                            } else {
+                              // Utiliser la valeur du Future une fois disponible
+                              return CircleAvatar(
+                                backgroundColor: Colors.blueAccent,
+                                child: Text(
+                                  snapshot.data![0].toUpperCase(),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                        title: FutureBuilder<String>(
+                          future: getUserName(friends[index]),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<String> snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Text('Chargement...',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500));
+                            } else if (snapshot.hasError) {
+                              return const Text('Erreur',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500));
+                            } else {
+                              return Text(snapshot.data!,
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w500));
+                            }
+                          },
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.message),
+                          color: Colors.grey[600],
+                          onPressed: () {
+                            // Logique de message ici
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              )
+            : const Center(
+                child: Text(
+                "Aucun ami",
+                style: TextStyle(fontSize: 24),
+              )));
   }
 }
 
@@ -209,92 +311,84 @@ class Requests extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: ListTile(
-              title: FutureBuilder<String>(
-                future: getUserName(items[index]),
-                builder:
-                    (BuildContext context, AsyncSnapshot<String> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Text('Chargement...',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w500));
-                  } else if (snapshot.hasError) {
-                    return const Text('Erreur',
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w500));
-                  } else {
-                    return Row(
-                      children: [
-                        Expanded(
-                          child: Text(snapshot.data!,
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w500)),
-                        ),
-                      ],
-                    );
-                  }
-                },
-              ),
-              trailing: SizedBox(
-                width: 70,
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: IconButton(
-                      onPressed: () {
-                        acceptFriendRequest(items[index]);
+    return items.isNotEmpty
+        ? ListView.builder(
+            itemCount: items.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: Card(
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: ListTile(
+                    title: FutureBuilder<String>(
+                      future: getUserName(items[index]),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Text('Chargement...',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w500));
+                        } else if (snapshot.hasError) {
+                          return const Text('Erreur',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w500));
+                        } else {
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: Text(snapshot.data!,
+                                    style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500)),
+                              ),
+                            ],
+                          );
+                        }
                       },
-                      icon: const Icon(Icons.check),
-                      iconSize: 30,
-                      color: const Color.fromARGB(255, 90, 206, 93),
-                    )),
-                    const SizedBox(
-                      width: 20,
                     ),
-                    Expanded(
-                        child: IconButton(
-                      onPressed: () {
-                        refuseFriendRequest(items[index]);
-                      },
-                      icon: const Icon(Icons.close),
-                      iconSize: 30,
-                      color: Colors.redAccent,
-                    )),
-                  ],
+                    trailing: SizedBox(
+                      width: 70,
+                      child: Row(
+                        children: [
+                          Expanded(
+                              child: IconButton(
+                            onPressed: () {
+                              acceptFriendRequest(items[index]);
+                            },
+                            icon: const Icon(Icons.check),
+                            iconSize: 30,
+                            color: const Color.fromARGB(255, 90, 206, 93),
+                          )),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                          Expanded(
+                              child: IconButton(
+                            onPressed: () {
+                              refuseFriendRequest(items[index]);
+                            },
+                            icon: const Icon(Icons.close),
+                            iconSize: 30,
+                            color: Colors.redAccent,
+                          )),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<String> getUserName(String email) async {
-    final String name;
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('email', isEqualTo: email)
-        .get();
-    if (querySnapshot.docs.isNotEmpty) {
-      name =
-          "${(querySnapshot.docs.first.data() as Map<String, dynamic>)['firstName'] ?? ""} ${(querySnapshot.docs.first.data() as Map<String, dynamic>)['name'] ?? ""}";
-    } else {
-      name = "Nom inconnu";
-      print("Error : name and firstname couldn't be fetch");
-    }
-
-    return name;
+              );
+            },
+          )
+        : const Center(
+            child: Text(
+            "Aucune demande d'ami",
+            style: TextStyle(fontSize: 24),
+          ));
   }
 
   Future<void> acceptFriendRequest(String email) async {
@@ -315,6 +409,20 @@ class Requests extends StatelessWidget {
     } else {
       print("Aucun utilisateur connecté");
     }
+
+    QuerySnapshot querySnapshot2 = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
+    if (querySnapshot2.docs.isNotEmpty) {
+      DocumentReference docRef = querySnapshot2.docs.first.reference;
+      docRef.update({
+        'friends': FieldValue.arrayUnion([currentUser.email])
+      });
+    } else {
+      print(
+          "Erreur en lien avec l'utilisateur qui a envoyé la demande d'ami (il n'existe pas apparamment)");
+    }
   }
 
   Future<void> refuseFriendRequest(String email) async {
@@ -333,4 +441,21 @@ class Requests extends StatelessWidget {
       print("Aucun utilisateur connecté");
     }
   }
+}
+
+Future<String> getUserName(String email) async {
+  final String name;
+  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      .collection('users')
+      .where('email', isEqualTo: email)
+      .get();
+  if (querySnapshot.docs.isNotEmpty) {
+    name =
+        "${(querySnapshot.docs.first.data() as Map<String, dynamic>)['firstName'] ?? ""} ${(querySnapshot.docs.first.data() as Map<String, dynamic>)['name'] ?? ""}";
+  } else {
+    name = "Nom inconnu";
+    print("Error : name and firstname couldn't be fetch");
+  }
+
+  return name;
 }
