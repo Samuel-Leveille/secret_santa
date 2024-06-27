@@ -139,7 +139,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
     );
   }
 
-  void _createGroup() async {
+  Future<void> _createGroup() async {
     String groupName = nameController.text;
     String groupDescription = descriptionController.text;
     final User? user = _auth.currentUser;
@@ -163,7 +163,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
     }
   }
 
-  void _addGroupToCurrentUser(User user, String groupId) async {
+  Future<void> _addGroupToCurrentUser(User user, String groupId) async {
     QuerySnapshot querySnapshot = await _firestore
         .collection('users')
         .where('email', isEqualTo: user.email)

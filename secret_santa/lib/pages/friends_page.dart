@@ -1,23 +1,287 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class FriendsPage extends StatefulWidget {
-  const FriendsPage({super.key});
+  FriendsPage({super.key});
 
   @override
   State<FriendsPage> createState() => _FriendsPageState();
 }
 
-class _FriendsPageState extends State<FriendsPage> {
+class _FriendsPageState extends State<FriendsPage>
+    with SingleTickerProviderStateMixin {
+  TabController? _tabController;
+  PageController? _pageController;
+  final friendEmailController = TextEditingController();
+  final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
+  List<String> _items = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _pageController = PageController(initialPage: 0);
+
+    _tabController?.addListener(() {
+      if (_tabController!.indexIsChanging) {
+        _pageController?.animateToPage(
+          _tabController!.index,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+
+    fetchUserFriendRequests();
+  }
+
+  @override
+  void dispose() {
+    _tabController?.dispose();
+    _pageController?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Colors.white,
-        child: const Center(
-          child: Text("Ajouter des amis"),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: Scaffold(
+        body: Container(
+          color: Colors.white,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: 25.0, top: 70, bottom: 20),
+                    child: Text(
+                      "Requêtes",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 25.0, right: 25.0),
+                child: TextFormField(
+                  controller: friendEmailController,
+                  decoration: InputDecoration(
+                      labelText: "Courriel",
+                      suffixIcon: IconButton(
+                          onPressed: sendRequest,
+                          icon: Icon(
+                            Icons.send,
+                            color: Colors.grey[600],
+                          ))),
+                ),
+              ),
+              TabBar(
+                labelColor: const Color.fromARGB(255, 134, 198, 250),
+                indicatorColor: const Color.fromARGB(255, 134, 198, 250),
+                controller: _tabController,
+                tabs: const [
+                  Tab(
+                    height: 80,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.people),
+                        SizedBox(
+                          width: 8.0,
+                        ),
+                        Text('Amis'),
+                      ],
+                    ),
+                  ),
+                  Tab(
+                    height: 80,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.person_add),
+                        SizedBox(
+                          width: 8.0,
+                        ),
+                        Text('Requêtes'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    _tabController?.animateTo(index);
+                  },
+                  children: [
+                    Friends(),
+                    Requests(
+                      items: _items,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<void> fetchUserFriendRequests() async {
+    User? user = _auth.currentUser;
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('users')
+        .where('email', isEqualTo: user?.email)
+        .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      final List<String> items = List<String>.from((querySnapshot.docs.first
+              .data() as Map<String, dynamic>)['friendRequests'] ??
+          []);
+      setState(() {
+        _items = items;
+      });
+    }
+  }
+
+  Future<void> sendRequest() async {
+    final String friendEmail = friendEmailController.text;
+    User? currentUser = _auth.currentUser;
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('users')
+        .where('email', isEqualTo: friendEmail)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      DocumentReference docRef = querySnapshot.docs.first.reference;
+      docRef.update({
+        'friendRequests': FieldValue.arrayUnion([currentUser!.email])
+      });
+      friendEmailController.text = "";
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Demande d'ami envoyée"),
+          padding: EdgeInsets.only(top: 15.0, bottom: 15.0, left: 15),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          padding: EdgeInsets.only(top: 20.0, bottom: 20.0, left: 15),
+          content: Text("Veuillez entrer un courriel valide"),
+        ),
+      );
+    }
+  }
+}
+
+class Friends extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text('Liste des amis', style: TextStyle(fontSize: 24)),
+    );
+  }
+}
+
+class Requests extends StatelessWidget {
+  final List<String> items;
+
+  Requests({required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: ListTile(
+              title: FutureBuilder<String>(
+                future: getUserName(items[index]),
+                builder:
+                    (BuildContext context, AsyncSnapshot<String> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Text('Chargement...',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w500));
+                  } else if (snapshot.hasError) {
+                    return const Text('Erreur',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w500));
+                  } else {
+                    return Expanded(
+                      child: Text(snapshot.data!,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.w500)),
+                    );
+                  }
+                },
+              ),
+              trailing: Container(
+                width: 70,
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: IconButton(
+                      onPressed: () {
+                        // Logique pour accepter
+                      },
+                      icon: const Icon(Icons.check),
+                      iconSize: 30,
+                      color: const Color.fromARGB(255, 90, 206, 93),
+                    )),
+                    const SizedBox(
+                      width: 20,
+                    ),
+                    Expanded(
+                        child: IconButton(
+                      onPressed: () {
+                        // Logique pour refuser
+                      },
+                      icon: const Icon(Icons.close),
+                      iconSize: 30,
+                      color: Colors.redAccent,
+                    )),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<String> getUserName(String email) async {
+    final String name;
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      name =
+          "${(querySnapshot.docs.first.data() as Map<String, dynamic>)['firstName'] ?? ""} ${(querySnapshot.docs.first.data() as Map<String, dynamic>)['name'] ?? ""}";
+    } else {
+      name = "Nom inconnu";
+      print("Error : name and firstname couldn't be fetch");
+    }
+
+    return name;
   }
 }
