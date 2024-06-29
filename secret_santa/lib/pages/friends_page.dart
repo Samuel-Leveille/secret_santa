@@ -16,8 +16,9 @@ class _FriendsPageState extends State<FriendsPage>
   final friendEmailController = TextEditingController();
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
-  List<String> _items = [];
+  List<String> _friendRequests = [];
   List<String> _friends = [];
+  List<String> _receiverFriendRequests = [];
 
   @override
   void initState() {
@@ -36,7 +37,7 @@ class _FriendsPageState extends State<FriendsPage>
     });
 
     fetchUserFriends();
-    fetchUserFriendRequests();
+    fetchCurrentUserFriendRequests();
   }
 
   @override
@@ -47,7 +48,8 @@ class _FriendsPageState extends State<FriendsPage>
   }
 
   void refreshFriendRequests() {
-    fetchUserFriendRequests();
+    fetchCurrentUserFriendRequests();
+    fetchUserFriends();
   }
 
   @override
@@ -131,7 +133,7 @@ class _FriendsPageState extends State<FriendsPage>
                   children: [
                     Friends(friends: _friends),
                     Requests(
-                      items: _items,
+                      items: _friendRequests,
                       onRequestHandled: refreshFriendRequests,
                     ),
                   ],
@@ -144,18 +146,35 @@ class _FriendsPageState extends State<FriendsPage>
     );
   }
 
-  Future<void> fetchUserFriendRequests() async {
+  Future<void> fetchCurrentUserFriendRequests() async {
     User? user = _auth.currentUser;
     QuerySnapshot querySnapshot = await _firestore
         .collection('users')
         .where('email', isEqualTo: user?.email)
         .get();
     if (querySnapshot.docs.isNotEmpty) {
-      final List<String> items = List<String>.from((querySnapshot.docs.first
-              .data() as Map<String, dynamic>)['friendRequests'] ??
-          []);
+      final List<String> friendRequests = List<String>.from(
+          (querySnapshot.docs.first.data()
+                  as Map<String, dynamic>)['friendRequests'] ??
+              []);
       setState(() {
-        _items = items;
+        _friendRequests = friendRequests;
+      });
+    }
+  }
+
+  Future<void> fetchReceiverFriendRequests(String email) async {
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      final List<String> friendRequests = List<String>.from(
+          (querySnapshot.docs.first.data()
+                  as Map<String, dynamic>)['friendRequests'] ??
+              []);
+      setState(() {
+        _receiverFriendRequests = friendRequests;
       });
     }
   }
@@ -177,25 +196,50 @@ class _FriendsPageState extends State<FriendsPage>
   }
 
   Future<void> sendRequest() async {
-    final String friendEmail = friendEmailController.text;
+    final String friendEmail = friendEmailController.text.trim();
     User? currentUser = _auth.currentUser;
     QuerySnapshot querySnapshot = await _firestore
         .collection('users')
         .where('email', isEqualTo: friendEmail)
         .get();
-
     if (querySnapshot.docs.isNotEmpty) {
       DocumentReference docRef = querySnapshot.docs.first.reference;
-      docRef.update({
-        'friendRequests': FieldValue.arrayUnion([currentUser!.email])
-      });
-      friendEmailController.text = "";
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Demande d'ami envoyée"),
-          padding: EdgeInsets.only(top: 15.0, bottom: 15.0, left: 15),
-        ),
-      );
+
+      fetchUserFriends();
+      fetchReceiverFriendRequests(friendEmail);
+
+      if (!_friends.contains(friendEmail)) {
+        if (!_receiverFriendRequests.contains(currentUser?.email)) {
+          docRef.update({
+            'friendRequests': FieldValue.arrayUnion([currentUser!.email])
+          });
+          friendEmailController.text = "";
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Demande d'ami envoyée"),
+              padding: EdgeInsets.only(top: 15.0, bottom: 15.0, left: 15),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              padding: EdgeInsets.only(top: 20.0, bottom: 20.0, left: 15),
+              content: Text(
+                  "Vous ne pouvez pas envoyer plusieurs requêtes à la même personne"),
+            ),
+          );
+          return;
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            padding: EdgeInsets.only(top: 20.0, bottom: 20.0, left: 15),
+            content: Text(
+                "Cet utilisateur se trouve déjà dans votre répertoire d'amis"),
+          ),
+        );
+        return;
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -203,6 +247,7 @@ class _FriendsPageState extends State<FriendsPage>
           content: Text("Veuillez entrer un courriel valide"),
         ),
       );
+      return;
     }
   }
 }
@@ -213,92 +258,85 @@ class Friends extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-        child: friends.isNotEmpty
-            ? ListView.builder(
-                itemCount: friends.length,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 8.0, horizontal: 16.0),
-                    child: Card(
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                      child: ListTile(
-                        leading: FutureBuilder<String>(
-                          future: getUserName(friends[index]),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<String> snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const CircleAvatar(
-                                backgroundColor: Colors.blueAccent,
-                                // Afficher un indicateur de chargement ou un placeholder
-                                child: Text(
-                                  "",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              );
-                            } else if (snapshot.hasError) {
-                              // Gérer l'erreur
-                              return const CircleAvatar(
-                                backgroundColor: Colors.redAccent,
-                                child: Icon(Icons.error, color: Colors.white),
-                              );
-                            } else {
-                              // Utiliser la valeur du Future une fois disponible
-                              return CircleAvatar(
-                                backgroundColor: Colors.blueAccent,
-                                child: Text(
-                                  snapshot.data![0].toUpperCase(),
-                                  style: const TextStyle(color: Colors.white),
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                        title: FutureBuilder<String>(
-                          future: getUserName(friends[index]),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<String> snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return const Text('Chargement...',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500));
-                            } else if (snapshot.hasError) {
-                              return const Text('Erreur',
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500));
-                            } else {
-                              return Text(snapshot.data!,
-                                  style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w500));
-                            }
-                          },
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.message),
-                          color: Colors.grey[600],
-                          onPressed: () {
-                            // Logique de message ici
-                          },
-                        ),
-                      ),
+    return friends.isNotEmpty
+        ? ListView.builder(
+            itemCount: friends.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: Card(
+                  elevation: 3,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: ListTile(
+                    leading: FutureBuilder<String>(
+                      future: getUserName(friends[index]),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const CircleAvatar(
+                            backgroundColor: Colors.blueAccent,
+                            child: Text(
+                              "",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return const CircleAvatar(
+                            backgroundColor: Colors.redAccent,
+                            child: Icon(Icons.error, color: Colors.white),
+                          );
+                        } else {
+                          return CircleAvatar(
+                            backgroundColor: Colors.blueAccent,
+                            child: Text(
+                              snapshot.data![0].toUpperCase(),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          );
+                        }
+                      },
                     ),
-                  );
-                },
-              )
-            : const Center(
-                child: Text(
-                "Aucun ami",
-                style: TextStyle(fontSize: 24),
-              )));
+                    title: FutureBuilder<String>(
+                      future: getUserName(friends[index]),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<String> snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Text('Chargement...',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w500));
+                        } else if (snapshot.hasError) {
+                          return const Text('Erreur',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w500));
+                        } else {
+                          return Text(snapshot.data!,
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w500));
+                        }
+                      },
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.message),
+                      color: Colors.grey[600],
+                      onPressed: () {
+                        // Logique de message ici
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
+          )
+        : const Center(
+            child: Text(
+            "Aucun ami",
+            style: TextStyle(fontSize: 24),
+          ));
   }
 }
 
