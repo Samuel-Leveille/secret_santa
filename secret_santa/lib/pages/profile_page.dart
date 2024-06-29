@@ -7,11 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/components/profile_data_field.dart';
+import 'package:secret_santa/pages/settings_page.dart';
 import 'package:secret_santa/utils/pick_image.dart';
 import 'package:secret_santa/utils/users_firestore_provider.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final String email;
+  const ProfilePage({super.key, required this.email});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -31,7 +33,8 @@ class _ProfilePageState extends State<ProfilePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       usersFirestoreProvider =
           Provider.of<UsersFirestoreProvider>(context, listen: false);
-      usersFirestoreProvider?.fetchUserData();
+      print("Email : " + widget.email);
+      usersFirestoreProvider?.fetchUserData(widget.email);
       getUserId();
     });
   }
@@ -107,7 +110,7 @@ class _ProfilePageState extends State<ProfilePage> {
       _imageUrl = url;
     });
 
-    await usersFirestoreProvider?.fetchUserData();
+    await usersFirestoreProvider?.fetchUserData(widget.email);
   }
 
   Future<void> getProfilePicture() async {
@@ -137,9 +140,30 @@ class _ProfilePageState extends State<ProfilePage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 10.0, right: 5.0),
+                                  child: IconButton(
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const SettingsPage()),
+                                        );
+                                      },
+                                      icon: const Icon(
+                                        Icons.settings,
+                                        size: 30,
+                                      )),
+                                ),
+                              ],
+                            ),
                             Padding(
                               padding:
-                                  const EdgeInsets.only(bottom: 20.0, top: 60),
+                                  const EdgeInsets.only(bottom: 20.0, top: 20),
                               child: Text(
                                   usersFirestoreProvider.userData!['email']),
                             ),

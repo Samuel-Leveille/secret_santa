@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,17 +11,12 @@ class UsersFirestoreProvider extends ChangeNotifier {
 
   Map<String, dynamic>? get userData => _userData;
 
-  UsersFirestoreProvider() {
-    fetchUserData();
-  }
-
-  Future<void> fetchUserData() async {
+  Future<void> fetchUserData(String email) async {
     try {
-      User? user = _auth.currentUser;
-      if (user != null) {
+      if (email.isNotEmpty) {
         QuerySnapshot querySnapshot = await _firestore
             .collection('users')
-            .where('email', isEqualTo: user.email)
+            .where('email', isEqualTo: email)
             .get();
         if (querySnapshot.docs.isNotEmpty) {
           DocumentSnapshot userDoc = querySnapshot.docs.first;
@@ -37,18 +34,18 @@ class UsersFirestoreProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateUserField(String fieldName, String fieldContent) async {
+  Future<void> updateUserField(
+      String fieldName, String fieldContent, String email) async {
     try {
-      User? user = _auth.currentUser;
-      if (user != null) {
+      if (email.isNotEmpty) {
         QuerySnapshot querySnapshot = await _firestore
             .collection('users')
-            .where('email', isEqualTo: user.email)
+            .where('email', isEqualTo: email)
             .get();
         for (var doc in querySnapshot.docs) {
           await doc.reference.update({fieldName: fieldContent});
         }
-        await fetchUserData();
+        await fetchUserData(email);
         notifyListeners();
       }
     } catch (e) {
@@ -58,19 +55,18 @@ class UsersFirestoreProvider extends ChangeNotifier {
   }
 
   Future<void> updateTwoUserField(String fieldName1, String fieldContent1,
-      String fieldName2, String fieldContent2) async {
+      String fieldName2, String fieldContent2, String email) async {
     try {
-      User? user = _auth.currentUser;
-      if (user != null) {
+      if (email.isNotEmpty) {
         QuerySnapshot querySnapshot = await _firestore
             .collection('users')
-            .where('email', isEqualTo: user.email)
+            .where('email', isEqualTo: email)
             .get();
         for (var doc in querySnapshot.docs) {
           await doc.reference.update({fieldName1: fieldContent1});
           await doc.reference.update({fieldName2: fieldContent2});
         }
-        await fetchUserData();
+        await fetchUserData(email);
         notifyListeners();
       }
     } catch (e) {

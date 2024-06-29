@@ -18,120 +18,98 @@ class _AddGroupPageState extends State<AddGroupPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: SingleChildScrollView(
-          child: Container(
-            width: MediaQuery.of(context).size.width * 1,
-            height: MediaQuery.of(context).size.height * 0.92,
-            color: Colors.white,
-            child: Align(
-                alignment: Alignment.topCenter,
-                child: Column(
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.only(bottom: 60.0, top: 100),
-                      child: Text(
-                        "Créer un groupe",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 27,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      height: MediaQuery.of(context).size.height * 0.40,
-                      child: Card(
-                        elevation: 20,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
-                        ),
-                        color: Colors.blue[50],
-                        shadowColor: Colors.black45,
-                        child: Padding(
-                          padding: const EdgeInsets.all(25.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              TextFormField(
-                                controller: nameController,
-                                decoration: InputDecoration(
-                                  labelText: 'Nom du groupe',
-                                  labelStyle: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.blueGrey[700],
-                                  ),
-                                  prefixIcon: Icon(
-                                    Icons.text_fields,
-                                    color: Colors.blueGrey[700],
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                    borderSide: BorderSide(
-                                      color: Colors.blueGrey.shade300,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                    borderSide: const BorderSide(
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 20,
-                              ),
-                              TextFormField(
-                                keyboardType: TextInputType.multiline,
-                                minLines: 1,
-                                maxLines: 4,
-                                maxLength: 150,
-                                controller: descriptionController,
-                                decoration: InputDecoration(
-                                  labelText: 'Description',
-                                  labelStyle: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.blueGrey[700],
-                                  ),
-                                  prefixIcon: Icon(
-                                    Icons.description,
-                                    color: Colors.blueGrey[700],
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                    borderSide: BorderSide(
-                                      color: Colors.blueGrey.shade300,
-                                    ),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                    borderSide: const BorderSide(
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "Créer un groupe",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30,
+                    color: Colors.teal,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Card(
+                  elevation: 8,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextFormField(
+                          controller: nameController,
+                          decoration: InputDecoration(
+                            labelText: 'Nom du groupe',
+                            labelStyle: TextStyle(
+                              fontSize: 16,
+                              color: Colors.teal[800],
+                            ),
+                            prefixIcon: Icon(
+                              Icons.group,
+                              color: Colors.teal[800],
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 20),
+                        TextFormField(
+                          controller: descriptionController,
+                          maxLines: 3,
+                          maxLength: 150,
+                          decoration: InputDecoration(
+                            labelText: 'Description',
+                            labelStyle: TextStyle(
+                              fontSize: 16,
+                              color: Colors.teal[800],
+                            ),
+                            prefixIcon: Icon(
+                              Icons.description,
+                              color: Colors.teal[800],
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(
-                      height: 50,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: _createGroup,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    FloatingActionButton.extended(
-                      onPressed: _createGroup,
-                      backgroundColor: Colors.teal[50],
-                      extendedPadding:
-                          const EdgeInsets.only(left: 120, right: 120),
-                      label: const Text("Créer"),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 50,
+                      vertical: 15,
                     ),
-                  ],
-                )),
+                  ),
+                  child: const Text(
+                    "Créer",
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -142,7 +120,6 @@ class _AddGroupPageState extends State<AddGroupPage> {
     String groupName = nameController.text;
     String groupDescription = descriptionController.text;
     final User? user = _auth.currentUser;
-    final String groupId;
 
     if (groupName.isEmpty || groupDescription.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -155,10 +132,9 @@ class _AddGroupPageState extends State<AddGroupPage> {
         'description': groupDescription,
         'admin': user.email
       });
-      nameController.text = "";
-      descriptionController.text = "";
-      groupId = docRef.id;
-      _addGroupToCurrentUser(user, groupId);
+      nameController.clear();
+      descriptionController.clear();
+      _addGroupToCurrentUser(user, docRef.id);
     }
   }
 

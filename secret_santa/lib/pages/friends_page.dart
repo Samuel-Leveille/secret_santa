@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:secret_santa/pages/profile_page.dart';
 
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
@@ -265,67 +266,76 @@ class Friends extends StatelessWidget {
               return Padding(
                 padding:
                     const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                child: Card(
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: ListTile(
-                    leading: FutureBuilder<String>(
-                      future: getUserName(friends[index]),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<String> snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const CircleAvatar(
-                            backgroundColor: Colors.blueAccent,
-                            child: Text(
-                              "",
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          );
-                        } else if (snapshot.hasError) {
-                          return const CircleAvatar(
-                            backgroundColor: Colors.redAccent,
-                            child: Icon(Icons.error, color: Colors.white),
-                          );
-                        } else {
-                          return CircleAvatar(
-                            backgroundColor: Colors.blueAccent,
-                            child: Text(
-                              snapshot.data![0].toUpperCase(),
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          );
-                        }
-                      },
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              ProfilePage(email: friends[index])),
+                    );
+                  },
+                  child: Card(
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
                     ),
-                    title: FutureBuilder<String>(
-                      future: getUserName(friends[index]),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<String> snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Text('Chargement...',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w500));
-                        } else if (snapshot.hasError) {
-                          return const Text('Erreur',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w500));
-                        } else {
-                          return Text(snapshot.data!,
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w500));
-                        }
-                      },
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.message),
-                      color: Colors.grey[600],
-                      onPressed: () {
-                        // Logique de message ici
-                      },
+                    child: ListTile(
+                      leading: FutureBuilder<String>(
+                        future: getUserName(friends[index]),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<String> snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const CircleAvatar(
+                              backgroundColor: Colors.blueAccent,
+                              child: Text(
+                                "",
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            );
+                          } else if (snapshot.hasError) {
+                            return const CircleAvatar(
+                              backgroundColor: Colors.redAccent,
+                              child: Icon(Icons.error, color: Colors.white),
+                            );
+                          } else {
+                            return CircleAvatar(
+                              backgroundColor: Colors.blueAccent,
+                              child: Text(
+                                snapshot.data![0].toUpperCase(),
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                      title: FutureBuilder<String>(
+                        future: getUserName(friends[index]),
+                        builder: (BuildContext context,
+                            AsyncSnapshot<String> snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Text('Chargement...',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.w500));
+                          } else if (snapshot.hasError) {
+                            return const Text('Erreur',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.w500));
+                          } else {
+                            return Text(snapshot.data!,
+                                style: const TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.w500));
+                          }
+                        },
+                      ),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.message),
+                        color: Colors.grey[600],
+                        onPressed: () {
+                          // Logique de message ici
+                        },
+                      ),
                     ),
                   ),
                 ),

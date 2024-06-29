@@ -12,41 +12,15 @@ class AccueilPage extends StatefulWidget {
 }
 
 class _AccueilPageState extends State<AccueilPage> {
-  final AuthServices _auth = AuthServices();
-
-  Future<void> signOut(BuildContext context) async {
-    try {
-      await _auth.signOut();
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const LoginPage()),
-      );
-    } catch (e) {
-      print("Some error occured with sign out : ${e.toString()}");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
         color: Colors.white,
         alignment: Alignment.center,
-        child: SafeArea(
+        child: const SafeArea(
           child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("Accueil"),
-                const SizedBox(
-                  height: 20,
-                ),
-                FloatingActionButton(
-                    onPressed: () async {
-                      await signOut(context);
-                    },
-                    child: const Text("Logout")),
-              ],
-            ),
+            child: Text("Accueil"),
           ),
         ),
       ),
