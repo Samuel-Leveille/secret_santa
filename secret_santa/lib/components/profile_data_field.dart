@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/utils/users_firestore_provider.dart';
@@ -8,6 +9,7 @@ class ProfileDataField extends StatefulWidget {
   final String content;
   final String label;
   final bool canModify;
+  final String email;
 
   const ProfileDataField({
     super.key,
@@ -16,6 +18,7 @@ class ProfileDataField extends StatefulWidget {
     required this.content,
     required this.label,
     required this.canModify,
+    required this.email,
   });
 
   @override
@@ -25,6 +28,7 @@ class ProfileDataField extends StatefulWidget {
 class _ProfileDataFieldState extends State<ProfileDataField> {
   bool isItBio = false;
   bool isItFirstName = true;
+  final _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
@@ -252,7 +256,9 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
                                 );
                               });
                         },
-                        icon: const Icon(Icons.edit),
+                        icon: widget.email == _auth.currentUser?.email
+                            ? const Icon(Icons.edit)
+                            : Container(),
                       ),
                     ),
                   )

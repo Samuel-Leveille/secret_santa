@@ -144,29 +144,38 @@ class _ProfilePageState extends State<ProfilePage> {
                               mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(
-                                      top: 10.0, right: 5.0),
-                                  child: IconButton(
-                                      onPressed: () {
-                                        Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  const SettingsPage()),
-                                        );
-                                      },
-                                      icon: const Icon(
-                                        Icons.settings,
-                                        size: 30,
-                                      )),
-                                ),
+                                    padding: const EdgeInsets.only(
+                                        top: 10.0, right: 5.0),
+                                    child:
+                                        widget.email == _auth.currentUser?.email
+                                            ? IconButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            const SettingsPage()),
+                                                  );
+                                                },
+                                                icon: const Icon(
+                                                  Icons.settings,
+                                                  size: 30,
+                                                ))
+                                            : null),
                               ],
                             ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: 20.0, top: 20),
-                              child: Text(
-                                  usersFirestoreProvider.userData!['email']),
-                            ),
+                            widget.email == _auth.currentUser?.email
+                                ? Padding(
+                                    padding: const EdgeInsets.only(
+                                        bottom: 20.0, top: 20),
+                                    child: Text(usersFirestoreProvider
+                                        .userData!['email']),
+                                  )
+                                : Padding(
+                                    padding: const EdgeInsets.only(
+                                        bottom: 20.0, top: 60),
+                                    child: Text(usersFirestoreProvider
+                                        .userData!['email']),
+                                  ),
                             const SizedBox(
                               height: 20,
                             ),
@@ -184,6 +193,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                             .userData!['name']),
                                     label: 'Nom',
                                     canModify: true,
+                                    email: widget.email,
                                   ),
                                   const SizedBox(
                                     height: 20,
@@ -195,6 +205,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         .userData!['biography'],
                                     label: 'À propos de moi',
                                     canModify: true,
+                                    email: widget.email,
                                   ),
                                   const SizedBox(
                                     height: 20,
@@ -207,6 +218,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                         .substring(0, 10),
                                     label: 'Date création du compte',
                                     canModify: false,
+                                    email: widget.email,
                                   ),
                                 ],
                               ),
@@ -233,6 +245,31 @@ class _ProfilePageState extends State<ProfilePage> {
                                 0.7,
                                 1.0
                               ]),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 15.0),
+                              child: Material(
+                                borderRadius: BorderRadius.circular(40),
+                                elevation: 8,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Color(0xFF26C6DA),
+                                      borderRadius: BorderRadius.circular(40)),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.arrow_back),
+                                    color: Colors.blue[50],
+                                    iconSize: 24.0,
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       Align(
@@ -314,127 +351,133 @@ class _ProfilePageState extends State<ProfilePage> {
                                 top: 66,
                                 left: 58,
                                 child: SizedBox(
-                                  height: 32,
-                                  width: 32,
-                                  child: IconButton.filled(
-                                      style: ButtonStyle(
-                                          backgroundColor:
-                                              WidgetStatePropertyAll(
-                                                  Colors.teal[100])),
-                                      icon: const Icon(Icons.add_a_photo),
-                                      color: Colors.black,
-                                      disabledColor: Colors.black,
-                                      iconSize: 15,
-                                      onPressed: () => {
-                                            showDialog(
-                                                context: context,
-                                                builder: (context) {
-                                                  return AlertDialog(
-                                                    title: const Text(
-                                                      "Photo de profil",
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    ),
-                                                    content: SizedBox(
-                                                      height: 125,
-                                                      child: Column(
-                                                        children: [
-                                                          const Divider(
-                                                            color: Colors.black,
-                                                            thickness: 0.5,
-                                                            height: 1,
+                                    height: 32,
+                                    width: 32,
+                                    child: widget.email ==
+                                            _auth.currentUser?.email
+                                        ? IconButton.filled(
+                                            style: ButtonStyle(
+                                                backgroundColor:
+                                                    WidgetStatePropertyAll(
+                                                        Colors.teal[100])),
+                                            icon: const Icon(Icons.add_a_photo),
+                                            color: Colors.black,
+                                            disabledColor: Colors.black,
+                                            iconSize: 15,
+                                            onPressed: () => {
+                                                  showDialog(
+                                                      context: context,
+                                                      builder: (context) {
+                                                        return AlertDialog(
+                                                          title: const Text(
+                                                            "Photo de profil",
+                                                            textAlign: TextAlign
+                                                                .center,
                                                           ),
-                                                          const SizedBox(
-                                                            height: 15,
-                                                          ),
-                                                          ElevatedButton.icon(
-                                                            onPressed:
-                                                                selectImageFromCamera,
-                                                            label: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      right:
-                                                                          40.0),
-                                                              child: Text(
-                                                                "Caméra",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                            .blue[
-                                                                        300]),
-                                                              ),
+                                                          content: SizedBox(
+                                                            height: 125,
+                                                            child: Column(
+                                                              children: [
+                                                                const Divider(
+                                                                  color: Colors
+                                                                      .black,
+                                                                  thickness:
+                                                                      0.5,
+                                                                  height: 1,
+                                                                ),
+                                                                const SizedBox(
+                                                                  height: 15,
+                                                                ),
+                                                                ElevatedButton
+                                                                    .icon(
+                                                                  onPressed:
+                                                                      selectImageFromCamera,
+                                                                  label:
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                        .only(
+                                                                        right:
+                                                                            40.0),
+                                                                    child: Text(
+                                                                      "Caméra",
+                                                                      style: TextStyle(
+                                                                          color:
+                                                                              Colors.blue[300]),
+                                                                    ),
+                                                                  ),
+                                                                  icon: Padding(
+                                                                    padding: const EdgeInsets
+                                                                        .only(
+                                                                        left:
+                                                                            40.0),
+                                                                    child: Icon(
+                                                                      Icons
+                                                                          .camera_alt,
+                                                                      color: Colors
+                                                                              .blue[
+                                                                          300],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(
+                                                                  height: 10.0,
+                                                                ),
+                                                                ElevatedButton
+                                                                    .icon(
+                                                                  onPressed:
+                                                                      selectImageFromGallery,
+                                                                  label:
+                                                                      Padding(
+                                                                    padding: const EdgeInsets
+                                                                        .only(
+                                                                        right:
+                                                                            40.0),
+                                                                    child: Text(
+                                                                      "Galerie",
+                                                                      style: TextStyle(
+                                                                          color:
+                                                                              Colors.blue[300]),
+                                                                    ),
+                                                                  ),
+                                                                  icon: Padding(
+                                                                    padding: const EdgeInsets
+                                                                        .only(
+                                                                        left:
+                                                                            40.0),
+                                                                    child: Icon(
+                                                                      Icons
+                                                                          .image,
+                                                                      color: Colors
+                                                                              .blue[
+                                                                          300],
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              ],
                                                             ),
-                                                            icon: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      left:
-                                                                          40.0),
-                                                              child: Icon(
-                                                                Icons
-                                                                    .camera_alt,
-                                                                color: Colors
-                                                                    .blue[300],
-                                                              ),
-                                                            ),
                                                           ),
-                                                          const SizedBox(
-                                                            height: 10.0,
-                                                          ),
-                                                          ElevatedButton.icon(
-                                                            onPressed:
-                                                                selectImageFromGallery,
-                                                            label: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      right:
-                                                                          40.0),
-                                                              child: Text(
-                                                                "Galerie",
-                                                                style: TextStyle(
-                                                                    color: Colors
-                                                                            .blue[
-                                                                        300]),
-                                                              ),
-                                                            ),
-                                                            icon: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .only(
-                                                                      left:
-                                                                          40.0),
-                                                              child: Icon(
-                                                                Icons.image,
-                                                                color: Colors
-                                                                    .blue[300],
-                                                              ),
-                                                            ),
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    actions: [
-                                                      Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          MaterialButton(
-                                                            onPressed: () {
-                                                              Navigator.pop(
-                                                                  context);
-                                                            },
-                                                            child: const Text(
-                                                                "Annuler"),
-                                                          ),
-                                                        ],
-                                                      )
-                                                    ],
-                                                  );
+                                                          actions: [
+                                                            Row(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                MaterialButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    Navigator.pop(
+                                                                        context);
+                                                                  },
+                                                                  child: const Text(
+                                                                      "Annuler"),
+                                                                ),
+                                                              ],
+                                                            )
+                                                          ],
+                                                        );
+                                                      })
                                                 })
-                                          }),
-                                ),
+                                        : null),
                               )
                             ],
                           ),
