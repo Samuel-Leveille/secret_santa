@@ -55,92 +55,94 @@ class _FriendsPageState extends State<FriendsPage>
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: Scaffold(
-        body: Container(
-          color: Colors.white,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(left: 25.0, top: 70, bottom: 20),
-                    child: Text(
-                      "Requêtes",
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 25.0, right: 25.0),
-                child: TextFormField(
-                  controller: friendEmailController,
-                  decoration: InputDecoration(
-                      labelText: "Courriel",
-                      suffixIcon: IconButton(
-                          onPressed: sendRequest,
-                          icon: Icon(
-                            Icons.send,
-                            color: Colors.grey[600],
-                          ))),
-                ),
-              ),
-              TabBar(
-                labelColor: const Color.fromARGB(255, 134, 198, 250),
-                indicatorColor: const Color.fromARGB(255, 134, 198, 250),
-                controller: _tabController,
-                tabs: const [
-                  Tab(
-                    height: 80,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.people),
-                        SizedBox(
-                          width: 8.0,
-                        ),
-                        Text('Amis'),
-                      ],
-                    ),
-                  ),
-                  Tab(
-                    height: 80,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.person_add),
-                        SizedBox(
-                          width: 8.0,
-                        ),
-                        Text('Requêtes'),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    _tabController?.animateTo(index);
-                  },
+    return SafeArea(
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Scaffold(
+          body: Container(
+            color: Colors.white,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                const Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Friends(friends: _friends),
-                    Requests(
-                      items: _friendRequests,
-                      onRequestHandled: refreshFriendRequests,
+                    Padding(
+                      padding: EdgeInsets.only(left: 25.0, top: 70, bottom: 20),
+                      child: Text(
+                        "Requêtes",
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.only(left: 25.0, right: 25.0),
+                  child: TextFormField(
+                    controller: friendEmailController,
+                    decoration: InputDecoration(
+                        labelText: "Courriel",
+                        suffixIcon: IconButton(
+                            onPressed: sendRequest,
+                            icon: Icon(
+                              Icons.send,
+                              color: Colors.grey[600],
+                            ))),
+                  ),
+                ),
+                TabBar(
+                  labelColor: const Color.fromARGB(255, 134, 198, 250),
+                  indicatorColor: const Color.fromARGB(255, 134, 198, 250),
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(
+                      height: 80,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.people),
+                          SizedBox(
+                            width: 8.0,
+                          ),
+                          Text('Amis'),
+                        ],
+                      ),
+                    ),
+                    Tab(
+                      height: 80,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.person_add),
+                          SizedBox(
+                            width: 8.0,
+                          ),
+                          Text('Requêtes'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: PageView(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      _tabController?.animateTo(index);
+                    },
+                    children: [
+                      Friends(friends: _friends),
+                      Requests(
+                        items: _friendRequests,
+                        onRequestHandled: refreshFriendRequests,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -343,9 +345,12 @@ class Friends extends StatelessWidget {
             },
           )
         : const Center(
+            child: Padding(
+            padding: EdgeInsets.only(bottom: 40.0),
             child: Text(
-            "Aucun ami",
-            style: TextStyle(fontSize: 24),
+              "Aucun ami",
+              style: TextStyle(fontSize: 24),
+            ),
           ));
   }
 }
@@ -378,9 +383,7 @@ class Requests extends StatelessWidget {
                           AsyncSnapshot<String> snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const Text('Chargement...',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w500));
+                          return const CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return const Text('Erreur',
                               style: TextStyle(
@@ -433,9 +436,12 @@ class Requests extends StatelessWidget {
             },
           )
         : const Center(
+            child: Padding(
+            padding: EdgeInsets.only(bottom: 40.0),
             child: Text(
-            "Aucune demande d'ami",
-            style: TextStyle(fontSize: 24),
+              "Aucune demande d'ami",
+              style: TextStyle(fontSize: 24),
+            ),
           ));
   }
 

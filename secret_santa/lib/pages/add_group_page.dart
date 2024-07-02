@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,98 +19,102 @@ class _AddGroupPageState extends State<AddGroupPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: GestureDetector(
+    return SafeArea(
+      child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "Créer un groupe",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 30,
-                    color: Colors.teal,
-                  ),
-                ),
-                const SizedBox(height: 30),
-                Card(
-                  elevation: 8,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextFormField(
-                          controller: nameController,
-                          decoration: InputDecoration(
-                            labelText: 'Nom du groupe',
-                            labelStyle: TextStyle(
-                              fontSize: 16,
-                              color: Colors.teal[800],
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Créer un groupe",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                        color: Colors.teal,
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    Card(
+                      elevation: 8,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextFormField(
+                              controller: nameController,
+                              decoration: InputDecoration(
+                                labelText: 'Nom du groupe',
+                                labelStyle: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.teal[800],
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.group,
+                                  color: Colors.teal[800],
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
                             ),
-                            prefixIcon: Icon(
-                              Icons.group,
-                              color: Colors.teal[800],
+                            const SizedBox(height: 20),
+                            TextFormField(
+                              controller: descriptionController,
+                              maxLines: 3,
+                              maxLength: 150,
+                              decoration: InputDecoration(
+                                labelText: 'Description',
+                                labelStyle: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.teal[800],
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.description,
+                                  color: Colors.teal[800],
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                          ],
                         ),
-                        const SizedBox(height: 20),
-                        TextFormField(
-                          controller: descriptionController,
-                          maxLines: 3,
-                          maxLength: 150,
-                          decoration: InputDecoration(
-                            labelText: 'Description',
-                            labelStyle: TextStyle(
-                              fontSize: 16,
-                              color: Colors.teal[800],
-                            ),
-                            prefixIcon: Icon(
-                              Icons.description,
-                              color: Colors.teal[800],
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                      ),
+                    ),
+                    const SizedBox(height: 30),
+                    ElevatedButton(
+                      onPressed: _createGroup,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ],
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 50,
+                          vertical: 15,
+                        ),
+                      ),
+                      child: const Text(
+                        "Créer",
+                        style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                const SizedBox(height: 30),
-                ElevatedButton(
-                  onPressed: _createGroup,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 50,
-                      vertical: 15,
-                    ),
-                  ),
-                  child: const Text(
-                    "Créer",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -130,7 +136,9 @@ class _AddGroupPageState extends State<AddGroupPage> {
       DocumentReference docRef = await _firestore.collection('groups').add({
         'name': groupName,
         'description': groupDescription,
-        'admin': user.email
+        'admin': user.email,
+        'participants': [user.email],
+        'dateCreation': DateTime.now().toString()
       });
       nameController.clear();
       descriptionController.clear();

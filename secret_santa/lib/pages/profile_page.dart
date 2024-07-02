@@ -33,7 +33,6 @@ class _ProfilePageState extends State<ProfilePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       usersFirestoreProvider =
           Provider.of<UsersFirestoreProvider>(context, listen: false);
-      print("Email : " + widget.email);
       usersFirestoreProvider?.fetchUserData(widget.email);
       getUserId();
     });
@@ -246,31 +245,34 @@ class _ProfilePageState extends State<ProfilePage> {
                                 1.0
                               ]),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 15.0),
-                              child: Material(
-                                borderRadius: BorderRadius.circular(40),
-                                elevation: 8,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      color: Color(0xFF26C6DA),
-                                      borderRadius: BorderRadius.circular(40)),
-                                  child: IconButton(
-                                    icon: const Icon(Icons.arrow_back),
-                                    color: Colors.blue[50],
-                                    iconSize: 24.0,
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
+                        child: _auth.currentUser?.email != widget.email
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 15.0),
+                                    child: Material(
+                                      borderRadius: BorderRadius.circular(40),
+                                      elevation: 8,
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            color: const Color(0xFF26C6DA),
+                                            borderRadius:
+                                                BorderRadius.circular(40)),
+                                        child: IconButton(
+                                          icon: const Icon(Icons.arrow_back),
+                                          color: Colors.blue[50],
+                                          iconSize: 24.0,
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                                ],
+                              )
+                            : null,
                       ),
                       Align(
                         alignment: Alignment.center,
