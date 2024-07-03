@@ -31,12 +31,12 @@ class _AddGroupPageState extends State<AddGroupPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
-                      "Créer un groupe",
+                    Text(
+                      "Créer un Groupe",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 30,
-                        color: Colors.teal,
+                        color: Colors.teal[300],
                       ),
                     ),
                     const SizedBox(height: 30),
@@ -56,11 +56,11 @@ class _AddGroupPageState extends State<AddGroupPage> {
                                 labelText: 'Nom du groupe',
                                 labelStyle: TextStyle(
                                   fontSize: 16,
-                                  color: Colors.teal[800],
+                                  color: Colors.teal[700],
                                 ),
                                 prefixIcon: Icon(
                                   Icons.group,
-                                  color: Colors.teal[800],
+                                  color: Colors.teal[700],
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -76,11 +76,11 @@ class _AddGroupPageState extends State<AddGroupPage> {
                                 labelText: 'Description',
                                 labelStyle: TextStyle(
                                   fontSize: 16,
-                                  color: Colors.teal[800],
+                                  color: Colors.teal[700],
                                 ),
                                 prefixIcon: Icon(
                                   Icons.description,
-                                  color: Colors.teal[800],
+                                  color: Colors.teal[700],
                                 ),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(12),
@@ -92,23 +92,47 @@ class _AddGroupPageState extends State<AddGroupPage> {
                       ),
                     ),
                     const SizedBox(height: 30),
-                    ElevatedButton(
-                      onPressed: _createGroup,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                    Container(
+                      decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                            colors: [
+                              Color.fromARGB(255, 178, 223, 219),
+                              Color.fromARGB(255, 128, 203, 196),
+                              Color.fromARGB(255, 77, 182, 172),
+                              Color.fromARGB(255, 38, 166, 154),
+                            ],
+                            stops: [0.0, 0.3, 0.7, 1.0],
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                                color: Colors.grey,
+                                blurRadius: 10,
+                                offset: Offset(0, 5),
+                                spreadRadius: 0),
+                          ],
+                          borderRadius: BorderRadius.circular(12.0)),
+                      child: ElevatedButton(
+                        onPressed: _createGroup,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 50,
+                            vertical: 15,
+                          ),
                         ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 50,
-                          vertical: 15,
-                        ),
-                      ),
-                      child: const Text(
-                        "Créer",
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.white,
+                        child: const Text(
+                          "Créer",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),

@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/firebase_auth/auth_services.dart';
+import 'package:secret_santa/pages/group_page.dart';
 import 'package:secret_santa/pages/login_page.dart';
 import 'package:secret_santa/utils/groups_firestore_provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -28,6 +30,13 @@ class _AccueilPageState extends State<AccueilPage> {
           Provider.of<GroupsFirestoreProvider>(context, listen: false);
       _groupsFirestoreProvider?.fetchGroupData();
     });
+  }
+
+  Color generateSoftColor() {
+    int red = 200 + Random().nextInt(56);
+    int green = 200 + Random().nextInt(56);
+    int blue = 200 + Random().nextInt(56);
+    return Color.fromARGB(255, red, green, blue);
   }
 
   @override
@@ -83,7 +92,7 @@ class _AccueilPageState extends State<AccueilPage> {
                   children: [
                     const Padding(
                       padding:
-                          EdgeInsets.only(left: 30.0, top: 50.0, bottom: 36.0),
+                          EdgeInsets.only(left: 30.0, top: 50.0, bottom: 40.0),
                       child: Text(
                         "Vos Groupes",
                         style: TextStyle(
@@ -126,60 +135,74 @@ class _AccueilPageState extends State<AccueilPage> {
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 8.0),
-                                    child: Card(
-                                      elevation: 5,
-                                      shadowColor: Colors.grey.withOpacity(0.2),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(16.0),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 16.0,
-                                            right: 16.0,
-                                            bottom: 10.0,
-                                            top: 40.0),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              group['name'] ??
-                                                  "Groupe de ${group['admin']}",
-                                              style: const TextStyle(
-                                                fontSize: 24,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black87,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 16),
-                                            Row(
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 12.0),
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      const GroupPage()));
+                                        },
+                                        child: Card(
+                                          color: generateSoftColor(),
+                                          elevation: 8,
+                                          shadowColor:
+                                              Colors.grey.withOpacity(0.6),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(16.0),
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 16.0,
+                                                right: 16.0,
+                                                bottom: 10.0,
+                                                top: 40.0),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
                                               children: [
-                                                const Icon(
-                                                  Icons.person,
-                                                  color: Colors.black54,
-                                                ),
-                                                const SizedBox(width: 8),
                                                 Text(
-                                                  "Créé par ${snapshot.data}",
+                                                  group['name'] ??
+                                                      "Groupe de ${group['admin']}",
                                                   style: const TextStyle(
-                                                    fontSize: 16,
-                                                    color: Colors.black54,
+                                                    fontSize: 26,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black87,
                                                   ),
                                                 ),
+                                                const SizedBox(height: 16),
+                                                Row(
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.person,
+                                                      color: Colors.black54,
+                                                    ),
+                                                    const SizedBox(width: 8),
+                                                    Text(
+                                                      "Créé par ${snapshot.data}",
+                                                      style: const TextStyle(
+                                                        fontSize: 16,
+                                                        color: Colors.black54,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                const SizedBox(
+                                                  height: 100,
+                                                ),
+                                                Text(
+                                                  "Créé le ${group['dateCreation'].substring(0, 10)}",
+                                                  style: const TextStyle(
+                                                      color: Colors.grey),
+                                                )
                                               ],
                                             ),
-                                            const SizedBox(
-                                              height: 100,
-                                            ),
-                                            Text(
-                                              "Créé le ${group['dateCreation'].substring(0, 10)}",
-                                              style:
-                                                  TextStyle(color: Colors.grey),
-                                            )
-                                          ],
+                                          ),
                                         ),
                                       ),
                                     ),
