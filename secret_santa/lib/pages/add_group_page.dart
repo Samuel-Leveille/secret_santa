@@ -164,6 +164,9 @@ class _AddGroupPageState extends State<AddGroupPage> {
         'participants': [user.email],
         'dateCreation': DateTime.now().toString()
       });
+
+      await docRef.update({'id': docRef.id});
+
       nameController.clear();
       descriptionController.clear();
       _addGroupToCurrentUser(user, docRef.id);

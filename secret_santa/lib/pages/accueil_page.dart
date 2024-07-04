@@ -4,9 +4,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:secret_santa/firebase_auth/auth_services.dart';
 import 'package:secret_santa/pages/group_page.dart';
-import 'package:secret_santa/pages/login_page.dart';
 import 'package:secret_santa/utils/groups_firestore_provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
@@ -28,7 +26,7 @@ class _AccueilPageState extends State<AccueilPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _groupsFirestoreProvider =
           Provider.of<GroupsFirestoreProvider>(context, listen: false);
-      _groupsFirestoreProvider?.fetchGroupData();
+      _groupsFirestoreProvider?.fetchGroupsData();
     });
   }
 
@@ -37,6 +35,10 @@ class _AccueilPageState extends State<AccueilPage> {
     int green = 200 + Random().nextInt(56);
     int blue = 200 + Random().nextInt(56);
     return Color.fromARGB(255, red, green, blue);
+  }
+
+  String getGroupId(Map<String, dynamic> group) {
+    return group['id'];
   }
 
   @override
@@ -49,7 +51,7 @@ class _AccueilPageState extends State<AccueilPage> {
           color: Colors.white,
           child: Consumer<GroupsFirestoreProvider>(
             builder: (context, provider, child) {
-              final groupsData = provider.groupData;
+              final groupsData = provider.groupsData;
               if (groupsData.isEmpty) {
                 return const Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -140,10 +142,13 @@ class _AccueilPageState extends State<AccueilPage> {
                                           const EdgeInsets.only(bottom: 12.0),
                                       child: GestureDetector(
                                         onTap: () {
+                                          String theGroupId = getGroupId(group);
                                           Navigator.of(context).push(
                                               MaterialPageRoute(
                                                   builder: (context) =>
-                                                      const GroupPage()));
+                                                      GroupPage(
+                                                        groupId: theGroupId,
+                                                      )));
                                         },
                                         child: Card(
                                           color: generateSoftColor(),
