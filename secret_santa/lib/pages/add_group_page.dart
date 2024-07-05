@@ -1,8 +1,8 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:secret_santa/pages/accueil_page.dart';
+import 'package:secret_santa/pages/group_page.dart';
 
 class AddGroupPage extends StatefulWidget {
   const AddGroupPage({super.key});
@@ -14,8 +14,25 @@ class AddGroupPage extends StatefulWidget {
 class _AddGroupPageState extends State<AddGroupPage> {
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
+  final moneyController = TextEditingController();
+  final datePigeController = TextEditingController();
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (picked != null) {
+      setState(() {
+        datePigeController.text = "${picked.toLocal()}".split(' ')[0];
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,18 +52,18 @@ class _AddGroupPageState extends State<AddGroupPage> {
                       "Créer un Groupe",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 30,
+                        fontSize: 32,
                         color: Colors.teal[300],
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 20),
                     Card(
-                      elevation: 8,
+                      elevation: 10,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(20.0),
+                        padding: const EdgeInsets.all(24.0),
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -63,7 +80,51 @@ class _AddGroupPageState extends State<AddGroupPage> {
                                   color: Colors.teal[700],
                                 ),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            TextFormField(
+                              controller: moneyController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                      decimal: true),
+                              decoration: InputDecoration(
+                                labelText: "Montant max / personne",
+                                labelStyle: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.teal[700],
+                                ),
+                                prefixIcon: Icon(
+                                  Icons.attach_money_outlined,
+                                  color: Colors.teal[700],
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                            GestureDetector(
+                              onTap: () => _selectDate(context),
+                              child: AbsorbPointer(
+                                child: TextFormField(
+                                  controller: datePigeController,
+                                  decoration: InputDecoration(
+                                    labelText: "Date de la pige",
+                                    labelStyle: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.teal[700],
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.date_range,
+                                      color: Colors.teal[700],
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -73,7 +134,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
                               maxLines: 3,
                               maxLength: 150,
                               decoration: InputDecoration(
-                                labelText: 'Description',
+                                labelText: 'Détails du groupe',
                                 labelStyle: TextStyle(
                                   fontSize: 16,
                                   color: Colors.teal[700],
@@ -83,7 +144,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
                                   color: Colors.teal[700],
                                 ),
                                 border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
                               ),
                             ),
@@ -93,33 +154,31 @@ class _AddGroupPageState extends State<AddGroupPage> {
                     ),
                     const SizedBox(height: 30),
                     Container(
+                      width: 320,
                       decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                            colors: [
-                              Color.fromARGB(255, 178, 223, 219),
-                              Color.fromARGB(255, 128, 203, 196),
-                              Color.fromARGB(255, 77, 182, 172),
-                              Color.fromARGB(255, 38, 166, 154),
-                            ],
-                            stops: [0.0, 0.3, 0.7, 1.0],
-                          ),
-                          boxShadow: const [
-                            BoxShadow(
-                                color: Colors.grey,
-                                blurRadius: 10,
-                                offset: Offset(0, 5),
-                                spreadRadius: 0),
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color.fromARGB(255, 128, 203, 196),
+                            Color.fromARGB(255, 38, 166, 154),
                           ],
-                          borderRadius: BorderRadius.circular(12.0)),
+                        ),
+                        borderRadius: BorderRadius.circular(15.0),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.grey,
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                            spreadRadius: 0,
+                          ),
+                        ],
+                      ),
                       child: ElevatedButton(
                         onPressed: _createGroup,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(15),
                           ),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 50,
@@ -129,7 +188,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
                         child: const Text(
                           "Créer",
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 20,
                             fontWeight: FontWeight.bold,
                             color: Colors.white,
                           ),
@@ -149,9 +208,14 @@ class _AddGroupPageState extends State<AddGroupPage> {
   Future<void> _createGroup() async {
     String groupName = nameController.text;
     String groupDescription = descriptionController.text;
+    String moneyMax = moneyController.text;
+    String pigeDate = datePigeController.text;
     final User? user = _auth.currentUser;
 
-    if (groupName.isEmpty || groupDescription.isEmpty) {
+    if (groupName.isEmpty ||
+        moneyMax.isEmpty ||
+        pigeDate.isEmpty ||
+        groupDescription.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Veuillez remplir tous les champs")),
       );
@@ -162,14 +226,22 @@ class _AddGroupPageState extends State<AddGroupPage> {
         'description': groupDescription,
         'admin': user.email,
         'participants': [user.email],
-        'dateCreation': DateTime.now().toString()
+        'dateCreation': DateTime.now().toString(),
+        'moneyMax': moneyMax,
+        'pigeDate': pigeDate
       });
 
       await docRef.update({'id': docRef.id});
-
       nameController.clear();
       descriptionController.clear();
+      moneyController.clear();
+      datePigeController.clear();
       _addGroupToCurrentUser(user, docRef.id);
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => GroupPage(groupId: docRef.id),
+        ),
+      );
     }
   }
 

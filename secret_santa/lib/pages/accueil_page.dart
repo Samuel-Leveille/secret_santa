@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:secret_santa/components/bottom_bar.dart';
 import 'package:secret_santa/pages/group_page.dart';
 import 'package:secret_santa/utils/groups_firestore_provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -105,7 +106,7 @@ class _AccueilPageState extends State<AccueilPage> {
                       ),
                     ),
                     Center(
-                      child: Container(
+                      child: SizedBox(
                         height: 275,
                         width: 325,
                         child: PageView.builder(

@@ -10,7 +10,7 @@ class GiftsPage extends StatefulWidget {
 class _GiftsPageState extends State<GiftsPage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: Text("Cadeaux"),
       ),

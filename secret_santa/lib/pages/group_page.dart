@@ -33,7 +33,10 @@ class _GroupPageState extends State<GroupPage> {
       if (userEmail != null) {
         _userProvider?.fetchUserData(userEmail);
       } else {
-        CircularProgressIndicator();
+        Center(
+            child: CircularProgressIndicator(
+          color: Colors.blue[300],
+        ));
         print("Erreur : Aucun utilisateur connecté ou email non disponible.");
       }
     });
@@ -71,7 +74,10 @@ class _GroupPageState extends State<GroupPage> {
             builder: (context, provider, child) {
               final group = provider.groupData;
               if (group == null) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(
+                    child: CircularProgressIndicator(
+                  color: Colors.blue[300],
+                ));
               }
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -104,17 +110,19 @@ class _GroupPageState extends State<GroupPage> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(left: 40.0),
-                        child: Text(
-                          group['description'],
-                          style: const TextStyle(color: Colors.grey),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 40.0, right: 30),
+                          child: Text(
+                            group['description'],
+                            style: const TextStyle(color: Colors.grey),
+                          ),
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(
-                    height: 60,
+                    height: 50,
                   ),
                   const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -168,8 +176,10 @@ class _GroupPageState extends State<GroupPage> {
                                   (context, AsyncSnapshot<dynamic> snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
-                                  return const Center(
-                                      child: CircularProgressIndicator());
+                                  return Center(
+                                      child: CircularProgressIndicator(
+                                    color: Colors.blue[300],
+                                  ));
                                 } else if (snapshot.hasError) {
                                   return const Text('Erreur',
                                       style: TextStyle(
@@ -183,7 +193,7 @@ class _GroupPageState extends State<GroupPage> {
                                               color: Colors.grey[300],
                                             )
                                           : Container(),
-                                      Container(
+                                      SizedBox(
                                         height: 75,
                                         child: Row(
                                           mainAxisAlignment:

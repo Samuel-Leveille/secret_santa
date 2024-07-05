@@ -7,11 +7,11 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AuthServices _auth = AuthServices();
+    final AuthServices auth = AuthServices();
 
     Future<void> signOut(BuildContext context) async {
       try {
-        await _auth.signOut();
+        await auth.signOut();
         Navigator.of(context).push(
           MaterialPageRoute(builder: (context) => const LoginPage()),
         );

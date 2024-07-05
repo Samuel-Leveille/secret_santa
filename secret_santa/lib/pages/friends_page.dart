@@ -289,12 +289,10 @@ class Friends extends StatelessWidget {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return const CircleAvatar(
-                              backgroundColor: Colors.blueAccent,
-                              child: Text(
-                                "",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            );
+                                backgroundColor: Colors.blueAccent,
+                                child: CircularProgressIndicator(
+                                  color: Colors.black,
+                                ));
                           } else if (snapshot.hasError) {
                             return const CircleAvatar(
                               backgroundColor: Colors.redAccent,
@@ -383,7 +381,10 @@ class Requests extends StatelessWidget {
                           AsyncSnapshot<String> snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
+                          return Center(
+                              child: CircularProgressIndicator(
+                            color: Colors.blue[300],
+                          ));
                         } else if (snapshot.hasError) {
                           return const Text('Erreur',
                               style: TextStyle(

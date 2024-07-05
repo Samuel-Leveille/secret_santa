@@ -52,7 +52,7 @@ class _BottomBarState extends State<BottomBar> {
           );
         }
 
-        final List<Widget> _pages = [
+        final List<Widget> pages = [
           const AccueilPage(),
           ProfilePage(email: currentUserEmail),
           const AddGroupPage(),
@@ -61,7 +61,7 @@ class _BottomBarState extends State<BottomBar> {
         ];
 
         return Scaffold(
-          body: _pages[_selectedPageIndex],
+          body: pages[_selectedPageIndex],
           bottomNavigationBar: CurvedNavigationBar(
             backgroundColor: Colors.white,
             color: const Color.fromARGB(255, 175, 216, 250),
