@@ -52,14 +52,21 @@ class _GroupPageState extends State<GroupPage> {
       name =
           "${(querySnapshot.docs.first.data() as Map<String, dynamic>)['firstName'] ?? ""} ${(querySnapshot.docs.first.data() as Map<String, dynamic>)['name'] ?? ""}";
     } else {
-      print("Error : name and firstname couldn't be fetch");
+      print("Error : name and firstname couldn't be fetched");
     }
 
     if (email == _groupProvider?.groupData?['admin']) {
       name = "$name (Admin)";
     }
-
     return name;
+  }
+
+  Future<List<dynamic>> getAdminFriends(BuildContext context) async {
+    String adminEmail = _auth.currentUser?.email as String;
+    final userProvider =
+        Provider.of<UsersFirestoreProvider>(context, listen: false);
+    await userProvider.fetchUserData(adminEmail);
+    return userProvider.userData?['friends'] ?? [];
   }
 
   @override
@@ -141,7 +148,224 @@ class _GroupPageState extends State<GroupPage> {
                       ? Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10.0),
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return FutureBuilder<List<dynamic>>(
+                                    future: getAdminFriends(context),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            color: Colors.blue[300],
+                                          ),
+                                        );
+                                      } else if (snapshot.hasError) {
+                                        return const Text('Erreur',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500));
+                                      } else {
+                                        List<dynamic> adminFriends =
+                                            snapshot.data ?? [];
+                                        List<dynamic> participants =
+                                            group['participants'];
+                                        List<dynamic> nonParticipants =
+                                            adminFriends
+                                                .where((friend) => !participants
+                                                    .contains(friend))
+                                                .toList();
+
+                                        return StatefulBuilder(
+                                          builder: (context, setState) {
+                                            return Dialog(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20.0),
+                                              ),
+                                              child: Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.85,
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height *
+                                                    0.6,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          20.0),
+                                                  boxShadow: const [
+                                                    BoxShadow(
+                                                      color: Colors.black12,
+                                                      blurRadius: 10,
+                                                      offset: Offset(0, 5),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      16.0),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      const Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                bottom: 10.0),
+                                                        child: Center(
+                                                          child: Text(
+                                                            "Ajouter des participants",
+                                                            style: TextStyle(
+                                                                fontSize: 20,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                          height: 10),
+                                                      nonParticipants.isEmpty
+                                                          ? Center(
+                                                              child: Padding(
+                                                                  padding:
+                                                                      const EdgeInsets
+                                                                          .only(
+                                                                          top:
+                                                                              130.0),
+                                                                  child: Center(
+                                                                    child:
+                                                                        Container(
+                                                                      width: MediaQuery.of(context)
+                                                                              .size
+                                                                              .width *
+                                                                          0.6,
+                                                                      child:
+                                                                          RichText(
+                                                                        textAlign:
+                                                                            TextAlign.center,
+                                                                        text:
+                                                                            const TextSpan(
+                                                                          children: [
+                                                                            TextSpan(
+                                                                              text: "Aucun participant\n",
+                                                                              style: TextStyle(
+                                                                                fontSize: 18,
+                                                                                fontWeight: FontWeight.w500,
+                                                                                color: Colors.grey,
+                                                                              ),
+                                                                            ),
+                                                                            TextSpan(
+                                                                              text: "à ajouter",
+                                                                              style: TextStyle(
+                                                                                fontSize: 18,
+                                                                                fontWeight: FontWeight.w500,
+                                                                                color: Colors.grey,
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  )),
+                                                            )
+                                                          : Expanded(
+                                                              child: ListView
+                                                                  .builder(
+                                                                itemCount:
+                                                                    nonParticipants
+                                                                        .length,
+                                                                itemBuilder:
+                                                                    (context,
+                                                                        index) {
+                                                                  return FutureBuilder(
+                                                                    future: getUserName(
+                                                                        nonParticipants[
+                                                                            index]),
+                                                                    builder:
+                                                                        (context,
+                                                                            snapshot) {
+                                                                      if (snapshot
+                                                                              .connectionState ==
+                                                                          ConnectionState
+                                                                              .waiting) {
+                                                                        return Center(
+                                                                          child:
+                                                                              CircularProgressIndicator(
+                                                                            color:
+                                                                                Colors.blue[300],
+                                                                          ),
+                                                                        );
+                                                                      } else if (snapshot
+                                                                          .hasError) {
+                                                                        return const Text(
+                                                                            'Erreur',
+                                                                            style:
+                                                                                TextStyle(fontSize: 18, fontWeight: FontWeight.w500));
+                                                                      } else {
+                                                                        return Column(
+                                                                          children: [
+                                                                            ListTile(
+                                                                              contentPadding: const EdgeInsets.all(
+                                                                                10.0,
+                                                                              ),
+                                                                              title: Text(
+                                                                                snapshot.data as String,
+                                                                                style: const TextStyle(fontWeight: FontWeight.w500),
+                                                                              ),
+                                                                              trailing: ElevatedButton(
+                                                                                onPressed: () {
+                                                                                  provider.addParticipantToGroup(
+                                                                                    group['id'],
+                                                                                    nonParticipants[index],
+                                                                                    () {
+                                                                                      setState(() {
+                                                                                        provider.fetchGroupData(widget.groupId);
+                                                                                        nonParticipants.remove(nonParticipants[index]);
+                                                                                      });
+                                                                                      provider.fetchGroupData(group['id']);
+                                                                                    },
+                                                                                  );
+                                                                                },
+                                                                                style: ElevatedButton.styleFrom(
+                                                                                    backgroundColor: Colors.cyan[100],
+                                                                                    shape: RoundedRectangleBorder(
+                                                                                      borderRadius: BorderRadius.circular(15.0),
+                                                                                    )),
+                                                                                child: const Text("Ajouter", style: TextStyle(color: Colors.white)),
+                                                                              ),
+                                                                            ),
+                                                                            const Divider(
+                                                                              thickness: 0.5,
+                                                                            )
+                                                                          ],
+                                                                        );
+                                                                      }
+                                                                    },
+                                                                  );
+                                                                },
+                                                              ),
+                                                            ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      }
+                                    },
+                                  );
+                                },
+                              );
+                            },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 20, vertical: 10),

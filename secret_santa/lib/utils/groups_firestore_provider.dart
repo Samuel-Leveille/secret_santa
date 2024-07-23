@@ -54,4 +54,18 @@ class GroupsFirestoreProvider extends ChangeNotifier {
       print("Les données du groupe n'ont pas pu être fetch : ${e.toString()}");
     }
   }
+
+  Future<void> addParticipantToGroup(
+      String groupId, String email, VoidCallback onParticipantAdded) async {
+    try {
+      DocumentReference groupRef =
+          FirebaseFirestore.instance.collection('groups').doc(groupId);
+      await groupRef.update({
+        'participants': FieldValue.arrayUnion([email])
+      });
+      onParticipantAdded();
+    } catch (e) {
+      print("Failed to add participant: $e");
+    }
+  }
 }

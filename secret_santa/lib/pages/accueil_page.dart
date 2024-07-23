@@ -64,7 +64,7 @@ class _AccueilPageState extends State<AccueilPage> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
-                            "Vos Groupes",
+                            "Mes Groupes",
                             style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.bold,
@@ -97,7 +97,7 @@ class _AccueilPageState extends State<AccueilPage> {
                       padding:
                           EdgeInsets.only(left: 30.0, top: 50.0, bottom: 40.0),
                       child: Text(
-                        "Vos Groupes",
+                        "Mes Groupes",
                         style: TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.bold,
