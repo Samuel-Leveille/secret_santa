@@ -129,6 +129,57 @@ class _GroupPageState extends State<GroupPage> {
                     ],
                   ),
                   const SizedBox(
+                    height: 15,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(left: 40.0),
+                        child: Icon(
+                          Icons.monetization_on,
+                          color: Color.fromARGB(255, 83, 154, 86),
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      const Text(
+                        "Montant",
+                      ),
+                      const Text(
+                        " MAX",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const Text(" par personne : "),
+                      Text(
+                        "${group['moneyMax']}\$",
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      )
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.only(left: 40.0),
+                        child: Icon(
+                          Icons.calendar_today,
+                          color: Colors.blue,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 5),
+                      const Text("Date de la pige : "),
+                      Text(
+                        group['pigeDate'],
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(
                     height: 50,
                   ),
                   const Row(
@@ -139,7 +190,7 @@ class _GroupPageState extends State<GroupPage> {
                         child: Text(
                           "Participants",
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 22),
+                              fontWeight: FontWeight.bold, fontSize: 24),
                         ),
                       ),
                     ],
@@ -242,7 +293,7 @@ class _GroupPageState extends State<GroupPage> {
                                                                               130.0),
                                                                   child: Center(
                                                                     child:
-                                                                        Container(
+                                                                        SizedBox(
                                                                       width: MediaQuery.of(context)
                                                                               .size
                                                                               .width *
