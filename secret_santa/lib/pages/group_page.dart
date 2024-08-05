@@ -404,6 +404,25 @@ class _GroupPageState extends State<GroupPage> {
                                                                 },
                                                               ),
                                                             ),
+                                                      ElevatedButton(
+                                                        style: ButtonStyle(
+                                                          backgroundColor:
+                                                              WidgetStateProperty
+                                                                  .all<Color>(Colors
+                                                                      .teal
+                                                                      .shade100), // Couleur de fond du bouton
+                                                          foregroundColor:
+                                                              WidgetStateProperty
+                                                                  .all<Color>(Colors
+                                                                      .white), // Couleur du texte
+                                                        ),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                        child: const Text(
+                                                            "Annuler"),
+                                                      )
                                                     ],
                                                   ),
                                                 ),
