@@ -410,11 +410,12 @@ class _GroupPageState extends State<GroupPage> {
                                                               WidgetStateProperty
                                                                   .all<Color>(Colors
                                                                       .teal
-                                                                      .shade100), // Couleur de fond du bouton
+                                                                      .shade100),
                                                           foregroundColor:
                                                               WidgetStateProperty
-                                                                  .all<Color>(Colors
-                                                                      .white), // Couleur du texte
+                                                                  .all<Color>(
+                                                                      Colors
+                                                                          .white),
                                                         ),
                                                         onPressed: () {
                                                           Navigator.of(context)

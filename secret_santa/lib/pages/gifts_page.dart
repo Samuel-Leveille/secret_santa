@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:secret_santa/utils/users_firestore_provider.dart';
 
 class GiftsPage extends StatefulWidget {
   const GiftsPage({super.key});
@@ -8,17 +12,44 @@ class GiftsPage extends StatefulWidget {
 }
 
 class _GiftsPageState extends State<GiftsPage> {
+  UsersFirestoreProvider? _userProvider;
+  final _auth = FirebaseAuth.instance;
   List<Widget> _linkFields = [];
+  final titleController = TextEditingController();
+  final descriptionController = TextEditingController();
+  List<TextEditingController> linksController = [];
+  final _firestore = FirebaseFirestore.instance;
+  bool _isTitleEmpty = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _userProvider =
+          Provider.of<UsersFirestoreProvider>(context, listen: false);
+      final userEmail = _auth.currentUser?.email;
+      if (userEmail!.isNotEmpty) {
+        _userProvider!.fetchUserData(userEmail);
+      }
+    });
+  }
 
   void _addLinkField() {
+    TextEditingController controller = TextEditingController();
+    linksController.add(controller);
     _linkFields.add(Padding(
       padding: const EdgeInsets.only(bottom: 10.0),
       child: TextField(
+        controller: controller,
         decoration: InputDecoration(
           labelText: 'Lien',
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.grey),
           ),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: Colors.grey)),
           filled: true,
           fillColor: Colors.white,
         ),
@@ -27,30 +58,86 @@ class _GiftsPageState extends State<GiftsPage> {
   }
 
   @override
+  void dispose() {
+    for (var controller in linksController) {
+      controller.dispose();
+    }
+    titleController.dispose();
+    descriptionController.dispose();
+    super.dispose();
+  }
+
+  void saveGift(StateSetter setState) async {
+    String title = titleController.text;
+    String description = descriptionController.text;
+    List<String> links = [];
+    for (int i = 0; i < linksController.length; i++) {
+      if (linksController[i].text.isNotEmpty) {
+        links.add(linksController[i].text);
+      }
+    }
+    if (title.isNotEmpty) {
+      if (links.isNotEmpty) {
+        for (int i = 0; i < links.length; i++) {
+          await _firestore.collection('gifts').add({
+            'title': title,
+            'description': description,
+            'links': links,
+            'userEmail': _auth.currentUser!.email
+          });
+        }
+      } else {
+        await _firestore.collection('gifts').add({
+          'title': title,
+          'description': description,
+          'userEmail': _auth.currentUser!.email
+        });
+      }
+      Navigator.of(context).pop();
+      titleController.clear();
+      descriptionController.clear();
+      links.clear();
+      _linkFields.clear();
+      linksController.clear();
+    } else {
+      setState(() {
+        _isTitleEmpty = title.isEmpty;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text(
-            'Cadeaux',
-            style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
           backgroundColor: Colors.white,
-          elevation: 1,
           leading: const BackButton(color: Colors.black),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(
-            child: Text(
-              "Liste des cadeaux",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue.shade800,
+        body: Container(
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          color: Colors.white,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 20.0),
+            child: Center(
+              child: Consumer<UsersFirestoreProvider>(
+                builder: (context, provider, child) {
+                  final user = provider.userData;
+                  if (user!.isNotEmpty) {
+                    if (user['giftsId'].isEmpty) {
+                      return Text(
+                        "  Ajoutez votre\npremier souhait",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade500,
+                        ),
+                      );
+                    }
+                  }
+                  return const Text("L'utilisateur possède des cadeaux");
+                },
               ),
             ),
           ),
@@ -106,9 +193,9 @@ class _GiftsPageState extends State<GiftsPage> {
                                 ),
                                 const SizedBox(height: 16.0),
                                 const Text(
-                                  "Ajouter un cadeau",
+                                  "Ajouter un souhait",
                                   style: TextStyle(
-                                    fontSize: 20,
+                                    fontSize: 22,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -118,24 +205,43 @@ class _GiftsPageState extends State<GiftsPage> {
                                     padding: const EdgeInsets.all(16.0),
                                     children: [
                                       TextField(
+                                        controller: titleController,
                                         decoration: InputDecoration(
                                           labelText: 'Titre',
                                           border: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(10),
+                                            borderSide: const BorderSide(
+                                                color: Colors.grey),
                                           ),
+                                          enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              borderSide: const BorderSide(
+                                                  color: Colors.grey)),
+                                          errorText: _isTitleEmpty
+                                              ? 'Le titre est obligatoire'
+                                              : null,
                                           filled: true,
                                           fillColor: Colors.white,
                                         ),
                                       ),
                                       const SizedBox(height: 10),
                                       TextField(
+                                        controller: descriptionController,
                                         decoration: InputDecoration(
-                                          labelText: 'À propos',
+                                          labelText: 'À propos (facultatif)',
                                           border: OutlineInputBorder(
                                             borderRadius:
                                                 BorderRadius.circular(10),
+                                            borderSide: const BorderSide(
+                                                color: Colors.grey),
                                           ),
+                                          enabledBorder: OutlineInputBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              borderSide: const BorderSide(
+                                                  color: Colors.grey)),
                                           filled: true,
                                           fillColor: Colors.white,
                                         ),
@@ -184,10 +290,15 @@ class _GiftsPageState extends State<GiftsPage> {
                                       const SizedBox(height: 10),
                                       ElevatedButton.icon(
                                         onPressed: () {
-                                          // Logique pour sauvegarder les données
+                                          saveGift(setState);
                                         },
-                                        icon: const Icon(Icons.save),
-                                        label: const Text('Sauvegarder'),
+                                        icon: const Icon(Icons.card_giftcard),
+                                        label: const Text(
+                                          'Ajouter',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16),
+                                        ),
                                         style: ElevatedButton.styleFrom(
                                           foregroundColor:
                                               Colors.green.shade800,
@@ -201,6 +312,22 @@ class _GiftsPageState extends State<GiftsPage> {
                                               vertical: 12.0),
                                         ),
                                       ),
+                                      const Padding(
+                                        padding: EdgeInsets.only(top: 15.0),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.info,
+                                              color: Colors.grey,
+                                            ),
+                                            Text(
+                                              "  L'ajout de liens et d'images\n  est fortement recommandé",
+                                              style:
+                                                  TextStyle(color: Colors.grey),
+                                            ),
+                                          ],
+                                        ),
+                                      )
                                     ],
                                   ),
                                 ),
