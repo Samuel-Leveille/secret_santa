@@ -494,31 +494,68 @@ class _GroupPageState extends State<GroupPage> {
                                           mainAxisAlignment:
                                               MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Row(
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 10.0),
-                                                  child: Icon(
-                                                    Icons.person,
-                                                    color: Colors.grey[700],
+                                            _auth.currentUser?.email ==
+                                                    participants[index]
+                                                ? Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 10.0),
+                                                        child: Icon(
+                                                          Icons.person,
+                                                          color:
+                                                              Colors.green[700],
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 5.0),
+                                                        child: Text(
+                                                          snapshot.data,
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .green[500],
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  )
+                                                : Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 10.0),
+                                                        child: Icon(
+                                                          Icons.person,
+                                                          color:
+                                                              Colors.grey[700],
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .only(
+                                                                left: 5.0),
+                                                        child: Text(
+                                                          snapshot.data,
+                                                          style: TextStyle(
+                                                              color: Colors
+                                                                  .grey[500],
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
-                                                ),
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 5.0),
-                                                  child: Text(
-                                                    snapshot.data,
-                                                    style: TextStyle(
-                                                        color: Colors.grey[500],
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
                                             Padding(
                                               padding: const EdgeInsets.only(
                                                   right: 25.0),
@@ -527,7 +564,11 @@ class _GroupPageState extends State<GroupPage> {
                                                   Navigator.of(context).push(
                                                       MaterialPageRoute(
                                                           builder: (context) =>
-                                                              const GiftsPage()));
+                                                              GiftsPage(
+                                                                participant:
+                                                                    participants[
+                                                                        index],
+                                                              )));
                                                 },
                                                 child: Container(
                                                   width: 40,
