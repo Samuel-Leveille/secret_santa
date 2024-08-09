@@ -111,7 +111,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
                                 child: TextFormField(
                                   controller: datePigeController,
                                   decoration: InputDecoration(
-                                    labelText: "Date de la pige",
+                                    labelText: "Lancement de la pige",
                                     labelStyle: TextStyle(
                                       fontSize: 16,
                                       color: Colors.teal[700],
@@ -133,7 +133,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
                               maxLines: 3,
                               maxLength: 150,
                               decoration: InputDecoration(
-                                labelText: 'Détails du groupe',
+                                labelText: 'À propos du groupe',
                                 labelStyle: TextStyle(
                                   fontSize: 16,
                                   color: Colors.teal[700],

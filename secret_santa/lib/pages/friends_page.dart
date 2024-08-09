@@ -79,20 +79,29 @@ class _FriendsPageState extends State<FriendsPage>
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.only(left: 25.0, right: 25.0),
-                  child: TextFormField(
-                    controller: friendEmailController,
-                    decoration: InputDecoration(
-                        labelText: "Courriel",
-                        suffixIcon: IconButton(
-                            onPressed: sendRequest,
-                            icon: Icon(
-                              Icons.send,
-                              color: Colors.grey[600],
-                            ))),
-                  ),
-                ),
+                ValueListenableBuilder(
+                    valueListenable: friendEmailController,
+                    builder: (context, TextEditingValue value, child) {
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 25.0, right: 25.0),
+                        child: TextFormField(
+                          controller: friendEmailController,
+                          decoration: InputDecoration(
+                              labelText: "Courriel",
+                              suffixIcon: IconButton(
+                                  onPressed: sendRequest,
+                                  icon: value.text.isEmpty
+                                      ? Icon(
+                                          Icons.send,
+                                          color: Colors.grey[600],
+                                        )
+                                      : const Icon(
+                                          Icons.send,
+                                          color: Colors.blueAccent,
+                                        ))),
+                        ),
+                      );
+                    }),
                 TabBar(
                   labelColor: const Color.fromARGB(255, 134, 198, 250),
                   indicatorColor: const Color.fromARGB(255, 134, 198, 250),

@@ -80,6 +80,8 @@ class _GroupPageState extends State<GroupPage> {
           child: Consumer<GroupsFirestoreProvider>(
             builder: (context, provider, child) {
               final group = provider.groupData;
+              List<dynamic> participants = [];
+              participants = group?['participants'];
               if (group == null) {
                 return Center(
                     child: CircularProgressIndicator(
@@ -172,7 +174,7 @@ class _GroupPageState extends State<GroupPage> {
                         ),
                       ),
                       const SizedBox(width: 5),
-                      const Text("Date de la pige : "),
+                      const Text("Lancement de la pige : "),
                       Text(
                         group['pigeDate'],
                         style: const TextStyle(fontWeight: FontWeight.bold),
@@ -299,29 +301,36 @@ class _GroupPageState extends State<GroupPage> {
                                                                               .width *
                                                                           0.6,
                                                                       child:
-                                                                          RichText(
-                                                                        textAlign:
-                                                                            TextAlign.center,
-                                                                        text:
-                                                                            const TextSpan(
-                                                                          children: [
-                                                                            TextSpan(
-                                                                              text: "Aucun participant\n",
-                                                                              style: TextStyle(
-                                                                                fontSize: 18,
-                                                                                fontWeight: FontWeight.w500,
-                                                                                color: Colors.grey,
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .only(
+                                                                            bottom:
+                                                                                152.4),
+                                                                        child:
+                                                                            RichText(
+                                                                          textAlign:
+                                                                              TextAlign.center,
+                                                                          text:
+                                                                              const TextSpan(
+                                                                            children: [
+                                                                              TextSpan(
+                                                                                text: "Aucun participant\n",
+                                                                                style: TextStyle(
+                                                                                  fontSize: 18,
+                                                                                  fontWeight: FontWeight.w500,
+                                                                                  color: Colors.grey,
+                                                                                ),
                                                                               ),
-                                                                            ),
-                                                                            TextSpan(
-                                                                              text: "à ajouter",
-                                                                              style: TextStyle(
-                                                                                fontSize: 18,
-                                                                                fontWeight: FontWeight.w500,
-                                                                                color: Colors.grey,
+                                                                              TextSpan(
+                                                                                text: "à ajouter",
+                                                                                style: TextStyle(
+                                                                                  fontSize: 18,
+                                                                                  fontWeight: FontWeight.w500,
+                                                                                  color: Colors.grey,
+                                                                                ),
                                                                               ),
-                                                                            ),
-                                                                          ],
+                                                                            ],
+                                                                          ),
                                                                         ),
                                                                       ),
                                                                     ),
@@ -455,154 +464,306 @@ class _GroupPageState extends State<GroupPage> {
                           ),
                         )
                       : Container(),
-                  Consumer<UsersFirestoreProvider>(
-                      builder: (context, provider, child) {
-                    List<dynamic> participants = [];
-                    participants = group['participants'];
-
-                    return Expanded(
-                      child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          itemCount: participants.length,
-                          itemBuilder: (context, index) {
-                            return FutureBuilder<dynamic>(
-                              future: getUserName(participants[index]),
-                              builder:
-                                  (context, AsyncSnapshot<dynamic> snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return Center(
-                                      child: CircularProgressIndicator(
-                                    color: Colors.blue[300],
-                                  ));
-                                } else if (snapshot.hasError) {
-                                  return const Text('Erreur',
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500));
-                                } else {
-                                  return Column(
-                                    children: [
-                                      index == 0
-                                          ? Divider(
-                                              color: Colors.grey[300],
-                                            )
-                                          : Container(),
-                                      SizedBox(
-                                        height: 75,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            _auth.currentUser?.email ==
-                                                    participants[index]
-                                                ? Row(
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                left: 10.0),
+                  Expanded(
+                    child: ListView.builder(
+                        padding: EdgeInsets.zero,
+                        itemCount: participants.length,
+                        itemBuilder: (context, index) {
+                          return FutureBuilder<dynamic>(
+                            future: getUserName(participants[index]),
+                            builder:
+                                (context, AsyncSnapshot<dynamic> snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Center(
+                                    child: CircularProgressIndicator(
+                                  color: Colors.blue[300],
+                                ));
+                              } else if (snapshot.hasError) {
+                                return const Text('Erreur',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500));
+                              } else {
+                                return Column(
+                                  children: [
+                                    index == 0
+                                        ? Divider(
+                                            color: Colors.grey[300],
+                                          )
+                                        : Container(),
+                                    SizedBox(
+                                      height: 75,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          _auth.currentUser?.email ==
+                                                  participants[index]
+                                              ? Row(
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 10.0),
+                                                      child: Icon(
+                                                        Icons.person,
+                                                        color:
+                                                            Colors.green[700],
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 5.0),
+                                                      child: Text(
+                                                        snapshot.data,
+                                                        style: TextStyle(
+                                                            color: Colors
+                                                                .green[500],
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                )
+                                              : Row(
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 10.0),
+                                                      child: Icon(
+                                                        Icons.person,
+                                                        color: Colors.grey[700],
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              left: 5.0),
+                                                      child: Text(
+                                                        snapshot.data,
+                                                        style: TextStyle(
+                                                            color: Colors
+                                                                .grey[500],
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                          Row(
+                                            children: [
+                                              participants[index] !=
+                                                          group['admin'] &&
+                                                      _auth.currentUser
+                                                              ?.email ==
+                                                          group['admin']
+                                                  ? GestureDetector(
+                                                      onTap: () {
+                                                        showDialog(
+                                                            context: context,
+                                                            builder: (context) {
+                                                              return Dialog(
+                                                                shape:
+                                                                    RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              20.0),
+                                                                ),
+                                                                child:
+                                                                    Container(
+                                                                  height: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .height *
+                                                                      0.25,
+                                                                  width: MediaQuery.of(
+                                                                              context)
+                                                                          .size
+                                                                          .width *
+                                                                      0.30,
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            20.0),
+                                                                    boxShadow: const [
+                                                                      BoxShadow(
+                                                                        color: Colors
+                                                                            .black12,
+                                                                        blurRadius:
+                                                                            10,
+                                                                        offset: Offset(
+                                                                            0,
+                                                                            5),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                  child: Column(
+                                                                    mainAxisAlignment:
+                                                                        MainAxisAlignment
+                                                                            .spaceEvenly,
+                                                                    children: [
+                                                                      const Padding(
+                                                                        padding: EdgeInsets.only(
+                                                                            left:
+                                                                                12.0,
+                                                                            right:
+                                                                                12.0,
+                                                                            bottom:
+                                                                                20.0),
+                                                                        child:
+                                                                            Text(
+                                                                          "Retirer cet utilisateur\n        du groupe ?",
+                                                                          style: TextStyle(
+                                                                              fontSize: 22,
+                                                                              fontWeight: FontWeight.bold),
+                                                                        ),
+                                                                      ),
+                                                                      Row(
+                                                                        mainAxisAlignment:
+                                                                            MainAxisAlignment.spaceEvenly,
+                                                                        children: [
+                                                                          Container(
+                                                                            height:
+                                                                                45,
+                                                                            child:
+                                                                                FittedBox(
+                                                                              child: FloatingActionButton.extended(
+                                                                                  extendedPadding: const EdgeInsets.only(left: 35.0, right: 35.0),
+                                                                                  backgroundColor: Colors.red[100],
+                                                                                  foregroundColor: Colors.black,
+                                                                                  onPressed: () {
+                                                                                    Navigator.of(context).pop();
+                                                                                  },
+                                                                                  label: const Text(
+                                                                                    'Annuler',
+                                                                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                                                                  )),
+                                                                            ),
+                                                                          ),
+                                                                          Container(
+                                                                            height:
+                                                                                45,
+                                                                            child:
+                                                                                FittedBox(
+                                                                              child: FloatingActionButton.extended(
+                                                                                  extendedPadding: const EdgeInsets.only(left: 35.0, right: 35.0),
+                                                                                  backgroundColor: Colors.teal[100],
+                                                                                  foregroundColor: Colors.black,
+                                                                                  onPressed: () {
+                                                                                    try {
+                                                                                      String deletedUser = participants[index];
+                                                                                      provider.removeParticipantFromGroup(group['id'], deletedUser, () {
+                                                                                        setState(() {
+                                                                                          provider.fetchGroupData(group['id']);
+                                                                                        });
+                                                                                      });
+                                                                                      Navigator.of(context).pop();
+                                                                                    } catch (e) {
+                                                                                      print("L'utilisateur n'a pas pu être retiré du groupe : $e");
+                                                                                    }
+                                                                                  },
+                                                                                  label: const Text(
+                                                                                    'Retirer',
+                                                                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                                                                  )),
+                                                                            ),
+                                                                          )
+                                                                        ],
+                                                                      )
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            });
+                                                      },
+                                                      child: Container(
+                                                        width: 40,
+                                                        height: 40,
+                                                        decoration:
+                                                            const BoxDecoration(
+                                                                shape: BoxShape
+                                                                    .circle,
+                                                                color: Colors
+                                                                    .white,
+                                                                boxShadow: [
+                                                              BoxShadow(
+                                                                  color: Colors
+                                                                      .grey,
+                                                                  blurRadius: 6,
+                                                                  offset:
+                                                                      Offset(
+                                                                          0, 3),
+                                                                  spreadRadius:
+                                                                      0)
+                                                            ]),
                                                         child: Icon(
-                                                          Icons.person,
+                                                          Icons.close,
+                                                          size: 30,
                                                           color:
-                                                              Colors.green[700],
+                                                              Colors.red[300],
                                                         ),
                                                       ),
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                left: 5.0),
-                                                        child: Text(
-                                                          snapshot.data,
-                                                          style: TextStyle(
-                                                              color: Colors
-                                                                  .green[500],
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  )
-                                                : Row(
-                                                    children: [
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                left: 10.0),
-                                                        child: Icon(
-                                                          Icons.person,
-                                                          color:
-                                                              Colors.grey[700],
-                                                        ),
-                                                      ),
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .only(
-                                                                left: 5.0),
-                                                        child: Text(
-                                                          snapshot.data,
-                                                          style: TextStyle(
-                                                              color: Colors
-                                                                  .grey[500],
-                                                              fontWeight:
-                                                                  FontWeight
-                                                                      .bold),
-                                                        ),
-                                                      ),
-                                                    ],
+                                                    )
+                                                  : Container(),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 20.0, left: 15.0),
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.of(context).push(
+                                                        MaterialPageRoute(
+                                                            builder:
+                                                                (context) =>
+                                                                    GiftsPage(
+                                                                      participant:
+                                                                          participants[
+                                                                              index],
+                                                                    )));
+                                                  },
+                                                  child: Container(
+                                                    width: 40,
+                                                    height: 40,
+                                                    decoration: BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color: Colors.blue[200],
+                                                        boxShadow: const [
+                                                          BoxShadow(
+                                                              color:
+                                                                  Colors.grey,
+                                                              blurRadius: 6,
+                                                              offset:
+                                                                  Offset(0, 3),
+                                                              spreadRadius: 0)
+                                                        ]),
+                                                    child: const Icon(
+                                                        Icons.card_giftcard),
                                                   ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                  right: 25.0),
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  Navigator.of(context).push(
-                                                      MaterialPageRoute(
-                                                          builder: (context) =>
-                                                              GiftsPage(
-                                                                participant:
-                                                                    participants[
-                                                                        index],
-                                                              )));
-                                                },
-                                                child: Container(
-                                                  width: 40,
-                                                  height: 40,
-                                                  decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color: Colors.blue[200],
-                                                      boxShadow: const [
-                                                        BoxShadow(
-                                                            color: Colors.grey,
-                                                            blurRadius: 6,
-                                                            offset:
-                                                                Offset(0, 3),
-                                                            spreadRadius: 0)
-                                                      ]),
-                                                  child: const Icon(
-                                                      Icons.card_giftcard),
                                                 ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
+                                            ],
+                                          ),
+                                        ],
                                       ),
-                                      Divider(
-                                        color: Colors.grey[300],
-                                      ),
-                                    ],
-                                  );
-                                }
-                              },
-                            );
-                          }),
-                    );
-                  }),
+                                    ),
+                                    Divider(
+                                      color: Colors.grey[300],
+                                    ),
+                                  ],
+                                );
+                              }
+                            },
+                          );
+                        }),
+                  ),
                 ],
               );
             },

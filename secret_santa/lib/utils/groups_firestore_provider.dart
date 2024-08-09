@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -66,6 +68,20 @@ class GroupsFirestoreProvider extends ChangeNotifier {
       onParticipantAdded();
     } catch (e) {
       print("Failed to add participant: $e");
+    }
+  }
+
+  Future<void> removeParticipantFromGroup(
+      String groupId, String email, VoidCallback onParticipantRemoved) async {
+    try {
+      DocumentReference groupRef =
+          FirebaseFirestore.instance.collection('groups').doc(groupId);
+      await groupRef.update({
+        'participants': FieldValue.arrayRemove([email])
+      });
+      onParticipantRemoved();
+    } catch (e) {
+      print("Failed to remove participant: $e");
     }
   }
 }
