@@ -155,7 +155,7 @@ class _LoginPageState extends State<LoginPage> {
 
   void _signIn() async {
     String email = emailController.text.trim();
-    String password = passwordController.text;
+    String password = passwordController.text.trim();
 
     User? user = await _auth.signInWithEmailAndPassword(email, password);
 

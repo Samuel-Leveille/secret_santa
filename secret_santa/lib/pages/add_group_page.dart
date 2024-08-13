@@ -205,8 +205,8 @@ class _AddGroupPageState extends State<AddGroupPage> {
   }
 
   Future<void> _createGroup() async {
-    String groupName = nameController.text;
-    String groupDescription = descriptionController.text;
+    String groupName = nameController.text.trim();
+    String groupDescription = descriptionController.text.trim();
     String moneyMax = moneyController.text;
     String pigeDate = datePigeController.text;
     final User? user = _auth.currentUser;

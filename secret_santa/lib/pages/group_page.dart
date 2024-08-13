@@ -81,24 +81,75 @@ class _GroupPageState extends State<GroupPage> {
             builder: (context, provider, child) {
               final group = provider.groupData;
               List<dynamic> participants = [];
-              participants = group?['participants'];
               if (group == null) {
                 return Center(
                     child: CircularProgressIndicator(
                   color: Colors.blue[300],
                 ));
               }
+              participants = group['participants'];
               return Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 5, left: 3),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5, left: 3),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        BackButton(
+                        const BackButton(
                           color: Colors.black,
                         ),
+                        IconButton(
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return Dialog(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20.0),
+                                        ),
+                                        child: Container(
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.25,
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.30,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius:
+                                                BorderRadius.circular(20.0),
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                color: Colors.black12,
+                                                blurRadius: 10,
+                                                offset: Offset(0, 5),
+                                              ),
+                                            ],
+                                          ),
+                                          child: const Column(
+                                            children: [
+                                              Padding(
+                                                padding: EdgeInsets.only(
+                                                    top: 14.0, bottom: 8.0),
+                                                child: Text(
+                                                  "Paramètre du groupe",
+                                                  style: TextStyle(
+                                                      fontSize: 22,
+                                                      fontWeight:
+                                                          FontWeight.w600),
+                                                ),
+                                              ),
+                                              Divider(),
+                                            ],
+                                          ),
+                                        ));
+                                  });
+                            },
+                            icon: const Icon(Icons.more_horiz))
                       ],
                     ),
                   ),
@@ -431,7 +482,7 @@ class _GroupPageState extends State<GroupPage> {
                                                               .pop();
                                                         },
                                                         child: const Text(
-                                                            "Annuler"),
+                                                            "Terminer"),
                                                       )
                                                     ],
                                                   ),

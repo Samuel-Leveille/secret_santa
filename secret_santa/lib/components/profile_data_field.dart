@@ -177,16 +177,19 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
                                                             "Annuler")),
                                                     TextButton(
                                                         onPressed: () async {
-                                                          await usersFirestoreProvider.updateTwoUserField(
-                                                              'firstName',
-                                                              textFirstNameController
-                                                                  .text,
-                                                              'name',
-                                                              textNameController
-                                                                  .text,
-                                                              usersFirestoreProvider
-                                                                      .userData![
-                                                                  'email']);
+                                                          await usersFirestoreProvider
+                                                              .updateTwoUserField(
+                                                                  'firstName',
+                                                                  textFirstNameController
+                                                                      .text
+                                                                      .trim(),
+                                                                  'name',
+                                                                  textNameController
+                                                                      .text
+                                                                      .trim(),
+                                                                  usersFirestoreProvider
+                                                                          .userData![
+                                                                      'email']);
                                                           Navigator.of(context)
                                                               .pop();
                                                         },
@@ -238,7 +241,8 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
                                                               .updateUserField(
                                                                   'biography',
                                                                   textBioController
-                                                                      .text,
+                                                                      .text
+                                                                      .trim(),
                                                                   usersFirestoreProvider
                                                                           .userData![
                                                                       'email']);

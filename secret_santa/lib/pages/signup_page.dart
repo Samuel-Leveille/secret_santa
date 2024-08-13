@@ -165,11 +165,11 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   void _signUp() async {
-    String name = nameController.text;
-    String firstName = firstNameController.text;
+    String name = nameController.text.trim();
+    String firstName = firstNameController.text.trim();
     String email = emailController.text.trim();
-    String password = passwordController.text;
-    String confirmPassword = confirmPasswordController.text;
+    String password = passwordController.text.trim();
+    String confirmPassword = confirmPasswordController.text.trim();
 
     if (name.isEmpty ||
         firstName.isEmpty ||

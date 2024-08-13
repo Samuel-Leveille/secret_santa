@@ -2,10 +2,12 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/pages/group_page.dart';
 import 'package:secret_santa/utils/groups_firestore_provider.dart';
+import 'package:secret_santa/utils/users_firestore_provider.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class AccueilPage extends StatefulWidget {
@@ -17,7 +19,9 @@ class AccueilPage extends StatefulWidget {
 
 class _AccueilPageState extends State<AccueilPage> {
   GroupsFirestoreProvider? _groupsFirestoreProvider;
+  UsersFirestoreProvider? _usersFirestoreProvider;
   List<Map<String, dynamic>>? groupsData;
+  final _auth = FirebaseAuth.instance;
   final _pageController = PageController(initialPage: 0);
 
   @override
@@ -27,6 +31,10 @@ class _AccueilPageState extends State<AccueilPage> {
       _groupsFirestoreProvider =
           Provider.of<GroupsFirestoreProvider>(context, listen: false);
       _groupsFirestoreProvider?.fetchGroupsData();
+      _usersFirestoreProvider =
+          Provider.of<UsersFirestoreProvider>(context, listen: false);
+      _usersFirestoreProvider
+          ?.fetchUserData(_auth.currentUser!.email as String);
     });
   }
 
@@ -49,9 +57,10 @@ class _AccueilPageState extends State<AccueilPage> {
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           color: Colors.white,
-          child: Consumer<GroupsFirestoreProvider>(
-            builder: (context, provider, child) {
-              final groupsData = provider.groupsData;
+          child: Consumer2<GroupsFirestoreProvider, UsersFirestoreProvider>(
+            builder: (context, groupsProvider, userProvider, child) {
+              final groupsData = groupsProvider.groupsData;
+              final userData = userProvider.userData;
               if (groupsData.isEmpty) {
                 return const Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -162,22 +171,176 @@ class _AccueilPageState extends State<AccueilPage> {
                                           child: Padding(
                                             padding: const EdgeInsets.only(
                                                 left: 16.0,
-                                                right: 16.0,
+                                                right: 10.0,
                                                 bottom: 10.0,
-                                                top: 40.0),
+                                                top: 5.0),
                                             child: Column(
                                               mainAxisAlignment:
-                                                  MainAxisAlignment.center,
+                                                  MainAxisAlignment.start,
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Text(
-                                                  group['name'] ??
-                                                      "Groupe de ${group['admin']}",
-                                                  style: const TextStyle(
-                                                    fontSize: 26,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black87,
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.end,
+                                                  children: [
+                                                    IconButton(
+                                                        onPressed: () {
+                                                          String
+                                                              groupAdminEmail =
+                                                              group['admin'];
+                                                          showDialog(
+                                                              context: context,
+                                                              builder:
+                                                                  (context) {
+                                                                return Dialog(
+                                                                  shape:
+                                                                      RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            20.0),
+                                                                  ),
+                                                                  child:
+                                                                      Container(
+                                                                    height: MediaQuery.of(context)
+                                                                            .size
+                                                                            .height *
+                                                                        0.25,
+                                                                    width: MediaQuery.of(context)
+                                                                            .size
+                                                                            .width *
+                                                                        0.30,
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      color: Colors
+                                                                          .white,
+                                                                      borderRadius:
+                                                                          BorderRadius.circular(
+                                                                              20.0),
+                                                                      boxShadow: const [
+                                                                        BoxShadow(
+                                                                          color:
+                                                                              Colors.black12,
+                                                                          blurRadius:
+                                                                              10,
+                                                                          offset: Offset(
+                                                                              0,
+                                                                              5),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    child:
+                                                                        Column(
+                                                                      mainAxisAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceEvenly,
+                                                                      children: [
+                                                                        Padding(
+                                                                          padding: const EdgeInsets
+                                                                              .only(
+                                                                              left: 12.0,
+                                                                              right: 12.0,
+                                                                              bottom: 20.0),
+                                                                          child: groupAdminEmail == _auth.currentUser!.email
+                                                                              ? const Text(
+                                                                                  "Supprimer le groupe ?",
+                                                                                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                                                                )
+                                                                              : const Text(
+                                                                                  "Quitter le groupe ?",
+                                                                                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                                                                ),
+                                                                        ),
+                                                                        Row(
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.spaceEvenly,
+                                                                          children: [
+                                                                            Container(
+                                                                              height: 45,
+                                                                              child: FittedBox(
+                                                                                child: FloatingActionButton.extended(
+                                                                                    extendedPadding: const EdgeInsets.only(left: 35.0, right: 35.0),
+                                                                                    backgroundColor: Colors.red[100],
+                                                                                    foregroundColor: Colors.black,
+                                                                                    onPressed: () {
+                                                                                      Navigator.of(context).pop();
+                                                                                    },
+                                                                                    label: const Text(
+                                                                                      'Annuler',
+                                                                                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                                                                    )),
+                                                                              ),
+                                                                            ),
+                                                                            Container(
+                                                                              height: 45,
+                                                                              child: FittedBox(
+                                                                                child: FloatingActionButton.extended(
+                                                                                    extendedPadding: const EdgeInsets.only(left: 35.0, right: 35.0),
+                                                                                    backgroundColor: Colors.teal[100],
+                                                                                    foregroundColor: Colors.black,
+                                                                                    onPressed: () {
+                                                                                      print(groupAdminEmail);
+                                                                                      if (groupAdminEmail == _auth.currentUser!.email) {
+                                                                                        try {
+                                                                                          String deletedGroupId = getGroupId(group);
+                                                                                          groupsProvider.deleteGroup(deletedGroupId, () {
+                                                                                            setState(() {
+                                                                                              groupsProvider.fetchGroupsData();
+                                                                                            });
+                                                                                          });
+                                                                                          Navigator.of(context).pop();
+                                                                                        } catch (e) {
+                                                                                          print("Le groupe n'a pas pu être supprimé : $e");
+                                                                                        }
+                                                                                      } else {
+                                                                                        try {
+                                                                                          String groupId = getGroupId(group);
+                                                                                          String userWhoLeaveTheGroup = _auth.currentUser!.email as String;
+                                                                                          groupsProvider.removeParticipantFromGroup(groupId, userWhoLeaveTheGroup, () {
+                                                                                            setState(() {
+                                                                                              groupsProvider.fetchGroupsData();
+                                                                                            });
+                                                                                          });
+                                                                                          Navigator.of(context).pop();
+                                                                                        } catch (e) {
+                                                                                          print("La tentative de quitter le groupe a échouée : $e");
+                                                                                        }
+                                                                                      }
+                                                                                    },
+                                                                                    label: const Text(
+                                                                                      'Confirmer',
+                                                                                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                                                                    )),
+                                                                              ),
+                                                                            )
+                                                                          ],
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              });
+                                                        },
+                                                        icon: const Icon(
+                                                          Icons.more_horiz,
+                                                          size: 32,
+                                                          color: Colors.black,
+                                                        ))
+                                                  ],
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          right: 6.0),
+                                                  child: Text(
+                                                    group['name'] ??
+                                                        "Groupe de ${group['admin']}",
+                                                    style: const TextStyle(
+                                                      fontSize: 26,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.black87,
+                                                    ),
                                                   ),
                                                 ),
                                                 const SizedBox(height: 16),
@@ -198,7 +361,7 @@ class _AccueilPageState extends State<AccueilPage> {
                                                   ],
                                                 ),
                                                 const SizedBox(
-                                                  height: 100,
+                                                  height: 80,
                                                 ),
                                                 Text(
                                                   "Créé le ${group['dateCreation'].substring(0, 10)}",
