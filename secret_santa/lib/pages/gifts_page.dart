@@ -15,7 +15,7 @@ class GiftsPage extends StatefulWidget {
 class _GiftsPageState extends State<GiftsPage> {
   UsersFirestoreProvider? _userProvider;
   final _auth = FirebaseAuth.instance;
-  List<Widget> _linkFields = [];
+  final List<Widget> _linkFields = [];
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   List<TextEditingController> linksController = [];

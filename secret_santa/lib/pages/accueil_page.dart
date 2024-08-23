@@ -61,7 +61,7 @@ class _AccueilPageState extends State<AccueilPage> {
             builder: (context, groupsProvider, userProvider, child) {
               final groupsData = groupsProvider.groupsData;
               final userData = userProvider.userData;
-              if (groupsData.isEmpty) {
+              if (userData?['groupsId'].isEmpty) {
                 return const Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
@@ -255,7 +255,7 @@ class _AccueilPageState extends State<AccueilPage> {
                                                                           mainAxisAlignment:
                                                                               MainAxisAlignment.spaceEvenly,
                                                                           children: [
-                                                                            Container(
+                                                                            SizedBox(
                                                                               height: 45,
                                                                               child: FittedBox(
                                                                                 child: FloatingActionButton.extended(
@@ -271,7 +271,7 @@ class _AccueilPageState extends State<AccueilPage> {
                                                                                     )),
                                                                               ),
                                                                             ),
-                                                                            Container(
+                                                                            SizedBox(
                                                                               height: 45,
                                                                               child: FittedBox(
                                                                                 child: FloatingActionButton.extended(

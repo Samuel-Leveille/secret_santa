@@ -682,7 +682,7 @@ class _GroupPageState extends State<GroupPage> {
                                                                         mainAxisAlignment:
                                                                             MainAxisAlignment.spaceEvenly,
                                                                         children: [
-                                                                          Container(
+                                                                          SizedBox(
                                                                             height:
                                                                                 45,
                                                                             child:
@@ -700,7 +700,7 @@ class _GroupPageState extends State<GroupPage> {
                                                                                   )),
                                                                             ),
                                                                           ),
-                                                                          Container(
+                                                                          SizedBox(
                                                                             height:
                                                                                 45,
                                                                             child:
