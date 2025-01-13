@@ -1,5 +1,5 @@
 plugins {
-    id "com.android.application"
+    id "com.android.application" version "8.1.1"
     // START: FlutterFire Configuration
     id 'com.google.gms.google-services'
     // END: FlutterFire Configuration
