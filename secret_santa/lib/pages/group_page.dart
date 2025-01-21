@@ -343,7 +343,7 @@ class _GroupPageState extends State<GroupPage> {
                                                                       const EdgeInsets
                                                                           .only(
                                                                           top:
-                                                                              130.0),
+                                                                              115.0),
                                                                   child: Center(
                                                                     child:
                                                                         SizedBox(
@@ -772,13 +772,12 @@ class _GroupPageState extends State<GroupPage> {
                                                   onTap: () {
                                                     Navigator.of(context).push(
                                                         MaterialPageRoute(
-                                                            builder:
-                                                                (context) =>
-                                                                    GiftsPage(
-                                                                      participant:
-                                                                          participants[
-                                                                              index],
-                                                                    )));
+                                                            builder: (context) => GiftsPage(
+                                                                participant:
+                                                                    participants[
+                                                                        index],
+                                                                groupId: widget
+                                                                    .groupId)));
                                                   },
                                                   child: Container(
                                                     width: 40,

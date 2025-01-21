@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -30,6 +29,31 @@ class UsersFirestoreProvider extends ChangeNotifier {
     } catch (e) {
       print(
           "Erreur lors de l'optentions des données de l'utilisateur : ${e.toString()}");
+    }
+  }
+
+  Future<Map<String, dynamic>?> fetchAndReturnUserData(String email) async {
+    try {
+      if (email.isNotEmpty) {
+        QuerySnapshot querySnapshot = await _firestore
+            .collection('users')
+            .where('email', isEqualTo: email)
+            .get();
+        if (querySnapshot.docs.isNotEmpty) {
+          DocumentSnapshot userDoc = querySnapshot.docs.first;
+          return userDoc.data() as Map<String, dynamic>?;
+        } else {
+          print("Aucune donnée obtenue");
+          return null;
+        }
+      } else {
+        print("Aucun utilisateur connecté");
+        return null;
+      }
+    } catch (e) {
+      print(
+          "Erreur lors de l'obtention des données de l'utilisateur : ${e.toString()}");
+      return null;
     }
   }
 

@@ -210,6 +210,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
     String moneyMax = moneyController.text;
     String pigeDate = datePigeController.text;
     final User? user = _auth.currentUser;
+    Map<String, List<String>> mapCadeauxParticipants = {};
 
     if (groupName.isEmpty ||
         moneyMax.isEmpty ||
@@ -227,7 +228,8 @@ class _AddGroupPageState extends State<AddGroupPage> {
         'participants': [user.email],
         'dateCreation': DateTime.now().toString(),
         'moneyMax': moneyMax,
-        'pigeDate': pigeDate
+        'pigeDate': pigeDate,
+        'cadeauxParticipants': mapCadeauxParticipants
       });
 
       await docRef.update({'id': docRef.id});
