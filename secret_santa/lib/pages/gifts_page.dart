@@ -201,19 +201,16 @@ class _GiftsPageState extends State<GiftsPage> {
   Future<void> uploadGiftImages() async {
     final user_data = await _userProvider
         ?.fetchAndReturnUserData(_auth.currentUser!.email ?? '');
-    print("PUUUUUUUUU : " + user_data.toString());
     if (user_data != null) {
-      print("ZDOIIIIIIIIIIITZ");
       setState(() {
         _gift_ids = user_data['giftsId'];
       });
-      print("LES IDs GIFTS : " + _gift_ids.toString());
       if (_gift_ids!.isNotEmpty) {
-        print("LONGUUUUUUUEUR : " + _gift_images.length.toString());
         for (int i = 0; i < _gift_images.length; i++) {
           await uploadImageAndUpdateUrl(
               _gift_images[i], _gift_ids![_gift_ids!.length - 1], i);
         }
+        _gift_images.clear();
       } else {
         print("L'utilisateur n'a aucun cadeau à sa liste de souhait");
       }
