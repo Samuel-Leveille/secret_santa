@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:secret_santa/pages/login_page.dart';
 import 'package:secret_santa/utils/groups_firestore_provider.dart';
 import 'package:secret_santa/utils/users_firestore_provider.dart';
+import 'package:secret_santa/utils/gift_images_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +21,7 @@ class MainApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => UsersFirestoreProvider()),
         ChangeNotifierProvider(create: (_) => GroupsFirestoreProvider()),
+        ChangeNotifierProvider(create: (_) => GiftImagesProvider()),
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,

@@ -45,8 +45,8 @@ class _AccueilPageState extends State<AccueilPage> {
     return Color.fromARGB(255, red, green, blue);
   }
 
-  String getGroupId(Map<String, dynamic> group) {
-    return group['id'];
+  String getGroupId(Map<String, dynamic>? group) {
+    return group?['id'];
   }
 
   @override
@@ -57,10 +57,10 @@ class _AccueilPageState extends State<AccueilPage> {
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           color: Colors.white,
-          child: Consumer2<GroupsFirestoreProvider, UsersFirestoreProvider>(
+          child: Consumer2<GroupsFirestoreProvider?, UsersFirestoreProvider?>(
             builder: (context, groupsProvider, userProvider, child) {
-              final groupsData = groupsProvider.groupsData;
-              final userData = userProvider.userData;
+              final groupsData = groupsProvider?.groupsData;
+              final userData = userProvider?.userData;
               if (userData?['groupsId'].isEmpty) {
                 return const Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -118,12 +118,12 @@ class _AccueilPageState extends State<AccueilPage> {
                         height: 275,
                         width: 325,
                         child: PageView.builder(
-                          itemCount: groupsData.length,
+                          itemCount: groupsData?.length,
                           controller: _pageController,
                           itemBuilder: (context, index) {
-                            final group = groupsData[index];
+                            final group = groupsData?[index];
                             return FutureBuilder(
-                              future: getUserName(group['admin']),
+                              future: getUserName(group?['admin']),
                               builder: (BuildContext context,
                                   AsyncSnapshot<String> snapshot) {
                                 if (snapshot.connectionState ==
@@ -188,7 +188,7 @@ class _AccueilPageState extends State<AccueilPage> {
                                                         onPressed: () {
                                                           String
                                                               groupAdminEmail =
-                                                              group['admin'];
+                                                              group?['admin'];
                                                           showDialog(
                                                               context: context,
                                                               builder:
@@ -283,7 +283,7 @@ class _AccueilPageState extends State<AccueilPage> {
                                                                                       if (groupAdminEmail == _auth.currentUser!.email) {
                                                                                         try {
                                                                                           String deletedGroupId = getGroupId(group);
-                                                                                          groupsProvider.deleteGroup(deletedGroupId, () {
+                                                                                          groupsProvider?.deleteGroup(deletedGroupId, () {
                                                                                             setState(() {
                                                                                               groupsProvider.fetchGroupsData();
                                                                                             });
@@ -296,7 +296,7 @@ class _AccueilPageState extends State<AccueilPage> {
                                                                                         try {
                                                                                           String groupId = getGroupId(group);
                                                                                           String userWhoLeaveTheGroup = _auth.currentUser!.email as String;
-                                                                                          groupsProvider.removeParticipantFromGroup(groupId, userWhoLeaveTheGroup, () {
+                                                                                          groupsProvider?.removeParticipantFromGroup(groupId, userWhoLeaveTheGroup, () {
                                                                                             setState(() {
                                                                                               groupsProvider.fetchGroupsData();
                                                                                             });
@@ -333,8 +333,8 @@ class _AccueilPageState extends State<AccueilPage> {
                                                       const EdgeInsets.only(
                                                           right: 6.0),
                                                   child: Text(
-                                                    group['name'] ??
-                                                        "Groupe de ${group['admin']}",
+                                                    group?['name'] ??
+                                                        "Groupe de ${group?['admin']}",
                                                     style: const TextStyle(
                                                       fontSize: 26,
                                                       fontWeight:
@@ -364,7 +364,7 @@ class _AccueilPageState extends State<AccueilPage> {
                                                   height: 80,
                                                 ),
                                                 Text(
-                                                  "Créé le ${group['dateCreation'].substring(0, 10)}",
+                                                  "Créé le ${group?['dateCreation'].substring(0, 10)}",
                                                   style: const TextStyle(
                                                       color: Colors.grey),
                                                 )
@@ -386,7 +386,7 @@ class _AccueilPageState extends State<AccueilPage> {
                     Center(
                       child: SmoothPageIndicator(
                         controller: _pageController,
-                        count: groupsData.length,
+                        count: groupsData?.length == null ? 0 : groupsData!.length,
                         effect: WormEffect(
                           dotHeight: 10,
                           dotWidth: 10,

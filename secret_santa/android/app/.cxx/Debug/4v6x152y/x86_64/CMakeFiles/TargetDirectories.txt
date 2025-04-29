@@ -1,0 +1,2 @@
+C:/Users/samle/secret_santa/secret_santa/secret_santa/android/app/.cxx/Debug/4v6x152y/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/samle/secret_santa/secret_santa/secret_santa/android/app/.cxx/Debug/4v6x152y/x86_64/CMakeFiles/rebuild_cache.dir

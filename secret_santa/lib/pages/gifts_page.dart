@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:secret_santa/utils/gift_images_provider.dart';
 import 'package:secret_santa/utils/pick_image.dart';
 import 'package:secret_santa/utils/users_firestore_provider.dart';
 
@@ -92,13 +93,12 @@ class _GiftsPageState extends State<GiftsPage> {
   Future<void> selectImageFromGallery() async {
     if (_userId == null) {
       print('Aucun utilisateur connecté');
+      return;
     }
     try {
       final pickedImage = await pickImage(ImageSource.gallery);
       if (pickedImage != null) {
-        setState(() {
-          _gift_images.add(pickedImage);
-        });
+        Provider.of<GiftImagesProvider>(context, listen: false).addImage(pickedImage);
       }
     } catch (e) {
       print('Error selecting image: $e');
@@ -217,8 +217,6 @@ class _GiftsPageState extends State<GiftsPage> {
       print("Données utilisateur non trouvées");
     }
   }
-
-  Future<void> supprimerImage() async {}
 
   @override
   Widget build(BuildContext context) {
@@ -410,76 +408,84 @@ class _GiftsPageState extends State<GiftsPage> {
                                               ),
                                             ),
                                             const SizedBox(height: 10),
-                                            if (_gift_images.isNotEmpty)
-                                              GridView.builder(
-                                                gridDelegate:
-                                                    const SliverGridDelegateWithFixedCrossAxisCount(
-                                                  crossAxisCount: 3,
-                                                  crossAxisSpacing: 8,
-                                                  mainAxisSpacing: 8,
-                                                ),
-                                                shrinkWrap: true,
-                                                physics:
-                                                    const NeverScrollableScrollPhysics(),
-                                                itemCount: _gift_images.length,
-                                                itemBuilder: (context, index) {
-                                                  return Stack(
-                                                    children: [
-                                                      Container(
-                                                        width: double.infinity,
-                                                        height: double.infinity,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color:
-                                                              Colors.grey[200],
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(8),
-                                                        ),
-                                                        child: ClipRRect(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(8),
-                                                          child: Image.memory(
-                                                            _gift_images[index],
-                                                            fit: BoxFit.cover,
-                                                            errorBuilder:
-                                                                (context, error,
-                                                                    stackTrace) {
-                                                              return const Center(
-                                                                  child: Text(
-                                                                      'Erreur image'));
-                                                            },
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      Positioned(
-                                                        top: -6,
-                                                        left: -6,
-                                                        child: SizedBox(
-                                                          height: 32,
-                                                          width: 32,
-                                                          child:
-                                                              IconButton.filled(
-                                                            style: ButtonStyle(
-                                                              backgroundColor:
-                                                                  MaterialStatePropertyAll(
-                                                                Colors.red[400],
+                                            if (Provider.of<GiftImagesProvider>(context, listen: false).giftImages.isNotEmpty)
+                                              Consumer<GiftImagesProvider>(
+                                                builder: (context, giftImagesProvider, child) {
+                                                  return GridView.builder(
+                                                    gridDelegate:
+                                                        const SliverGridDelegateWithFixedCrossAxisCount(
+                                                      crossAxisCount: 3,
+                                                      crossAxisSpacing: 8,
+                                                      mainAxisSpacing: 8,
+                                                    ),
+                                                    shrinkWrap: true,
+                                                    physics:
+                                                        const NeverScrollableScrollPhysics(),
+                                                    itemCount: giftImagesProvider.giftImages.length,
+                                                    itemBuilder: (context, index) {
+                                                      return Stack(
+                                                        children: [
+                                                          Container(
+                                                            width: double.infinity,
+                                                            height: double.infinity,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              color:
+                                                                  Colors.grey[200],
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(8),
+                                                            ),
+                                                            child: ClipRRect(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(8),
+                                                              child: Image.memory(
+                                                                giftImagesProvider.giftImages[index],
+                                                                fit: BoxFit.cover,
+                                                                errorBuilder:
+                                                                    (context, error,
+                                                                        stackTrace) {
+                                                                  return const Center(
+                                                                      child: Text(
+                                                                          'Erreur image'));
+                                                                },
                                                               ),
                                                             ),
-                                                            icon: const Icon(
-                                                                Icons.delete),
-                                                            color: Colors.black,
-                                                            iconSize: 18,
-                                                            onPressed: () {
-                                                              supprimerImage(); // Passez l'index pour identifier l'image
-                                                            },
                                                           ),
-                                                        ),
-                                                      ),
-                                                    ],
+                                                          Positioned(
+                                                            top: -6,
+                                                            left: -6,
+                                                            child: SizedBox(
+                                                              height: 32,
+                                                              width: 32,
+                                                              child:
+                                                                  IconButton.filled(
+                                                                style: ButtonStyle(
+                                                                  backgroundColor:
+                                                                      MaterialStatePropertyAll(
+                                                                    Colors.red[400],
+                                                                  ),
+                                                                ),
+                                                                icon: const Icon(
+                                                                    Icons.delete),
+                                                                color: Colors.black,
+                                                                iconSize: 18,
+                                                                onPressed: () {
+                                                                  print("images : " + giftImagesProvider.giftImages.length.toString());
+                                                                  giftImagesProvider
+                                                                      .removeImage(
+                                                                          index);
+                                                                  print("images : " + giftImagesProvider.giftImages.length.toString());
+                                                                },
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      );
+                                                    },
                                                   );
-                                                },
+                                                }
                                               )
                                             else
                                               Container(),
