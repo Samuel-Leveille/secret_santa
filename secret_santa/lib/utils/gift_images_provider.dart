@@ -15,4 +15,12 @@ class GiftImagesProvider extends ChangeNotifier {
     _giftImages.removeAt(index);
     notifyListeners();
   }
+
+  void removeAllImage() {
+    for (int i = _giftImages.length; i != 0; i--) {
+      print("quantity: " + _giftImages.length.toString());
+      _giftImages.removeAt(i - 1);
+    }
+    notifyListeners();
+  }
 }
