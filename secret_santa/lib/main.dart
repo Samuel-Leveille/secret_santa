@@ -23,9 +23,10 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GroupsFirestoreProvider()),
         ChangeNotifierProvider(create: (_) => GiftImagesProvider()),
       ],
-      child: const MaterialApp(
+      child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: LoginPage(),
+        theme: ThemeData(fontFamily: "Montserrat"),
+        home: const LoginPage(),
       ),
     );
   }

@@ -18,7 +18,6 @@ class GiftImagesProvider extends ChangeNotifier {
 
   void removeAllImage() {
     for (int i = _giftImages.length; i != 0; i--) {
-      print("quantity: " + _giftImages.length.toString());
       _giftImages.removeAt(i - 1);
     }
     notifyListeners();

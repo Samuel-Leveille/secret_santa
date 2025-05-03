@@ -33,6 +33,7 @@ class _GiftsPageState extends State<GiftsPage> {
   List<dynamic>? _gift_ids = [];
   String? _imageUrl;
   List<Uint8List> _gift_images = [];
+  bool erreurNbreImage = false;
 
   @override
   void initState() {
@@ -136,7 +137,7 @@ class _GiftsPageState extends State<GiftsPage> {
     super.dispose();
   }
 
-  void saveGift(StateSetter setState) async {
+  void saveGift(StateSetter setState, BuildContext context) async {
     String title = titleController.text;
     String description = descriptionController.text;
     List<String> links = [];
@@ -190,7 +191,7 @@ class _GiftsPageState extends State<GiftsPage> {
         });
       }
 
-      uploadGiftImages();
+      uploadGiftImages(context);
     } else {
       setState(() {
         _isTitleEmpty = title.isEmpty;
@@ -198,7 +199,9 @@ class _GiftsPageState extends State<GiftsPage> {
     }
   }
 
-  Future<void> uploadGiftImages() async {
+  Future<void> uploadGiftImages(BuildContext context) async {
+    final giftImageProvider =
+        Provider.of<GiftImagesProvider>(context, listen: false);
     final user_data = await _userProvider
         ?.fetchAndReturnUserData(_auth.currentUser!.email ?? '');
     if (user_data != null) {
@@ -206,11 +209,12 @@ class _GiftsPageState extends State<GiftsPage> {
         _gift_ids = user_data['giftsId'];
       });
       if (_gift_ids!.isNotEmpty) {
-        for (int i = 0; i < _gift_images.length; i++) {
-          await uploadImageAndUpdateUrl(
-              _gift_images[i], _gift_ids![_gift_ids!.length - 1], i);
+        for (int i = 0; i < giftImageProvider.giftImages.length; i++) {
+          await uploadImageAndUpdateUrl(giftImageProvider.giftImages[i],
+              _gift_ids![_gift_ids!.length - 1], i);
         }
         _gift_images.clear();
+        giftImageProvider.removeAllImage();
       } else {
         print("L'utilisateur n'a aucun cadeau à sa liste de souhait");
       }
@@ -483,6 +487,13 @@ class _GiftsPageState extends State<GiftsPage> {
                                                             color: Colors.black,
                                                             iconSize: 18,
                                                             onPressed: () {
+                                                              setState(
+                                                                () {
+                                                                  erreurNbreImage =
+                                                                      false;
+                                                                },
+                                                              );
+
                                                               giftImagesProvider
                                                                   .removeImage(
                                                                       index);
@@ -495,32 +506,60 @@ class _GiftsPageState extends State<GiftsPage> {
                                                 },
                                               );
                                             }),
-                                            const SizedBox(height: 10),
-                                            ElevatedButton.icon(
-                                              onPressed: () {
-                                                selectImageFromGallery();
+                                            Consumer<GiftImagesProvider>(
+                                              builder: (context,
+                                                  giftImagesProvider, child) {
+                                                return SizedBox(
+                                                    height: erreurNbreImage ||
+                                                            giftImagesProvider
+                                                                .giftImages
+                                                                .isNotEmpty
+                                                        ? 10
+                                                        : 0);
                                               },
-                                              icon: const Icon(Icons.image),
-                                              label: const Text(
-                                                  'Ajouter une image'),
-                                              style: ElevatedButton.styleFrom(
-                                                foregroundColor:
-                                                    Colors.blue.shade800,
-                                                backgroundColor:
-                                                    Colors.blue.shade100,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius:
-                                                      BorderRadius.circular(10),
-                                                ),
-                                                padding:
-                                                    const EdgeInsets.symmetric(
+                                            ),
+                                            Consumer<GiftImagesProvider>(
+                                              builder: (context,
+                                                  giftImagesProvider, child) {
+                                                return ElevatedButton.icon(
+                                                  onPressed: giftImagesProvider
+                                                              .giftImages
+                                                              .length <
+                                                          3
+                                                      ? () {
+                                                          setState(() {
+                                                            erreurNbreImage =
+                                                                false;
+                                                          });
+                                                          selectImageFromGallery();
+                                                        }
+                                                      : null,
+                                                  icon: const Icon(Icons.image),
+                                                  label: const Text(
+                                                      'Ajouter une image'),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                    foregroundColor:
+                                                        Colors.blue.shade800,
+                                                    backgroundColor:
+                                                        Colors.blue.shade100,
+                                                    shape:
+                                                        RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                    ),
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
                                                         vertical: 12.0),
-                                              ),
+                                                  ),
+                                                );
+                                              },
                                             ),
                                             const SizedBox(height: 10),
                                             ElevatedButton.icon(
                                               onPressed: () {
-                                                saveGift(setState);
+                                                saveGift(setState, context);
                                               },
                                               icon: const Icon(
                                                   Icons.card_giftcard),

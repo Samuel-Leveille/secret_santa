@@ -26,3 +26,29 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  fonts:
+    - family: PermanentMarker
+      fonts:
+        - asset: assets/fonts/PermanentMarker/PermanentMarker-Regular.ttf
+    - family: Montserrat
+      fonts:
+        - asset: assets/fonts/Montserrat/static/Montserrat-100.ttf
+          weight: 100
+        - asset: assets/fonts/Montserrat/static/Montserrat-200.ttf
+          weight: 200
+        - asset: assets/fonts/Montserrat/static/Montserrat-300.ttf
+          weight: 300
+        - asset: assets/fonts/Montserrat/static/Montserrat-400.ttf
+          weight: 400
+        - asset: assets/fonts/Montserrat/static/Montserrat-500.ttf
+          weight: 500
+        - asset: assets/fonts/Montserrat/static/Montserrat-600.ttf
+          weight: 600
+        - asset: assets/fonts/Montserrat/static/Montserrat-700.ttf
+          weight: 700
+        - asset: assets/fonts/Montserrat/static/Montserrat-800.ttf
+          weight: 800
+        - asset: assets/fonts/Montserrat/static/Montserrat-900.ttf
+          weight: 900
+
