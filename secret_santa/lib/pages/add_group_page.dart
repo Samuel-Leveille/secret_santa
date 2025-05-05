@@ -1,7 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:secret_santa/pages/group_page.dart';
+import 'package:secret_santa/services/groups_service.dart';
 
 class AddGroupPage extends StatefulWidget {
   const AddGroupPage({super.key});
@@ -16,7 +15,8 @@ class _AddGroupPageState extends State<AddGroupPage> {
   final moneyController = TextEditingController();
   final datePigeController = TextEditingController();
   final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
+
+  final GroupsService groupsService = GroupsService();
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -172,7 +172,19 @@ class _AddGroupPageState extends State<AddGroupPage> {
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: _createGroup,
+                        onPressed: () async {
+                          await groupsService.createGroup(
+                              nameController.text.trim(),
+                              descriptionController.text.trim(),
+                              moneyController.text,
+                              datePigeController.text,
+                              _auth.currentUser,
+                              context);
+                          nameController.clear();
+                          descriptionController.clear();
+                          moneyController.clear();
+                          datePigeController.clear();
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -202,63 +214,5 @@ class _AddGroupPageState extends State<AddGroupPage> {
         ),
       ),
     );
-  }
-
-  Future<void> _createGroup() async {
-    String groupName = nameController.text.trim();
-    String groupDescription = descriptionController.text.trim();
-    String moneyMax = moneyController.text;
-    String pigeDate = datePigeController.text;
-    final User? user = _auth.currentUser;
-    Map<String, List<String>> mapCadeauxParticipants = {};
-
-    if (groupName.isEmpty ||
-        moneyMax.isEmpty ||
-        pigeDate.isEmpty ||
-        groupDescription.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Veuillez remplir tous les champs")),
-      );
-      return;
-    } else if (user != null) {
-      DocumentReference docRef = await _firestore.collection('groups').add({
-        'name': groupName,
-        'description': groupDescription,
-        'admin': user.email,
-        'participants': [user.email],
-        'dateCreation': DateTime.now().toString(),
-        'moneyMax': moneyMax,
-        'pigeDate': pigeDate,
-        'cadeauxParticipants': mapCadeauxParticipants
-      });
-
-      await docRef.update({'id': docRef.id});
-      nameController.clear();
-      descriptionController.clear();
-      moneyController.clear();
-      datePigeController.clear();
-      _addGroupToCurrentUser(user, docRef.id);
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => GroupPage(groupId: docRef.id),
-        ),
-      );
-    }
-  }
-
-  Future<void> _addGroupToCurrentUser(User user, String groupId) async {
-    QuerySnapshot querySnapshot = await _firestore
-        .collection('users')
-        .where('email', isEqualTo: user.email)
-        .get();
-
-    if (querySnapshot.docs.isNotEmpty) {
-      DocumentReference docRef = querySnapshot.docs.first.reference;
-      await docRef.update({
-        'groupsId': FieldValue.arrayUnion([groupId])
-      });
-    } else {
-      print("QuerySnapshot vide.");
-    }
   }
 }

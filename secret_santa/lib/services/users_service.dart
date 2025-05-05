@@ -81,4 +81,21 @@ class UsersService {
           "La mise à jour des données de l'utilisateur a échouée : ${e.toString()}");
     }
   }
+
+  Future<String> getUserName(String email) async {
+    final String name;
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      name =
+          "${(querySnapshot.docs.first.data() as Map<String, dynamic>)['firstName'] ?? ""} ${(querySnapshot.docs.first.data() as Map<String, dynamic>)['name'] ?? ""}";
+    } else {
+      name = "Nom inconnu";
+      print("Error : name and firstname couldn't be fetch");
+    }
+
+    return name;
+  }
 }

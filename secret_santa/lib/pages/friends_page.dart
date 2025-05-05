@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:secret_santa/pages/profile_page.dart';
+import 'package:secret_santa/services/friends_service.dart';
+import 'package:secret_santa/services/users_service.dart';
 
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
@@ -21,6 +23,8 @@ class _FriendsPageState extends State<FriendsPage>
   List<String> _friends = [];
   List<String> _receiverFriendRequests = [];
 
+  final FriendsService friendsService = FriendsService();
+
   @override
   void initState() {
     super.initState();
@@ -37,8 +41,17 @@ class _FriendsPageState extends State<FriendsPage>
       }
     });
 
-    fetchUserFriends();
-    fetchCurrentUserFriendRequests();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    List<String> userFriends = await friendsService.fetchUserFriends();
+    List<String> userFriendRequests =
+        await friendsService.fetchCurrentUserFriendRequests();
+    setState(() {
+      _friends = userFriends;
+      _friendRequests = userFriendRequests;
+    });
   }
 
   @override
@@ -48,9 +61,14 @@ class _FriendsPageState extends State<FriendsPage>
     super.dispose();
   }
 
-  void refreshFriendRequests() {
-    fetchCurrentUserFriendRequests();
-    fetchUserFriends();
+  void refreshFriendRequests() async {
+    List<String> userFriendsRequests =
+        await friendsService.fetchCurrentUserFriendRequests();
+    List<String> userFriends = await friendsService.fetchUserFriends();
+    setState(() {
+      _friendRequests = userFriendsRequests;
+      _friends = userFriends;
+    });
   }
 
   @override
@@ -158,55 +176,6 @@ class _FriendsPageState extends State<FriendsPage>
     );
   }
 
-  Future<void> fetchCurrentUserFriendRequests() async {
-    User? user = _auth.currentUser;
-    QuerySnapshot querySnapshot = await _firestore
-        .collection('users')
-        .where('email', isEqualTo: user?.email)
-        .get();
-    if (querySnapshot.docs.isNotEmpty) {
-      final List<String> friendRequests = List<String>.from(
-          (querySnapshot.docs.first.data()
-                  as Map<String, dynamic>)['friendRequests'] ??
-              []);
-      setState(() {
-        _friendRequests = friendRequests;
-      });
-    }
-  }
-
-  Future<void> fetchReceiverFriendRequests(String email) async {
-    QuerySnapshot querySnapshot = await _firestore
-        .collection('users')
-        .where('email', isEqualTo: email)
-        .get();
-    if (querySnapshot.docs.isNotEmpty) {
-      final List<String> friendRequests = List<String>.from(
-          (querySnapshot.docs.first.data()
-                  as Map<String, dynamic>)['friendRequests'] ??
-              []);
-      setState(() {
-        _receiverFriendRequests = friendRequests;
-      });
-    }
-  }
-
-  Future<void> fetchUserFriends() async {
-    User? user = _auth.currentUser;
-    QuerySnapshot querySnapshot = await _firestore
-        .collection('users')
-        .where('email', isEqualTo: user?.email)
-        .get();
-    if (querySnapshot.docs.isNotEmpty) {
-      final List<String> friends = List<String>.from((querySnapshot.docs.first
-              .data() as Map<String, dynamic>)['friends'] ??
-          []);
-      setState(() {
-        _friends = friends;
-      });
-    }
-  }
-
   Future<void> sendRequest() async {
     final String friendEmail = friendEmailController.text.trim();
     User? currentUser = _auth.currentUser;
@@ -217,8 +186,13 @@ class _FriendsPageState extends State<FriendsPage>
     if (querySnapshot.docs.isNotEmpty) {
       DocumentReference docRef = querySnapshot.docs.first.reference;
 
-      fetchUserFriends();
-      fetchReceiverFriendRequests(friendEmail);
+      List<String> userFriends = await friendsService.fetchUserFriends();
+      List<String> receiverFriend =
+          await friendsService.fetchReceiverFriendRequests(friendEmail);
+      setState(() {
+        _friends = userFriends;
+        _receiverFriendRequests = receiverFriend;
+      });
 
       if (!_friends.contains(friendEmail)) {
         if (!_receiverFriendRequests.contains(currentUser?.email)) {
@@ -266,7 +240,9 @@ class _FriendsPageState extends State<FriendsPage>
 
 class Friends extends StatelessWidget {
   final List<String> friends;
-  const Friends({super.key, required this.friends});
+  final UsersService usersService = UsersService();
+
+  Friends({super.key, required this.friends});
 
   @override
   Widget build(BuildContext context) {
@@ -292,7 +268,7 @@ class Friends extends StatelessWidget {
                     ),
                     child: ListTile(
                       leading: FutureBuilder<String>(
-                        future: getUserName(friends[index]),
+                        future: usersService.getUserName(friends[index]),
                         builder: (BuildContext context,
                             AsyncSnapshot<String> snapshot) {
                           if (snapshot.connectionState ==
@@ -319,7 +295,7 @@ class Friends extends StatelessWidget {
                         },
                       ),
                       title: FutureBuilder<String>(
-                        future: getUserName(friends[index]),
+                        future: usersService.getUserName(friends[index]),
                         builder: (BuildContext context,
                             AsyncSnapshot<String> snapshot) {
                           if (snapshot.connectionState ==
@@ -365,9 +341,10 @@ class Friends extends StatelessWidget {
 class Requests extends StatelessWidget {
   final List<String> items;
   final VoidCallback onRequestHandled;
+  final FriendsService friendsService = FriendsService();
+  final UsersService usersService = UsersService();
 
-  const Requests(
-      {super.key, required this.items, required this.onRequestHandled});
+  Requests({super.key, required this.items, required this.onRequestHandled});
 
   @override
   Widget build(BuildContext context) {
@@ -385,7 +362,7 @@ class Requests extends StatelessWidget {
                   ),
                   child: ListTile(
                     title: FutureBuilder<String>(
-                      future: getUserName(items[index]),
+                      future: usersService.getUserName(items[index]),
                       builder: (BuildContext context,
                           AsyncSnapshot<String> snapshot) {
                         if (snapshot.connectionState ==
@@ -419,7 +396,8 @@ class Requests extends StatelessWidget {
                           Expanded(
                               child: IconButton(
                             onPressed: () {
-                              acceptFriendRequest(items[index]);
+                              friendsService.acceptFriendRequest(
+                                  items[index], onRequestHandled);
                             },
                             icon: const Icon(Icons.check),
                             iconSize: 30,
@@ -431,7 +409,8 @@ class Requests extends StatelessWidget {
                           Expanded(
                               child: IconButton(
                             onPressed: () {
-                              refuseFriendRequest(items[index]);
+                              friendsService.refuseFriendRequest(
+                                  items[index], onRequestHandled);
                             },
                             icon: const Icon(Icons.close),
                             iconSize: 30,
@@ -454,72 +433,4 @@ class Requests extends StatelessWidget {
             ),
           ));
   }
-
-  Future<void> acceptFriendRequest(String email) async {
-    User? currentUser = FirebaseAuth.instance.currentUser;
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('email', isEqualTo: currentUser!.email)
-        .get();
-    if (querySnapshot.docs.isNotEmpty) {
-      DocumentReference docRef = querySnapshot.docs.first.reference;
-      docRef.update({
-        'friends': FieldValue.arrayUnion([email])
-      });
-      docRef.update({
-        'friendRequests': FieldValue.arrayRemove([email])
-      });
-      onRequestHandled();
-    } else {
-      print("Aucun utilisateur connecté");
-    }
-
-    QuerySnapshot querySnapshot2 = await FirebaseFirestore.instance
-        .collection('users')
-        .where('email', isEqualTo: email)
-        .get();
-    if (querySnapshot2.docs.isNotEmpty) {
-      DocumentReference docRef = querySnapshot2.docs.first.reference;
-      docRef.update({
-        'friends': FieldValue.arrayUnion([currentUser.email])
-      });
-    } else {
-      print(
-          "Erreur en lien avec l'utilisateur qui a envoyé la demande d'ami (il n'existe pas apparamment)");
-    }
-  }
-
-  Future<void> refuseFriendRequest(String email) async {
-    User? currentUser = FirebaseAuth.instance.currentUser;
-    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .where('email', isEqualTo: currentUser!.email)
-        .get();
-    if (querySnapshot.docs.isNotEmpty) {
-      DocumentReference docRef = querySnapshot.docs.first.reference;
-      docRef.update({
-        'friendRequests': FieldValue.arrayRemove([email])
-      });
-      onRequestHandled();
-    } else {
-      print("Aucun utilisateur connecté");
-    }
-  }
-}
-
-Future<String> getUserName(String email) async {
-  final String name;
-  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-      .collection('users')
-      .where('email', isEqualTo: email)
-      .get();
-  if (querySnapshot.docs.isNotEmpty) {
-    name =
-        "${(querySnapshot.docs.first.data() as Map<String, dynamic>)['firstName'] ?? ""} ${(querySnapshot.docs.first.data() as Map<String, dynamic>)['name'] ?? ""}";
-  } else {
-    name = "Nom inconnu";
-    print("Error : name and firstname couldn't be fetch");
-  }
-
-  return name;
 }
