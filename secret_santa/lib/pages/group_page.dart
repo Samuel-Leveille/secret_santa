@@ -3,8 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/pages/gifts_page.dart';
-import 'package:secret_santa/utils/groups_firestore_provider.dart';
-import 'package:secret_santa/utils/users_firestore_provider.dart';
+import 'package:secret_santa/providers/groups_firestore_provider.dart';
+import 'package:secret_santa/providers/users_firestore_provider.dart';
+import 'package:secret_santa/services/groups_service.dart';
 
 class GroupPage extends StatefulWidget {
   final String groupId;
@@ -18,6 +19,8 @@ class _GroupPageState extends State<GroupPage> {
   GroupsFirestoreProvider? _groupProvider;
   UsersFirestoreProvider? _userProvider;
   final _auth = FirebaseAuth.instance;
+
+  GroupsService _groupsService = GroupsService();
 
   @override
   void initState() {
@@ -433,7 +436,7 @@ class _GroupPageState extends State<GroupPage> {
                                                                               ),
                                                                               trailing: ElevatedButton(
                                                                                 onPressed: () {
-                                                                                  provider.addParticipantToGroup(
+                                                                                  _groupsService.addParticipantToGroup(
                                                                                     group['id'],
                                                                                     nonParticipants[index],
                                                                                     () {
@@ -712,7 +715,7 @@ class _GroupPageState extends State<GroupPage> {
                                                                                   onPressed: () {
                                                                                     try {
                                                                                       String deletedUser = participants[index];
-                                                                                      provider.removeParticipantFromGroup(group['id'], deletedUser, () {
+                                                                                      _groupsService.removeParticipantFromGroup(group['id'], deletedUser, () {
                                                                                         setState(() {
                                                                                           provider.fetchGroupData(group['id']);
                                                                                         });

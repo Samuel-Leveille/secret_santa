@@ -6,9 +6,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:secret_santa/utils/gift_images_provider.dart';
+import 'package:secret_santa/providers/gift_images_provider.dart';
+import 'package:secret_santa/services/users_service.dart';
 import 'package:secret_santa/utils/pick_image.dart';
-import 'package:secret_santa/utils/users_firestore_provider.dart';
+import 'package:secret_santa/providers/users_firestore_provider.dart';
 
 class GiftsPage extends StatefulWidget {
   final dynamic participant;
@@ -31,9 +32,10 @@ class _GiftsPageState extends State<GiftsPage> {
   bool _isTitleEmpty = false;
   String? _userId;
   List<dynamic>? _gift_ids = [];
-  String? _imageUrl;
   List<Uint8List> _gift_images = [];
   bool erreurNbreImage = false;
+
+  final UsersService _usersService = UsersService();
 
   @override
   void initState() {
@@ -120,10 +122,6 @@ class _GiftsPageState extends State<GiftsPage> {
       'images': FieldValue.arrayUnion([url])
     });
 
-    setState(() {
-      _imageUrl = url;
-    });
-
     await _userProvider?.fetchUserData(_auth.currentUser!.email ?? '');
   }
 
@@ -202,8 +200,8 @@ class _GiftsPageState extends State<GiftsPage> {
   Future<void> uploadGiftImages(BuildContext context) async {
     final giftImageProvider =
         Provider.of<GiftImagesProvider>(context, listen: false);
-    final user_data = await _userProvider
-        ?.fetchAndReturnUserData(_auth.currentUser!.email ?? '');
+    final user_data = await _usersService
+        .fetchAndReturnUserData(_auth.currentUser!.email ?? '');
     if (user_data != null) {
       setState(() {
         _gift_ids = user_data['giftsId'];

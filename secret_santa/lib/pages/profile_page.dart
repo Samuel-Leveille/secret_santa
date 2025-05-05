@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:secret_santa/components/profile_data_field.dart';
 import 'package:secret_santa/pages/settings_page.dart';
 import 'package:secret_santa/utils/pick_image.dart';
-import 'package:secret_santa/utils/users_firestore_provider.dart';
+import 'package:secret_santa/providers/users_firestore_provider.dart';
 
 class ProfilePage extends StatefulWidget {
   final String email;

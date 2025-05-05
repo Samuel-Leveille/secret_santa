@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:secret_santa/utils/users_firestore_provider.dart';
+import 'package:secret_santa/providers/users_firestore_provider.dart';
+import 'package:secret_santa/services/users_service.dart';
 
 class ProfileDataField extends StatefulWidget {
   final double width;
@@ -29,6 +30,8 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
   bool isItBio = false;
   bool isItFirstName = true;
   final _auth = FirebaseAuth.instance;
+
+  final UsersService _usersService = UsersService();
 
   @override
   void initState() {
@@ -177,16 +180,20 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
                                                             "Annuler")),
                                                     TextButton(
                                                         onPressed: () async {
+                                                          await _usersService.updateTwoUserField(
+                                                              'firstName',
+                                                              textFirstNameController
+                                                                  .text
+                                                                  .trim(),
+                                                              'name',
+                                                              textNameController
+                                                                  .text
+                                                                  .trim(),
+                                                              usersFirestoreProvider
+                                                                      .userData![
+                                                                  'email']);
                                                           await usersFirestoreProvider
-                                                              .updateTwoUserField(
-                                                                  'firstName',
-                                                                  textFirstNameController
-                                                                      .text
-                                                                      .trim(),
-                                                                  'name',
-                                                                  textNameController
-                                                                      .text
-                                                                      .trim(),
+                                                              .fetchUserData(
                                                                   usersFirestoreProvider
                                                                           .userData![
                                                                       'email']);
@@ -237,12 +244,17 @@ class _ProfileDataFieldState extends State<ProfileDataField> {
                                                             "Annuler")),
                                                     TextButton(
                                                         onPressed: () async {
-                                                          await usersFirestoreProvider
+                                                          await _usersService
                                                               .updateUserField(
                                                                   'biography',
                                                                   textBioController
                                                                       .text
                                                                       .trim(),
+                                                                  usersFirestoreProvider
+                                                                          .userData![
+                                                                      'email']);
+                                                          await usersFirestoreProvider
+                                                              .fetchUserData(
                                                                   usersFirestoreProvider
                                                                           .userData![
                                                                       'email']);

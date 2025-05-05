@@ -1,13 +1,12 @@
-import 'dart:async';
-import 'dart:math';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/pages/group_page.dart';
-import 'package:secret_santa/utils/groups_firestore_provider.dart';
-import 'package:secret_santa/utils/users_firestore_provider.dart';
+import 'package:secret_santa/providers/groups_firestore_provider.dart';
+import 'package:secret_santa/providers/users_firestore_provider.dart';
+import 'package:secret_santa/services/users_service.dart';
+import 'package:secret_santa/services/groups_service.dart';
+import 'package:secret_santa/utils/generate_color.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class AccueilPage extends StatefulWidget {
@@ -20,9 +19,12 @@ class AccueilPage extends StatefulWidget {
 class _AccueilPageState extends State<AccueilPage> {
   GroupsFirestoreProvider? _groupsFirestoreProvider;
   UsersFirestoreProvider? _usersFirestoreProvider;
-  List<Map<String, dynamic>>? groupsData;
   final _auth = FirebaseAuth.instance;
   final _pageController = PageController(initialPage: 0);
+
+  final UsersService _usersService = UsersService();
+  final GroupsService _groupsService = GroupsService();
+  final GenerateColor _generateColor = GenerateColor();
 
   @override
   void initState() {
@@ -36,17 +38,6 @@ class _AccueilPageState extends State<AccueilPage> {
       _usersFirestoreProvider
           ?.fetchUserData(_auth.currentUser!.email as String);
     });
-  }
-
-  Color generateSoftColor() {
-    int red = 200 + Random().nextInt(56);
-    int green = 200 + Random().nextInt(56);
-    int blue = 200 + Random().nextInt(56);
-    return Color.fromARGB(255, red, green, blue);
-  }
-
-  String getGroupId(Map<String, dynamic>? group) {
-    return group?['id'];
   }
 
   @override
@@ -123,7 +114,8 @@ class _AccueilPageState extends State<AccueilPage> {
                           itemBuilder: (context, index) {
                             final group = groupsData?[index];
                             return FutureBuilder(
-                              future: getUserName(group?['admin']),
+                              future: _usersService
+                                  .getUserNameByEmail(group?['admin']),
                               builder: (BuildContext context,
                                   AsyncSnapshot<String> snapshot) {
                                 if (snapshot.connectionState ==
@@ -151,7 +143,8 @@ class _AccueilPageState extends State<AccueilPage> {
                                           const EdgeInsets.only(bottom: 12.0),
                                       child: GestureDetector(
                                         onTap: () {
-                                          String theGroupId = getGroupId(group);
+                                          String theGroupId =
+                                              _groupsService.getGroupId(group);
                                           Navigator.of(context).push(
                                               MaterialPageRoute(
                                                   builder: (context) =>
@@ -160,7 +153,8 @@ class _AccueilPageState extends State<AccueilPage> {
                                                       )));
                                         },
                                         child: Card(
-                                          color: generateSoftColor(),
+                                          color: _generateColor
+                                              .generateSoftColor(),
                                           elevation: 8,
                                           shadowColor:
                                               Colors.grey.withOpacity(0.6),
@@ -282,10 +276,10 @@ class _AccueilPageState extends State<AccueilPage> {
                                                                                       print(groupAdminEmail);
                                                                                       if (groupAdminEmail == _auth.currentUser!.email) {
                                                                                         try {
-                                                                                          String deletedGroupId = getGroupId(group);
-                                                                                          groupsProvider?.deleteGroup(deletedGroupId, () {
+                                                                                          String deletedGroupId = _groupsService.getGroupId(group);
+                                                                                          _groupsService.deleteGroup(deletedGroupId, () {
                                                                                             setState(() {
-                                                                                              groupsProvider.fetchGroupsData();
+                                                                                              groupsProvider?.fetchGroupsData();
                                                                                             });
                                                                                           });
                                                                                           Navigator.of(context).pop();
@@ -294,11 +288,11 @@ class _AccueilPageState extends State<AccueilPage> {
                                                                                         }
                                                                                       } else {
                                                                                         try {
-                                                                                          String groupId = getGroupId(group);
+                                                                                          String groupId = _groupsService.getGroupId(group);
                                                                                           String userWhoLeaveTheGroup = _auth.currentUser!.email as String;
-                                                                                          groupsProvider?.removeParticipantFromGroup(groupId, userWhoLeaveTheGroup, () {
+                                                                                          _groupsService.removeParticipantFromGroup(groupId, userWhoLeaveTheGroup, () {
                                                                                             setState(() {
-                                                                                              groupsProvider.fetchGroupsData();
+                                                                                              groupsProvider?.fetchGroupsData();
                                                                                             });
                                                                                           });
                                                                                           Navigator.of(context).pop();
@@ -386,7 +380,8 @@ class _AccueilPageState extends State<AccueilPage> {
                     Center(
                       child: SmoothPageIndicator(
                         controller: _pageController,
-                        count: groupsData?.length == null ? 0 : groupsData!.length,
+                        count:
+                            groupsData?.length == null ? 0 : groupsData!.length,
                         effect: WormEffect(
                           dotHeight: 10,
                           dotWidth: 10,
@@ -411,21 +406,4 @@ class _AccueilPageState extends State<AccueilPage> {
       ),
     );
   }
-}
-
-Future<String> getUserName(String email) async {
-  final String name;
-  QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-      .collection('users')
-      .where('email', isEqualTo: email)
-      .get();
-  if (querySnapshot.docs.isNotEmpty) {
-    name =
-        "${(querySnapshot.docs.first.data() as Map<String, dynamic>)['firstName'] ?? ""} ${(querySnapshot.docs.first.data() as Map<String, dynamic>)['name'] ?? ""}";
-  } else {
-    name = "Nom inconnu";
-    print("Error : name and firstname couldn't be fetch");
-  }
-
-  return name;
 }
