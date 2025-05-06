@@ -1,7 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class UsersService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
+
+  Future<String> getUserId() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      print('Aucun utilisateur connecté');
+      return "";
+    }
+    final userDocs = await _firestore
+        .collection('users')
+        .where('email', isEqualTo: user.email)
+        .get();
+    if (userDocs.docs.isEmpty) {
+      print('Aucun document correspondant trouvé pour cet utilisateur');
+      return "";
+    } else {
+      return userDocs.docs.first.id;
+    }
+  }
 
   Future<String> getUserNameByEmail(String email) async {
     final String name;
