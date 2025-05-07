@@ -3,10 +3,14 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:secret_santa/pages/group_page.dart';
+import 'package:secret_santa/providers/groups_firestore_provider.dart';
+import 'package:secret_santa/providers/users_firestore_provider.dart';
 
 class GroupsService {
   final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
 
   String getGroupId(Map<String, dynamic>? group) {
     return group?['id'];
@@ -153,5 +157,33 @@ class GroupsService {
     } else {
       print("QuerySnapshot vide.");
     }
+  }
+
+  Future<String> getUserName(
+      String email, GroupsFirestoreProvider? _groupProvider) async {
+    String name = "Nom inconnu";
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      name =
+          "${(querySnapshot.docs.first.data() as Map<String, dynamic>)['firstName'] ?? ""} ${(querySnapshot.docs.first.data() as Map<String, dynamic>)['name'] ?? ""}";
+    } else {
+      print("Error : name and firstname couldn't be fetched");
+    }
+
+    if (email == _groupProvider?.groupData?['admin']) {
+      name = "$name (Admin)";
+    }
+    return name;
+  }
+
+  Future<List<dynamic>> getAdminFriends(BuildContext context) async {
+    String adminEmail = _auth.currentUser?.email as String;
+    final userProvider =
+        Provider.of<UsersFirestoreProvider>(context, listen: false);
+    await userProvider.fetchUserData(adminEmail);
+    return userProvider.userData?['friends'] ?? [];
   }
 }

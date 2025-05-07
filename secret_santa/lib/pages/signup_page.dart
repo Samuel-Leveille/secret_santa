@@ -1,11 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:secret_santa/components/auth_password_textfield.dart';
 import 'package:secret_santa/components/auth_textfield.dart';
-import 'package:secret_santa/firebase_auth/auth_services.dart';
 import 'package:secret_santa/pages/login_page.dart';
-import 'package:secret_santa/pages/transition_page.dart';
+import 'package:secret_santa/services/users_service.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -15,14 +12,14 @@ class SignupPage extends StatefulWidget {
 }
 
 class _SignupPageState extends State<SignupPage> {
-  final AuthServices _auth = AuthServices();
-
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
   final nameController = TextEditingController();
   final firstNameController = TextEditingController();
+
+  final UsersService usersService = UsersService();
 
   @override
   void dispose() {
@@ -119,7 +116,20 @@ class _SignupPageState extends State<SignupPage> {
                               borderRadius: BorderRadius.circular(30.0),
                             ),
                             backgroundColor: const Color(0xFFB2EBF2),
-                            onPressed: _signUp,
+                            onPressed: () async {
+                              await usersService.signUp(
+                                  nameController.text.trim(),
+                                  firstNameController.text.trim(),
+                                  emailController.text.trim(),
+                                  passwordController.text.trim(),
+                                  confirmPasswordController.text.trim(),
+                                  context);
+                              emailController.text = "";
+                              passwordController.text = "";
+                              confirmPasswordController.text = "";
+                              nameController.text = "";
+                              firstNameController.text = "";
+                            },
                             label: Text(
                               "S'inscrire",
                               style: TextStyle(
@@ -162,89 +172,5 @@ class _SignupPageState extends State<SignupPage> {
         ),
       )),
     );
-  }
-
-  void _signUp() async {
-    String name = nameController.text.trim();
-    String firstName = firstNameController.text.trim();
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
-    String confirmPassword = confirmPasswordController.text.trim();
-
-    if (name.isEmpty ||
-        firstName.isEmpty ||
-        email.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content:
-                Text("Remplissez tous les champs du formulaire d'inscription")),
-      );
-      return;
-    }
-    // Vérification du format de l'e-mail
-    Pattern pattern =
-        r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    RegExp regex = RegExp(pattern as String);
-    if (!regex.hasMatch(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Entrez une adresse courriel valide")),
-      );
-      return;
-    }
-
-    // Vérification de la complexité du mot de passe
-    Pattern passwordPattern =
-        r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$';
-    RegExp passwordRegex = RegExp(passwordPattern as String);
-    if (!passwordRegex.hasMatch(password)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text(
-                "Le mot de passe doit comporter au moins 8 caractères, dont une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial")),
-      );
-      return;
-    }
-    if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Les mots de passe ne correspondent pas")),
-      );
-      return;
-    }
-    User? user = await _auth.signUpWithEmailAndPassword(email, password);
-
-    if (user != null) {
-      CollectionReference collRef =
-          FirebaseFirestore.instance.collection('users');
-      collRef.add({
-        'firstName': firstName,
-        'name': name,
-        'email': email,
-        'role': 'utilisateur',
-        'profileImageUrl': '',
-        'dateInscription': DateTime.now().toString(),
-        'biography': '',
-        'groupsId': [],
-        'giftsId': [],
-        'friendRequests': [],
-        'friends': []
-      });
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => const TransitionPage(),
-        ),
-      );
-      emailController.text = "";
-      passwordController.text = "";
-      confirmPasswordController.text = "";
-      nameController.text = "";
-      firstNameController.text = "";
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Erreur : la création de compte a échouée")),
-      );
-    }
   }
 }

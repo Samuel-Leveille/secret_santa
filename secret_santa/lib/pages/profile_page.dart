@@ -1,14 +1,9 @@
-import 'dart:typed_data';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/components/profile_data_field.dart';
 import 'package:secret_santa/pages/settings_page.dart';
-import 'package:secret_santa/utils/pick_image.dart';
+import 'package:secret_santa/services/users_service.dart';
 import 'package:secret_santa/providers/users_firestore_provider.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -20,12 +15,12 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  Uint8List? _image;
   String? _imageUrl;
   final _auth = FirebaseAuth.instance;
-  final _firestore = FirebaseFirestore.instance;
   String? _userId;
   UsersFirestoreProvider? usersFirestoreProvider;
+
+  final UsersService _usersService = UsersService();
 
   @override
   void initState() {
@@ -34,7 +29,14 @@ class _ProfilePageState extends State<ProfilePage> {
       usersFirestoreProvider =
           Provider.of<UsersFirestoreProvider>(context, listen: false);
       usersFirestoreProvider?.fetchUserData(widget.email);
-      getUserId();
+      _loadUserId();
+    });
+  }
+
+  Future<void> _loadUserId() async {
+    String loadedUserId = await _usersService.getUserId();
+    setState(() {
+      _userId = loadedUserId;
     });
   }
 
@@ -42,74 +44,6 @@ class _ProfilePageState extends State<ProfilePage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     getProfilePicture();
-  }
-
-  Future<void> getUserId() async {
-    final user = _auth.currentUser;
-    if (user == null) {
-      print('Aucun utilisateur connecté');
-      return;
-    }
-    final userDocs = await _firestore
-        .collection('users')
-        .where('email', isEqualTo: user.email)
-        .get();
-    if (userDocs.docs.isEmpty) {
-      print('Aucun document correspondant trouvé pour cet utilisateur');
-      return;
-    }
-    setState(() {
-      _userId = userDocs.docs.first.id;
-    });
-  }
-
-  Future<void> selectImageFromGallery() async {
-    if (_userId == null) {
-      print('Aucun utilisateur connecté');
-      return;
-    }
-    try {
-      final pickedImage = await pickImage(ImageSource.gallery);
-      if (pickedImage != null) {
-        await uploadImageAndUpdateUrl(pickedImage);
-      }
-    } catch (e) {
-      print('Error selecting image: $e');
-    }
-  }
-
-  Future<void> selectImageFromCamera() async {
-    if (_userId == null) {
-      print('Aucun utilisateur connecté');
-      return;
-    }
-    try {
-      final pickedImage = await pickImage(ImageSource.camera);
-      if (pickedImage != null) {
-        await uploadImageAndUpdateUrl(pickedImage);
-      }
-    } catch (e) {
-      print('Error selecting image: $e');
-    }
-  }
-
-  Future<void> uploadImageAndUpdateUrl(Uint8List image) async {
-    final ref = FirebaseStorage.instance
-        .ref()
-        .child('profile_pictures')
-        .child('$_userId.jpg');
-    await ref.putData(image);
-    final url = await ref.getDownloadURL();
-
-    await _firestore.collection('users').doc(_userId).update({
-      'profileImageUrl': url,
-    });
-
-    setState(() {
-      _imageUrl = url;
-    });
-
-    await usersFirestoreProvider?.fetchUserData(widget.email);
   }
 
   Future<void> getProfilePicture() async {
@@ -355,131 +289,171 @@ class _ProfilePageState extends State<ProfilePage> {
                                 child: SizedBox(
                                     height: 32,
                                     width: 32,
-                                    child: widget.email ==
-                                            _auth.currentUser?.email
-                                        ? IconButton.filled(
-                                            style: ButtonStyle(
-                                                backgroundColor:
-                                                    WidgetStatePropertyAll(
-                                                        Colors.teal[100])),
-                                            icon: const Icon(Icons.add_a_photo),
-                                            color: Colors.black,
-                                            disabledColor: Colors.black,
-                                            iconSize: 15,
-                                            onPressed: () => {
-                                                  showDialog(
-                                                      context: context,
-                                                      builder: (context) {
-                                                        return AlertDialog(
-                                                          title: const Text(
-                                                            "Photo de profil",
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                          ),
-                                                          content: SizedBox(
-                                                            height: 125,
-                                                            child: Column(
-                                                              children: [
-                                                                const Divider(
-                                                                  color: Colors
-                                                                      .black,
-                                                                  thickness:
-                                                                      0.5,
-                                                                  height: 1,
-                                                                ),
-                                                                const SizedBox(
-                                                                  height: 15,
-                                                                ),
-                                                                ElevatedButton
-                                                                    .icon(
-                                                                  onPressed:
-                                                                      selectImageFromCamera,
-                                                                  label:
-                                                                      Padding(
-                                                                    padding: const EdgeInsets
-                                                                        .only(
-                                                                        right:
-                                                                            40.0),
-                                                                    child: Text(
-                                                                      "Caméra",
-                                                                      style: TextStyle(
-                                                                          color:
-                                                                              Colors.blue[300]),
-                                                                    ),
-                                                                  ),
-                                                                  icon: Padding(
-                                                                    padding: const EdgeInsets
-                                                                        .only(
-                                                                        left:
-                                                                            40.0),
-                                                                    child: Icon(
-                                                                      Icons
-                                                                          .camera_alt,
+                                    child:
+                                        widget.email == _auth.currentUser?.email
+                                            ? IconButton.filled(
+                                                style: ButtonStyle(
+                                                    backgroundColor:
+                                                        WidgetStatePropertyAll(
+                                                            Colors.teal[100])),
+                                                icon: const Icon(
+                                                    Icons.add_a_photo),
+                                                color: Colors.black,
+                                                disabledColor: Colors.black,
+                                                iconSize: 15,
+                                                onPressed: () => {
+                                                      showDialog(
+                                                          context: context,
+                                                          builder: (context) {
+                                                            return AlertDialog(
+                                                              title: const Text(
+                                                                "Photo de profil",
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                              ),
+                                                              content: SizedBox(
+                                                                height: 125,
+                                                                child: Column(
+                                                                  children: [
+                                                                    const Divider(
                                                                       color: Colors
-                                                                              .blue[
-                                                                          300],
+                                                                          .black,
+                                                                      thickness:
+                                                                          0.5,
+                                                                      height: 1,
                                                                     ),
-                                                                  ),
-                                                                ),
-                                                                const SizedBox(
-                                                                  height: 10.0,
-                                                                ),
-                                                                ElevatedButton
-                                                                    .icon(
-                                                                  onPressed:
-                                                                      selectImageFromGallery,
-                                                                  label:
-                                                                      Padding(
-                                                                    padding: const EdgeInsets
-                                                                        .only(
-                                                                        right:
-                                                                            40.0),
-                                                                    child: Text(
-                                                                      "Galerie",
-                                                                      style: TextStyle(
+                                                                    const SizedBox(
+                                                                      height:
+                                                                          15,
+                                                                    ),
+                                                                    ElevatedButton
+                                                                        .icon(
+                                                                      onPressed:
+                                                                          () async {
+                                                                        if (_userId ==
+                                                                            null) {
+                                                                          print(
+                                                                              'Aucun utilisateur connecté');
+                                                                          return;
+                                                                        } else {
+                                                                          String url = await _usersService.selectProfileImageFromCamera(
+                                                                              _userId,
+                                                                              usersFirestoreProvider,
+                                                                              widget.email);
+                                                                          setState(
+                                                                              () {
+                                                                            _imageUrl =
+                                                                                url;
+                                                                          });
+                                                                        }
+                                                                      },
+                                                                      label:
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .only(
+                                                                            right:
+                                                                                40.0),
+                                                                        child:
+                                                                            Text(
+                                                                          "Caméra",
+                                                                          style:
+                                                                              TextStyle(color: Colors.blue[300]),
+                                                                        ),
+                                                                      ),
+                                                                      icon:
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .only(
+                                                                            left:
+                                                                                40.0),
+                                                                        child:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .camera_alt,
                                                                           color:
-                                                                              Colors.blue[300]),
+                                                                              Colors.blue[300],
+                                                                        ),
+                                                                      ),
                                                                     ),
-                                                                  ),
-                                                                  icon: Padding(
-                                                                    padding: const EdgeInsets
-                                                                        .only(
-                                                                        left:
-                                                                            40.0),
-                                                                    child: Icon(
-                                                                      Icons
-                                                                          .image,
-                                                                      color: Colors
-                                                                              .blue[
-                                                                          300],
+                                                                    const SizedBox(
+                                                                      height:
+                                                                          10.0,
                                                                     ),
-                                                                  ),
+                                                                    ElevatedButton
+                                                                        .icon(
+                                                                      onPressed:
+                                                                          () async {
+                                                                        if (_userId ==
+                                                                            null) {
+                                                                          print(
+                                                                              'Aucun utilisateur connecté');
+                                                                          return;
+                                                                        } else {
+                                                                          String url = await _usersService.selectProfileImageFromGallery(
+                                                                              _userId,
+                                                                              usersFirestoreProvider,
+                                                                              widget.email);
+                                                                          setState(
+                                                                              () {
+                                                                            _imageUrl =
+                                                                                url;
+                                                                          });
+                                                                        }
+                                                                      },
+                                                                      label:
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .only(
+                                                                            right:
+                                                                                40.0),
+                                                                        child:
+                                                                            Text(
+                                                                          "Galerie",
+                                                                          style:
+                                                                              TextStyle(color: Colors.blue[300]),
+                                                                        ),
+                                                                      ),
+                                                                      icon:
+                                                                          Padding(
+                                                                        padding: const EdgeInsets
+                                                                            .only(
+                                                                            left:
+                                                                                40.0),
+                                                                        child:
+                                                                            Icon(
+                                                                          Icons
+                                                                              .image,
+                                                                          color:
+                                                                              Colors.blue[300],
+                                                                        ),
+                                                                      ),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              actions: [
+                                                                Row(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    MaterialButton(
+                                                                      onPressed:
+                                                                          () {
+                                                                        Navigator.pop(
+                                                                            context);
+                                                                      },
+                                                                      child: const Text(
+                                                                          "Annuler"),
+                                                                    ),
+                                                                  ],
                                                                 )
                                                               ],
-                                                            ),
-                                                          ),
-                                                          actions: [
-                                                            Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                MaterialButton(
-                                                                  onPressed:
-                                                                      () {
-                                                                    Navigator.pop(
-                                                                        context);
-                                                                  },
-                                                                  child: const Text(
-                                                                      "Annuler"),
-                                                                ),
-                                                              ],
-                                                            )
-                                                          ],
-                                                        );
-                                                      })
-                                                })
-                                        : null),
+                                                            );
+                                                          })
+                                                    })
+                                            : null),
                               )
                             ],
                           ),

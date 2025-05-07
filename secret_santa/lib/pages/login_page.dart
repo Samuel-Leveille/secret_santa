@@ -1,10 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:secret_santa/components/auth_password_textfield.dart';
 import 'package:secret_santa/components/auth_textfield.dart';
-import 'package:secret_santa/firebase_auth/auth_services.dart';
 import 'package:secret_santa/pages/signup_page.dart';
-import 'package:secret_santa/pages/transition_page.dart';
+import 'package:secret_santa/services/users_service.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,11 +12,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final AuthServices _auth = AuthServices();
-
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
+  final UsersService _usersService = UsersService();
 
   @override
   void dispose() {
@@ -107,7 +105,14 @@ class _LoginPageState extends State<LoginPage> {
                               borderRadius: BorderRadius.circular(30.0),
                             ),
                             backgroundColor: const Color(0xFFB2EBF2),
-                            onPressed: _signIn,
+                            onPressed: () async {
+                              await _usersService.signIn(
+                                  emailController.text.trim(),
+                                  passwordController.text.trim(),
+                                  context);
+                              emailController.text = "";
+                              passwordController.text = "";
+                            },
                             label: Text(
                               "Se connecter",
                               style: TextStyle(
@@ -151,26 +156,5 @@ class _LoginPageState extends State<LoginPage> {
         ),
       )),
     );
-  }
-
-  void _signIn() async {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
-
-    User? user = await _auth.signInWithEmailAndPassword(email, password);
-
-    if (user != null) {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => const TransitionPage(),
-        ),
-      );
-      emailController.text = "";
-      passwordController.text = "";
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erreur : la connexion a échouée")),
-      );
-    }
   }
 }

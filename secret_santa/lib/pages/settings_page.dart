@@ -1,24 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:secret_santa/firebase_auth/auth_services.dart';
-import 'package:secret_santa/pages/login_page.dart';
+import 'package:secret_santa/services/users_service.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final AuthServices auth = AuthServices();
-
-    Future<void> signOut(BuildContext context) async {
-      try {
-        await auth.signOut();
-        Navigator.of(context).push(
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
-      } catch (e) {
-        print("Some error occured with sign out : ${e.toString()}");
-      }
-    }
+    final UsersService usersService = UsersService();
 
     return Scaffold(
       appBar: AppBar(
@@ -27,7 +15,7 @@ class SettingsPage extends StatelessWidget {
       body: Center(
         child: FloatingActionButton(
             onPressed: () async {
-              await signOut(context);
+              await usersService.signOut(context);
             },
             child: const Text("Logout")),
       ),
