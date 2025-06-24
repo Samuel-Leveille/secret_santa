@@ -15,12 +15,16 @@ class GroupsFirestoreProvider extends ChangeNotifier {
     User? currentUser = _auth.currentUser;
     try {
       if (currentUser != null) {
-        QuerySnapshot querySnapshot = await _firestore
-            .collection('groups')
-            .where('participants', arrayContains: currentUser.email)
-            .get();
-        if (querySnapshot.docs.isNotEmpty) {
-          _groupsData = querySnapshot.docs
+        final email = currentUser.email;
+        if (email == null) {
+          print("Email du current user est null");
+          return;
+        }
+        final groupsRef = _firestore.collection('groups');
+        final snapshot =
+            await groupsRef.where('participants', arrayContains: email).get();
+        if (snapshot.docs.isNotEmpty) {
+          _groupsData = snapshot.docs
               .map((doc) => doc.data() as Map<String, dynamic>)
               .toList();
         } else {

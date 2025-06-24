@@ -29,6 +29,7 @@ class _GiftsPageState extends State<GiftsPage> {
   String? _userId;
   bool erreurNbreImage = false;
   Map<String, dynamic>? gift;
+  bool isLoading = true;
 
   GiftsService giftsService = GiftsService();
 
@@ -47,6 +48,7 @@ class _GiftsPageState extends State<GiftsPage> {
         for (var giftId in _userProvider?.userData?['giftsId']) {
           _giftsProvider?.fetchGiftData(giftId);
         }
+        isLoading = false;
       }
       _loadUserId();
     });
@@ -132,21 +134,25 @@ class _GiftsPageState extends State<GiftsPage> {
                         widget.participant == user['email']) {
                       return Consumer<GiftsProvider>(
                         builder: (context, provider, child) {
-                          return GridView.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2),
-                            itemCount: user['giftsId'].length,
-                            itemBuilder: (context, index) {
-                              final gift =
-                                  provider.getGiftById(user['giftsId'][index]);
-                              return Container(
-                                child: Center(
-                                  child: Text(gift?['title']),
-                                ),
-                              );
-                            },
-                          );
+                          return isLoading
+                              ? const Center(
+                                  child: CircularProgressIndicator(),
+                                )
+                              : GridView.builder(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2),
+                                  itemCount: user['giftsId'].length,
+                                  itemBuilder: (context, index) {
+                                    final gift = provider
+                                        .getGiftById(user['giftsId'][index]);
+                                    return Container(
+                                      child: Center(
+                                        child: Text(gift?['title']),
+                                      ),
+                                    );
+                                  },
+                                );
                         },
                       );
                     } else {
