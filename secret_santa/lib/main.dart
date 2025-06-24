@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/pages/login_page.dart';
+import 'package:secret_santa/providers/gifts_provider.dart';
 import 'package:secret_santa/providers/groups_firestore_provider.dart';
 import 'package:secret_santa/providers/users_firestore_provider.dart';
 import 'package:secret_santa/providers/gift_images_provider.dart';
@@ -22,6 +23,7 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => UsersFirestoreProvider()),
         ChangeNotifierProvider(create: (_) => GroupsFirestoreProvider()),
         ChangeNotifierProvider(create: (_) => GiftImagesProvider()),
+        ChangeNotifierProvider(create: (_) => GiftsProvider())
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/providers/gift_images_provider.dart';
+import 'package:secret_santa/providers/gifts_provider.dart';
 import 'package:secret_santa/services/users_service.dart';
 import 'package:secret_santa/services/gifts_service.dart';
 import 'package:secret_santa/providers/users_firestore_provider.dart';
@@ -18,6 +19,7 @@ class GiftsPage extends StatefulWidget {
 
 class _GiftsPageState extends State<GiftsPage> {
   UsersFirestoreProvider? _userProvider;
+  GiftsProvider? _giftsProvider;
   final _auth = FirebaseAuth.instance;
   final List<Widget> _linkFields = [];
   final titleController = TextEditingController();
@@ -26,6 +28,7 @@ class _GiftsPageState extends State<GiftsPage> {
   bool _isTitleEmpty = false;
   String? _userId;
   bool erreurNbreImage = false;
+  Map<String, dynamic>? gift;
 
   GiftsService giftsService = GiftsService();
 
@@ -35,11 +38,15 @@ class _GiftsPageState extends State<GiftsPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _giftsProvider = Provider.of<GiftsProvider>(context, listen: false);
       _userProvider =
           Provider.of<UsersFirestoreProvider>(context, listen: false);
       final userEmail = _auth.currentUser?.email;
       if (userEmail!.isNotEmpty) {
         _userProvider!.fetchUserData(userEmail);
+        for (var giftId in _userProvider?.userData?['giftsId']) {
+          _giftsProvider?.fetchGiftData(giftId);
+        }
       }
       _loadUserId();
     });
@@ -120,6 +127,27 @@ class _GiftsPageState extends State<GiftsPage> {
                           fontWeight: FontWeight.bold,
                           color: Colors.grey.shade500,
                         ),
+                      );
+                    } else if (!user['giftsId'].isEmpty &&
+                        widget.participant == user['email']) {
+                      return Consumer<GiftsProvider>(
+                        builder: (context, provider, child) {
+                          return GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2),
+                            itemCount: user['giftsId'].length,
+                            itemBuilder: (context, index) {
+                              final gift =
+                                  provider.getGiftById(user['giftsId'][index]);
+                              return Container(
+                                child: Center(
+                                  child: Text(gift?['title']),
+                                ),
+                              );
+                            },
+                          );
+                        },
                       );
                     } else {
                       return Text(
