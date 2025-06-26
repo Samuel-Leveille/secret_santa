@@ -93,7 +93,7 @@ class GiftsService {
       List<String> documentIds =
           querySnapshot.docs.map((doc) => doc.id).toList();
 
-      final userEmail = _auth.currentUser!.email;
+      final userEmail = _auth.currentUser!.email!.replaceAll('.', ',');
 
       if (documentIds.isNotEmpty) {
         await _firestore

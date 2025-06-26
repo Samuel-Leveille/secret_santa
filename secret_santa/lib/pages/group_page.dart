@@ -751,6 +751,9 @@ class _GroupPageState extends State<GroupPage> {
                                                     Navigator.of(context).push(
                                                         MaterialPageRoute(
                                                             builder: (context) => GiftsPage(
+                                                                key: ValueKey(
+                                                                    widget
+                                                                        .groupId),
                                                                 participant:
                                                                     participants[
                                                                         index],

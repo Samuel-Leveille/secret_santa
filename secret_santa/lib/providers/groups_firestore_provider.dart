@@ -7,9 +7,11 @@ class GroupsFirestoreProvider extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   List<Map<String, dynamic>> _groupsData = [];
   Map<String, dynamic>? _groupData;
+  List<String> _giftsIdOfAParticipant = [];
 
   List<Map<String, dynamic>> get groupsData => _groupsData;
   Map<String, dynamic>? get groupData => _groupData;
+  List<String> get giftsIdOfAParticipant => _giftsIdOfAParticipant;
 
   Future<void> fetchGroupsData() async {
     User? currentUser = _auth.currentUser;
@@ -57,5 +59,43 @@ class GroupsFirestoreProvider extends ChangeNotifier {
     } catch (e) {
       print("Les données du groupe n'ont pas pu être fetch : ${e.toString()}");
     }
+  }
+
+  Future<void> fetchGiftsIdOfAParticipant(
+      String groupId, String? userEmail) async {
+    try {
+      if (groupId.isNotEmpty) {
+        DocumentSnapshot documentSnapshot =
+            await _firestore.collection('groups').doc(groupId).get();
+        if (documentSnapshot.exists) {
+          final data = documentSnapshot.data() as Map<String, dynamic>;
+          final groupParticipantCadeaux =
+              data['cadeauxParticipants'] as Map<String, dynamic>;
+          userEmail = userEmail!.replaceAll('.', ',');
+          if (groupParticipantCadeaux.isNotEmpty &&
+              groupParticipantCadeaux.containsKey(userEmail)) {
+            _giftsIdOfAParticipant =
+                List<String>.from(groupParticipantCadeaux[userEmail]);
+          } else {
+            print(
+                "Le participant ${userEmail} n'a pas ajouté de cadeau dans ce groupe.");
+          }
+        } else {
+          print("Le document snapshot pour le fetch de gift n'existe pas.");
+        }
+        notifyListeners();
+      } else {
+        print(
+            "Erreur lors de l'optentions des données du cadeau : La String groupId (ID du cadeau) est vide");
+      }
+    } catch (e) {
+      print(
+          "Erreur lors de l'optentions des données du cadeau : ${e.toString()}");
+    }
+  }
+
+  void emptyGifts() {
+    _giftsIdOfAParticipant.clear();
+    notifyListeners();
   }
 }

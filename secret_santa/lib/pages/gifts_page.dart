@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/providers/gift_images_provider.dart';
 import 'package:secret_santa/providers/gifts_provider.dart';
+import 'package:secret_santa/providers/groups_firestore_provider.dart';
 import 'package:secret_santa/services/users_service.dart';
 import 'package:secret_santa/services/gifts_service.dart';
 import 'package:secret_santa/providers/users_firestore_provider.dart';
@@ -20,6 +21,7 @@ class GiftsPage extends StatefulWidget {
 class _GiftsPageState extends State<GiftsPage> {
   UsersFirestoreProvider? _userProvider;
   GiftsProvider? _giftsProvider;
+  GroupsFirestoreProvider? _groupsProvider;
   final _auth = FirebaseAuth.instance;
   final List<Widget> _linkFields = [];
   final titleController = TextEditingController();
@@ -30,6 +32,8 @@ class _GiftsPageState extends State<GiftsPage> {
   bool erreurNbreImage = false;
   Map<String, dynamic>? gift;
   bool isLoading = true;
+  bool areGiftsLoading = true;
+  late List<String> listOfGiftIds;
 
   GiftsService giftsService = GiftsService();
 
@@ -38,17 +42,31 @@ class _GiftsPageState extends State<GiftsPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       _giftsProvider = Provider.of<GiftsProvider>(context, listen: false);
       _userProvider =
           Provider.of<UsersFirestoreProvider>(context, listen: false);
+      _groupsProvider =
+          Provider.of<GroupsFirestoreProvider>(context, listen: false);
+
+      _giftsProvider!.emptyGifts();
+      _groupsProvider!.emptyGifts();
+
       final userEmail = _auth.currentUser?.email;
       if (userEmail!.isNotEmpty) {
-        _userProvider!.fetchUserData(userEmail);
-        for (var giftId in _userProvider?.userData?['giftsId']) {
-          _giftsProvider?.fetchGiftData(giftId);
+        await _userProvider!.fetchUserData(userEmail);
+        await _groupsProvider?.fetchGiftsIdOfAParticipant(
+            widget.groupId, userEmail);
+        listOfGiftIds = _groupsProvider!.giftsIdOfAParticipant;
+        if (listOfGiftIds != [] || listOfGiftIds.isNotEmpty) {
+          await Future.wait(listOfGiftIds.map(
+            (giftId) => _giftsProvider!.fetchGiftDataById(giftId),
+          ));
         }
-        isLoading = false;
+        setState(() {
+          areGiftsLoading = false;
+          isLoading = false;
+        });
       }
       _loadUserId();
     });
@@ -119,7 +137,12 @@ class _GiftsPageState extends State<GiftsPage> {
               child: Consumer<UsersFirestoreProvider>(
                 builder: (context, provider, child) {
                   final user = provider.userData;
-                  if (user!.isNotEmpty) {
+                  if (isLoading || areGiftsLoading) {
+                    return const CircularProgressIndicator();
+                  }
+                  if (user != null &&
+                      widget.participant != null &&
+                      user.isNotEmpty) {
                     if (user['giftsId'].isEmpty &&
                         widget.participant == user['email']) {
                       return Text(
@@ -130,29 +153,30 @@ class _GiftsPageState extends State<GiftsPage> {
                           color: Colors.grey.shade500,
                         ),
                       );
-                    } else if (!user['giftsId'].isEmpty &&
-                        widget.participant == user['email']) {
+                    } else if (user['giftsId'].isNotEmpty &&
+                        widget.participant == user['email'] &&
+                        listOfGiftIds.isNotEmpty) {
                       return Consumer<GiftsProvider>(
                         builder: (context, provider, child) {
-                          return isLoading
-                              ? const Center(
-                                  child: CircularProgressIndicator(),
-                                )
-                              : GridView.builder(
-                                  gridDelegate:
-                                      const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 2),
-                                  itemCount: user['giftsId'].length,
-                                  itemBuilder: (context, index) {
-                                    final gift = provider
-                                        .getGiftById(user['giftsId'][index]);
-                                    return Container(
-                                      child: Center(
-                                        child: Text(gift?['title']),
-                                      ),
-                                    );
-                                  },
-                                );
+                          return GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2),
+                            itemCount:
+                                _groupsProvider!.giftsIdOfAParticipant.length,
+                            itemBuilder: (context, index) {
+                              final gift = provider.getGiftById(_groupsProvider!
+                                  .giftsIdOfAParticipant[index]);
+                              if (gift == null) {
+                                return const CircularProgressIndicator();
+                              }
+                              return Container(
+                                child: Center(
+                                  child: Text(gift['title']),
+                                ),
+                              );
+                            },
+                          );
                         },
                       );
                     } else {
