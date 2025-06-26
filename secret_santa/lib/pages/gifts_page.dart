@@ -7,6 +7,7 @@ import 'package:secret_santa/providers/groups_firestore_provider.dart';
 import 'package:secret_santa/services/users_service.dart';
 import 'package:secret_santa/services/gifts_service.dart';
 import 'package:secret_santa/providers/users_firestore_provider.dart';
+import 'package:flutter/services.dart';
 
 class GiftsPage extends StatefulWidget {
   final dynamic participant;
@@ -55,20 +56,27 @@ class _GiftsPageState extends State<GiftsPage> {
       final userEmail = _auth.currentUser?.email;
       if (userEmail!.isNotEmpty) {
         await _userProvider!.fetchUserData(userEmail);
-        await _groupsProvider?.fetchGiftsIdOfAParticipant(
-            widget.groupId, userEmail);
-        listOfGiftIds = _groupsProvider!.giftsIdOfAParticipant;
-        if (listOfGiftIds != [] || listOfGiftIds.isNotEmpty) {
-          await Future.wait(listOfGiftIds.map(
-            (giftId) => _giftsProvider!.fetchGiftDataById(giftId),
-          ));
-        }
-        setState(() {
-          areGiftsLoading = false;
-          isLoading = false;
-        });
+        _loadGiftsData(userEmail);
+      } else {
+        print(
+            "Les cadeaux n'ont pas pu être chargé, car le email de l'utilisateur est vide.");
       }
       _loadUserId();
+    });
+  }
+
+  Future<void> _loadGiftsData(String userEmail) async {
+    await _groupsProvider?.fetchGiftsIdOfAParticipant(
+        widget.groupId, userEmail);
+    listOfGiftIds = _groupsProvider!.giftsIdOfAParticipant;
+    if (listOfGiftIds != [] || listOfGiftIds.isNotEmpty) {
+      await Future.wait(listOfGiftIds.map(
+        (giftId) => _giftsProvider!.fetchGiftDataById(giftId),
+      ));
+    }
+    setState(() {
+      isLoading = false;
+      areGiftsLoading = false;
     });
   }
 
@@ -267,6 +275,10 @@ class _GiftsPageState extends State<GiftsPage> {
                                           children: [
                                             TextField(
                                               controller: titleController,
+                                              inputFormatters: [
+                                                LengthLimitingTextInputFormatter(
+                                                    25),
+                                              ],
                                               decoration: InputDecoration(
                                                 labelText: 'Titre',
                                                 border: OutlineInputBorder(
@@ -505,6 +517,14 @@ class _GiftsPageState extends State<GiftsPage> {
                                                     _isTitleEmpty = trueOrFalse;
                                                   },
                                                 );
+                                                final userEmail =
+                                                    _auth.currentUser?.email;
+                                                if (userEmail!.isNotEmpty) {
+                                                  _loadGiftsData(userEmail);
+                                                } else {
+                                                  print(
+                                                      "Les cadeaux n'ont pas pu être chargé, car le email de l'utilisateur est vide.");
+                                                }
                                               },
                                               icon: const Icon(
                                                   Icons.card_giftcard),
