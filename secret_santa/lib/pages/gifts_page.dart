@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/providers/gift_images_provider.dart';
 import 'package:secret_santa/providers/gifts_provider.dart';
@@ -166,24 +167,97 @@ class _GiftsPageState extends State<GiftsPage> {
                         listOfGiftIds.isNotEmpty) {
                       return Consumer<GiftsProvider>(
                         builder: (context, provider, child) {
-                          return GridView.builder(
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2),
-                            itemCount:
-                                _groupsProvider!.giftsIdOfAParticipant.length,
-                            itemBuilder: (context, index) {
-                              final gift = provider.getGiftById(_groupsProvider!
-                                  .giftsIdOfAParticipant[index]);
-                              if (gift == null) {
-                                return const CircularProgressIndicator();
-                              }
-                              return Container(
-                                child: Center(
-                                  child: Text(gift['title']),
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.only(
+                                    top: 12.0, left: 20.0, bottom: 18.0),
+                                child: Text(
+                                  "Liste de souhait",
+                                  style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                              );
-                            },
+                              ),
+                              Expanded(
+                                child: GridView.builder(
+                                  gridDelegate:
+                                      const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2),
+                                  itemCount: _groupsProvider!
+                                      .giftsIdOfAParticipant.length,
+                                  itemBuilder: (context, index) {
+                                    final gift = provider.getGiftById(
+                                        _groupsProvider!
+                                            .giftsIdOfAParticipant[index]);
+                                    if (gift == null) {
+                                      return const CircularProgressIndicator();
+                                    }
+                                    return Card(
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(22.0),
+                                        ),
+                                        elevation: 10,
+                                        margin: index % 2 == 0
+                                            ? const EdgeInsets.only(
+                                                top: 12.0,
+                                                bottom: 12.0,
+                                                left: 16.0,
+                                                right: 8.0)
+                                            : const EdgeInsets.only(
+                                                top: 12.0,
+                                                bottom: 12.0,
+                                                left: 8.0,
+                                                right: 16.0),
+                                        child: Column(
+                                          children: [
+                                            Expanded(
+                                              flex: 7,
+                                              child: Container(
+                                                decoration: const BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            topLeft: Radius
+                                                                .circular(22),
+                                                            topRight:
+                                                                Radius.circular(
+                                                                    22))),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 3,
+                                              child: Container(
+                                                decoration: const BoxDecoration(
+                                                    color: Color.fromARGB(
+                                                        255, 43, 103, 167),
+                                                    borderRadius:
+                                                        BorderRadius.only(
+                                                            bottomLeft: Radius
+                                                                .circular(22),
+                                                            bottomRight:
+                                                                Radius.circular(
+                                                                    22))),
+                                                child: Center(
+                                                    child: Text(
+                                                  gift['title'],
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                      color: Color.fromARGB(
+                                                          225, 255, 255, 255)),
+                                                )),
+                                              ),
+                                            )
+                                          ],
+                                        ));
+                                  },
+                                ),
+                              ),
+                            ],
                           );
                         },
                       );
