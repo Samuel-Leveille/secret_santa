@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
@@ -88,6 +89,30 @@ class _GiftsPageState extends State<GiftsPage> {
     });
   }
 
+  void showImageDialog(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.9),
+      builder: (_) => GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Center(
+            child: InteractiveViewer(
+              panEnabled: true,
+              minScale: 1,
+              maxScale: 4,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.network(imageUrl),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   void _addLinkField() {
     TextEditingController controller = TextEditingController();
     linksController.add(controller);
@@ -152,7 +177,7 @@ class _GiftsPageState extends State<GiftsPage> {
                   if (user != null &&
                       widget.participant != null &&
                       user.isNotEmpty) {
-                    if (user['giftsId'].isEmpty &&
+                    if (listOfGiftIds.isEmpty &&
                         widget.participant == user['email']) {
                       return Text(
                         "  Ajoutez votre\npremier souhait",
@@ -174,7 +199,7 @@ class _GiftsPageState extends State<GiftsPage> {
                                 padding: EdgeInsets.only(
                                     top: 12.0, left: 20.0, bottom: 18.0),
                                 child: Text(
-                                  "Liste de souhait",
+                                  "Liste de souhaits",
                                   style: TextStyle(
                                       fontSize: 24,
                                       fontWeight: FontWeight.bold),
@@ -191,69 +216,292 @@ class _GiftsPageState extends State<GiftsPage> {
                                     final gift = provider.getGiftById(
                                         _groupsProvider!
                                             .giftsIdOfAParticipant[index]);
+                                    final giftImageUrls = gift?['images'];
+                                    final giftLinks = gift?['links'];
                                     if (gift == null) {
                                       return const CircularProgressIndicator();
                                     }
-                                    return Card(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(22.0),
-                                        ),
-                                        elevation: 10,
-                                        margin: index % 2 == 0
-                                            ? const EdgeInsets.only(
-                                                top: 12.0,
-                                                bottom: 12.0,
-                                                left: 16.0,
-                                                right: 8.0)
-                                            : const EdgeInsets.only(
-                                                top: 12.0,
-                                                bottom: 12.0,
-                                                left: 8.0,
-                                                right: 16.0),
-                                        child: Column(
-                                          children: [
-                                            Expanded(
-                                              flex: 7,
-                                              child: Container(
-                                                decoration: const BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                            topLeft: Radius
-                                                                .circular(22),
-                                                            topRight:
-                                                                Radius.circular(
-                                                                    22))),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 3,
-                                              child: Container(
-                                                decoration: const BoxDecoration(
-                                                    color: Color.fromARGB(
-                                                        255, 43, 103, 167),
-                                                    borderRadius:
-                                                        BorderRadius.only(
-                                                            bottomLeft: Radius
-                                                                .circular(22),
-                                                            bottomRight:
-                                                                Radius.circular(
-                                                                    22))),
-                                                child: Center(
-                                                    child: Text(
+                                    return GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: Text(
                                                   gift['title'],
-                                                  textAlign: TextAlign.center,
                                                   style: const TextStyle(
+                                                      fontSize: 20,
                                                       fontWeight:
-                                                          FontWeight.w700,
+                                                          FontWeight.bold),
+                                                ),
+                                                content: SingleChildScrollView(
+                                                  child: Column(
+                                                    children: [
+                                                      Row(
+                                                        children: [
+                                                          Expanded(
+                                                            child: Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .only(
+                                                                      bottom:
+                                                                          10.0),
+                                                              child: Text(
+                                                                gift['description'] !=
+                                                                            null &&
+                                                                        gift['description']
+                                                                            .trim()
+                                                                            .isNotEmpty
+                                                                    ? gift[
+                                                                        'description']
+                                                                    : "",
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .start,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      if (giftLinks != null)
+                                                        ...giftLinks
+                                                            .map((link) {
+                                                          return Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .only(
+                                                                    bottom: 8),
+                                                            child: InkWell(
+                                                              onTap: () async {
+                                                                await Clipboard.setData(
+                                                                    ClipboardData(
+                                                                        text:
+                                                                            link));
+                                                              },
+                                                              child: Row(
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  const Icon(
+                                                                      Icons
+                                                                          .link,
+                                                                      size: 18,
+                                                                      color: Colors
+                                                                          .blue),
+                                                                  const SizedBox(
+                                                                      width: 6),
+                                                                  Expanded(
+                                                                    child: Text(
+                                                                      link,
+                                                                      style:
+                                                                          const TextStyle(
+                                                                        color: Colors
+                                                                            .blue,
+                                                                        decoration:
+                                                                            TextDecoration.underline,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        }),
+                                                      giftImageUrls != null &&
+                                                              giftImageUrls
+                                                                  .isNotEmpty
+                                                          ? Padding(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .only(
+                                                                      top:
+                                                                          12.0),
+                                                              child: GridView
+                                                                  .builder(
+                                                                gridDelegate:
+                                                                    const SliverGridDelegateWithFixedCrossAxisCount(
+                                                                  crossAxisCount:
+                                                                      3,
+                                                                  crossAxisSpacing:
+                                                                      8,
+                                                                  mainAxisSpacing:
+                                                                      8,
+                                                                ),
+                                                                shrinkWrap:
+                                                                    true,
+                                                                physics:
+                                                                    const NeverScrollableScrollPhysics(),
+                                                                itemCount:
+                                                                    giftImageUrls
+                                                                        .length
+                                                                        .clamp(
+                                                                            0,
+                                                                            3),
+                                                                itemBuilder:
+                                                                    (context,
+                                                                        index) {
+                                                                  return GestureDetector(
+                                                                    onTap: () => showImageDialog(
+                                                                        context,
+                                                                        giftImageUrls[
+                                                                            index]),
+                                                                    child:
+                                                                        Stack(
+                                                                      alignment:
+                                                                          Alignment
+                                                                              .topRight,
+                                                                      children: [
+                                                                        Container(
+                                                                          width:
+                                                                              double.infinity,
+                                                                          height:
+                                                                              double.infinity,
+                                                                          decoration:
+                                                                              BoxDecoration(
+                                                                            color:
+                                                                                Colors.grey[200],
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(8),
+                                                                          ),
+                                                                          child:
+                                                                              ClipRRect(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(8),
+                                                                            child:
+                                                                                Image.network(
+                                                                              giftImageUrls[index],
+                                                                              fit: BoxFit.cover,
+                                                                              errorBuilder: (context, error, stackTrace) {
+                                                                                return const Center(child: Text('Erreur image'));
+                                                                              },
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        Container(
+                                                                          decoration: const BoxDecoration(
+                                                                              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(8)),
+                                                                              color: Colors.white),
+                                                                          child:
+                                                                              const Icon(
+                                                                            Icons.zoom_in,
+                                                                            color: Color.fromARGB(
+                                                                                255,
+                                                                                53,
+                                                                                131,
+                                                                                187),
+                                                                            size:
+                                                                                28,
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  );
+                                                                },
+                                                              ),
+                                                            )
+                                                          : Container()
+                                                    ],
+                                                  ),
+                                                ),
+                                                backgroundColor: Colors.white,
+                                              );
+                                            });
+                                      },
+                                      child: Card(
+                                          color: Colors.white,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(22.0),
+                                          ),
+                                          elevation: 10,
+                                          margin: index % 2 == 0
+                                              ? const EdgeInsets.only(
+                                                  top: 12.0,
+                                                  bottom: 12.0,
+                                                  left: 16.0,
+                                                  right: 8.0)
+                                              : const EdgeInsets.only(
+                                                  top: 12.0,
+                                                  bottom: 12.0,
+                                                  left: 8.0,
+                                                  right: 16.0),
+                                          child: Column(
+                                            children: [
+                                              Expanded(
+                                                  flex: 7,
+                                                  child: giftImageUrls !=
+                                                              null &&
+                                                          giftImageUrls
+                                                              .isNotEmpty
+                                                      ? Container(
+                                                          decoration: BoxDecoration(
+                                                              image: DecorationImage(
+                                                                  image: NetworkImage(
+                                                                      giftImageUrls[
+                                                                          0])),
+                                                              borderRadius: const BorderRadius
+                                                                  .only(
+                                                                  topLeft: Radius
+                                                                      .circular(
+                                                                          22),
+                                                                  topRight: Radius
+                                                                      .circular(
+                                                                          22))))
+                                                      : Container(
+                                                          decoration: const BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                              borderRadius: BorderRadius.only(
+                                                                  topLeft: Radius
+                                                                      .circular(
+                                                                          22),
+                                                                  topRight: Radius
+                                                                      .circular(
+                                                                          22))),
+                                                          child: const Icon(
+                                                            Icons.card_giftcard,
+                                                            size: 50,
+                                                            color:
+                                                                Color.fromARGB(
+                                                                    255,
+                                                                    43,
+                                                                    103,
+                                                                    167),
+                                                          ),
+                                                        )),
+                                              Expanded(
+                                                flex: 3,
+                                                child: Container(
+                                                  decoration: const BoxDecoration(
                                                       color: Color.fromARGB(
-                                                          225, 255, 255, 255)),
-                                                )),
-                                              ),
-                                            )
-                                          ],
-                                        ));
+                                                          255, 43, 103, 167),
+                                                      borderRadius:
+                                                          BorderRadius.only(
+                                                              bottomLeft: Radius
+                                                                  .circular(22),
+                                                              bottomRight:
+                                                                  Radius
+                                                                      .circular(
+                                                                          22))),
+                                                  child: Center(
+                                                      child: Text(
+                                                    gift['title'],
+                                                    textAlign: TextAlign.center,
+                                                    style: const TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color: Color.fromARGB(
+                                                            225,
+                                                            255,
+                                                            255,
+                                                            255)),
+                                                  )),
+                                                ),
+                                              )
+                                            ],
+                                          )),
+                                    );
                                   },
                                 ),
                               ),
@@ -443,6 +691,8 @@ class _GiftsPageState extends State<GiftsPage> {
                                                     .giftImages.length,
                                                 itemBuilder: (context, index) {
                                                   return Stack(
+                                                    alignment:
+                                                        Alignment.topLeft,
                                                     children: [
                                                       Container(
                                                         width: double.infinity,
@@ -474,37 +724,46 @@ class _GiftsPageState extends State<GiftsPage> {
                                                           ),
                                                         ),
                                                       ),
-                                                      Positioned(
-                                                        top: -6,
-                                                        left: -6,
-                                                        child: SizedBox(
-                                                          height: 32,
-                                                          width: 32,
-                                                          child:
-                                                              IconButton.filled(
-                                                            style: ButtonStyle(
-                                                              backgroundColor:
-                                                                  MaterialStatePropertyAll(
-                                                                Colors.red[400],
-                                                              ),
+                                                      Container(
+                                                        width: 30,
+                                                        height: 30,
+                                                        decoration: const BoxDecoration(
+                                                            color: Colors.white,
+                                                            borderRadius:
+                                                                BorderRadius.only(
+                                                                    bottomRight:
+                                                                        Radius.circular(
+                                                                            8))),
+                                                        child:
+                                                            IconButton.filled(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .all(0),
+                                                          style:
+                                                              const ButtonStyle(
+                                                            backgroundColor:
+                                                                MaterialStatePropertyAll(
+                                                              Colors
+                                                                  .transparent,
                                                             ),
-                                                            icon: const Icon(
-                                                                Icons.delete),
-                                                            color: Colors.black,
-                                                            iconSize: 18,
-                                                            onPressed: () {
-                                                              setState(
-                                                                () {
-                                                                  erreurNbreImage =
-                                                                      false;
-                                                                },
-                                                              );
-
-                                                              giftImagesProvider
-                                                                  .removeImage(
-                                                                      index);
-                                                            },
                                                           ),
+                                                          icon: const Icon(
+                                                              Icons.delete),
+                                                          color:
+                                                              Colors.red[400],
+                                                          iconSize: 24,
+                                                          onPressed: () {
+                                                            setState(
+                                                              () {
+                                                                erreurNbreImage =
+                                                                    false;
+                                                              },
+                                                            );
+
+                                                            giftImagesProvider
+                                                                .removeImage(
+                                                                    index);
+                                                          },
                                                         ),
                                                       ),
                                                     ],
