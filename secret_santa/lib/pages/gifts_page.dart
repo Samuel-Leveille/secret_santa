@@ -52,7 +52,7 @@ class _GiftsPageState extends State<GiftsPage> {
       _groupsProvider =
           Provider.of<GroupsFirestoreProvider>(context, listen: false);
 
-      final userEmail = _auth.currentUser?.email;
+      final userEmail = widget.participant;
       if (userEmail!.isNotEmpty) {
         await _userProvider!.fetchUserData(userEmail);
         _loadGiftsData(userEmail);
@@ -163,8 +163,7 @@ class _GiftsPageState extends State<GiftsPage> {
           actions: [
             Consumer<UsersFirestoreProvider>(
               builder: (context, provider, child) {
-                final user = provider.userData;
-                if (widget.participant == user?['email']) {
+                if (widget.participant == _auth.currentUser?.email) {
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0, top: 8.0),
                     child: OutlinedButton.icon(
@@ -621,7 +620,7 @@ class _GiftsPageState extends State<GiftsPage> {
                     widget.participant != null &&
                     user.isNotEmpty) {
                   if (listOfGiftIds.isEmpty &&
-                      widget.participant == user['email']) {
+                      widget.participant == _auth.currentUser?.email) {
                     return Text(
                       "  Ajoutez votre\npremier souhait",
                       style: TextStyle(
@@ -630,8 +629,7 @@ class _GiftsPageState extends State<GiftsPage> {
                         color: Colors.grey.shade500,
                       ),
                     );
-                  } else if (user['giftsId'].isNotEmpty &&
-                      widget.participant == user['email'] &&
+                  } else if (widget.participant == user['email'] &&
                       listOfGiftIds.isNotEmpty) {
                     return Consumer<GiftsProvider>(
                       builder: (context, provider, child) {
@@ -690,192 +688,154 @@ class _GiftsPageState extends State<GiftsPage> {
                                                     title: Row(
                                                       children: [
                                                         Expanded(
-                                                          child: Text(
-                                                            gift['title'],
-                                                            style: const TextStyle(
-                                                                fontSize: 20,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold),
+                                                          child: Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .only(
+                                                                    right: 8.0),
+                                                            child: Text(
+                                                              gift['title'],
+                                                              style: const TextStyle(
+                                                                  fontSize: 20,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .bold),
+                                                            ),
                                                           ),
                                                         ),
-                                                        IconButton.filled(
-                                                          onPressed: () {
-                                                            showDialog(
-                                                              context: context,
-                                                              builder:
-                                                                  (context) {
-                                                                return AlertDialog(
-                                                                  shape: RoundedRectangleBorder(
-                                                                      borderRadius:
-                                                                          BorderRadius.circular(
-                                                                              24)),
-                                                                  backgroundColor:
-                                                                      Colors
-                                                                          .white,
-                                                                  contentPadding:
-                                                                      const EdgeInsets
-                                                                          .fromLTRB(
-                                                                          24,
-                                                                          20,
-                                                                          24,
-                                                                          22),
-                                                                  titlePadding:
-                                                                      const EdgeInsets
-                                                                          .only(
-                                                                          top:
-                                                                              22),
-                                                                  title:
-                                                                      const Column(
-                                                                    children: [
-                                                                      Icon(
-                                                                        Icons
-                                                                            .delete_forever,
-                                                                        size:
-                                                                            48,
-                                                                        color: Colors
-                                                                            .redAccent,
-                                                                      ),
-                                                                      SizedBox(
-                                                                          height:
-                                                                              12),
-                                                                      Text(
-                                                                        'Supprimer le souhait ?',
-                                                                        textAlign:
-                                                                            TextAlign.center,
-                                                                        style:
-                                                                            TextStyle(
-                                                                          fontSize:
-                                                                              20,
-                                                                          fontWeight:
-                                                                              FontWeight.bold,
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                  content:
-                                                                      const Text(
-                                                                    'Êtes-vous sûr de vouloir supprimer ce souhait ? Cette action est irréversible.',
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .center,
-                                                                    style:
-                                                                        TextStyle(
-                                                                      fontSize:
-                                                                          16,
-                                                                      color: Colors
-                                                                          .black87,
-                                                                    ),
-                                                                  ),
-                                                                  actionsPadding:
-                                                                      const EdgeInsets
-                                                                          .only(
-                                                                          bottom:
-                                                                              12,
-                                                                          right:
-                                                                              16,
-                                                                          left:
-                                                                              16),
-                                                                  actionsAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceBetween,
-                                                                  actions: [
-                                                                    OutlinedButton(
-                                                                      onPressed:
-                                                                          () =>
-                                                                              Navigator.of(context).pop(),
-                                                                      style: OutlinedButton
-                                                                          .styleFrom(
+                                                        widget.participant ==
+                                                                _auth
+                                                                    .currentUser
+                                                                    ?.email
+                                                            ? IconButton.filled(
+                                                                onPressed: () {
+                                                                  showDialog(
+                                                                    context:
+                                                                        context,
+                                                                    builder:
+                                                                        (context) {
+                                                                      return AlertDialog(
                                                                         shape: RoundedRectangleBorder(
                                                                             borderRadius:
-                                                                                BorderRadius.circular(12)),
-                                                                        side: const BorderSide(
-                                                                            color:
-                                                                                Colors.grey),
-                                                                        padding: const EdgeInsets
-                                                                            .symmetric(
-                                                                            horizontal:
-                                                                                20,
-                                                                            vertical:
-                                                                                12),
-                                                                      ),
-                                                                      child:
-                                                                          const Text(
-                                                                        'Annuler',
-                                                                        style: TextStyle(
-                                                                            fontSize:
-                                                                                16,
-                                                                            color:
-                                                                                Colors.black87),
-                                                                      ),
-                                                                    ),
-                                                                    ElevatedButton(
-                                                                      onPressed:
-                                                                          () async {
-                                                                        Navigator.of(context)
-                                                                            .pop();
-                                                                        Navigator.of(context)
-                                                                            .pop();
-                                                                        final userEmail = _auth
-                                                                            .currentUser
-                                                                            ?.email;
-                                                                        await giftsService
-                                                                            .deleteGift(_groupsProvider!.giftsIdOfAParticipant[index]);
-                                                                        if (userEmail !=
-                                                                                null &&
-                                                                            userEmail.isNotEmpty) {
-                                                                          await _loadGiftsData(
-                                                                              userEmail);
-                                                                        }
-                                                                      },
-                                                                      style: ElevatedButton
-                                                                          .styleFrom(
+                                                                                BorderRadius.circular(24)),
                                                                         backgroundColor:
-                                                                            Colors.redAccent,
-                                                                        shape: RoundedRectangleBorder(
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(12)),
-                                                                        padding: const EdgeInsets
-                                                                            .symmetric(
-                                                                            horizontal:
-                                                                                20,
-                                                                            vertical:
-                                                                                12),
-                                                                      ),
-                                                                      child:
-                                                                          const Text(
-                                                                        'Supprimer',
-                                                                        style: TextStyle(
+                                                                            Colors.white,
+                                                                        contentPadding: const EdgeInsets
+                                                                            .fromLTRB(
+                                                                            24,
+                                                                            20,
+                                                                            24,
+                                                                            22),
+                                                                        titlePadding: const EdgeInsets
+                                                                            .only(
+                                                                            top:
+                                                                                22),
+                                                                        title:
+                                                                            const Column(
+                                                                          children: [
+                                                                            Icon(
+                                                                              Icons.delete_forever,
+                                                                              size: 48,
+                                                                              color: Colors.redAccent,
+                                                                            ),
+                                                                            SizedBox(height: 12),
+                                                                            Text(
+                                                                              'Supprimer le souhait ?',
+                                                                              textAlign: TextAlign.center,
+                                                                              style: TextStyle(
+                                                                                fontSize: 20,
+                                                                                fontWeight: FontWeight.bold,
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        content:
+                                                                            const Text(
+                                                                          'Êtes-vous sûr de vouloir supprimer ce souhait ? Cette action est irréversible.',
+                                                                          textAlign:
+                                                                              TextAlign.center,
+                                                                          style:
+                                                                              TextStyle(
                                                                             fontSize:
                                                                                 16,
                                                                             color:
-                                                                                Colors.black),
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                );
-                                                              },
-                                                            );
-                                                          },
-                                                          icon: const Icon(
-                                                            Icons.delete,
-                                                            color:
-                                                                Color.fromARGB(
-                                                                    255,
-                                                                    180,
-                                                                    180,
-                                                                    180),
-                                                            size: 26,
-                                                          ),
-                                                          style: const ButtonStyle(
-                                                              backgroundColor:
-                                                                  MaterialStatePropertyAll(
-                                                                      Color.fromARGB(
+                                                                                Colors.black87,
+                                                                          ),
+                                                                        ),
+                                                                        actionsPadding: const EdgeInsets
+                                                                            .only(
+                                                                            bottom:
+                                                                                12,
+                                                                            right:
+                                                                                16,
+                                                                            left:
+                                                                                16),
+                                                                        actionsAlignment:
+                                                                            MainAxisAlignment.spaceBetween,
+                                                                        actions: [
+                                                                          OutlinedButton(
+                                                                            onPressed: () =>
+                                                                                Navigator.of(context).pop(),
+                                                                            style:
+                                                                                OutlinedButton.styleFrom(
+                                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                                              side: const BorderSide(color: Colors.grey),
+                                                                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                                                            ),
+                                                                            child:
+                                                                                const Text(
+                                                                              'Annuler',
+                                                                              style: TextStyle(fontSize: 16, color: Colors.black87),
+                                                                            ),
+                                                                          ),
+                                                                          ElevatedButton(
+                                                                            onPressed:
+                                                                                () async {
+                                                                              Navigator.of(context).pop();
+                                                                              Navigator.of(context).pop();
+                                                                              final userEmail = _auth.currentUser?.email;
+                                                                              await giftsService.deleteGift(_groupsProvider!.giftsIdOfAParticipant[index]);
+                                                                              if (userEmail != null && userEmail.isNotEmpty) {
+                                                                                await _loadGiftsData(userEmail);
+                                                                              }
+                                                                            },
+                                                                            style:
+                                                                                ElevatedButton.styleFrom(
+                                                                              backgroundColor: Colors.redAccent,
+                                                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                                                            ),
+                                                                            child:
+                                                                                const Text(
+                                                                              'Supprimer',
+                                                                              style: TextStyle(fontSize: 16, color: Colors.black),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      );
+                                                                    },
+                                                                  );
+                                                                },
+                                                                icon:
+                                                                    const Icon(
+                                                                  Icons.delete,
+                                                                  color: Color
+                                                                      .fromARGB(
                                                                           255,
-                                                                          241,
-                                                                          241,
-                                                                          241))),
-                                                        )
+                                                                          180,
+                                                                          180,
+                                                                          180),
+                                                                  size: 26,
+                                                                ),
+                                                                style: const ButtonStyle(
+                                                                    backgroundColor:
+                                                                        MaterialStatePropertyAll(Color.fromARGB(
+                                                                            255,
+                                                                            241,
+                                                                            241,
+                                                                            241))),
+                                                              )
+                                                            : Container(),
                                                       ],
                                                     ),
                                                     content:
