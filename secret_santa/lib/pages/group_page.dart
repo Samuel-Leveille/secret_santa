@@ -270,10 +270,23 @@ class _GroupPageState extends State<GroupPage> {
                                                         .size
                                                         .width *
                                                     0.85,
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height *
-                                                    0.6,
+                                                height: nonParticipants
+                                                            .length <=
+                                                        1
+                                                    ? MediaQuery.of(context)
+                                                            .size
+                                                            .height *
+                                                        0.4
+                                                    : nonParticipants.length ==
+                                                            2
+                                                        ? MediaQuery.of(context)
+                                                                .size
+                                                                .height *
+                                                            0.5
+                                                        : MediaQuery.of(context)
+                                                                .size
+                                                                .height *
+                                                            0.6,
                                                 decoration: BoxDecoration(
                                                   color: Colors.white,
                                                   borderRadius:
@@ -310,16 +323,15 @@ class _GroupPageState extends State<GroupPage> {
                                                           ),
                                                         ),
                                                       ),
-                                                      const SizedBox(
-                                                          height: 10),
+                                                      const SizedBox.shrink(),
                                                       nonParticipants.isEmpty
-                                                          ? Center(
+                                                          ? Expanded(
                                                               child: Padding(
                                                                   padding:
                                                                       const EdgeInsets
                                                                           .only(
                                                                           top:
-                                                                              115.0),
+                                                                              50.0),
                                                                   child: Center(
                                                                     child:
                                                                         SizedBox(
@@ -332,7 +344,7 @@ class _GroupPageState extends State<GroupPage> {
                                                                         padding: const EdgeInsets
                                                                             .only(
                                                                             bottom:
-                                                                                152.4),
+                                                                                50.4),
                                                                         child:
                                                                             RichText(
                                                                           textAlign:
@@ -594,125 +606,168 @@ class _GroupPageState extends State<GroupPage> {
                                                   ? GestureDetector(
                                                       onTap: () {
                                                         showDialog(
-                                                            context: context,
-                                                            builder: (context) {
-                                                              return Dialog(
-                                                                shape:
-                                                                    RoundedRectangleBorder(
+                                                          context: context,
+                                                          builder: (context) {
+                                                            return AlertDialog(
+                                                              shape: RoundedRectangleBorder(
                                                                   borderRadius:
                                                                       BorderRadius
                                                                           .circular(
-                                                                              20.0),
-                                                                ),
-                                                                child:
-                                                                    Container(
-                                                                  height: MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .height *
-                                                                      0.25,
-                                                                  width: MediaQuery.of(
-                                                                              context)
-                                                                          .size
-                                                                          .width *
-                                                                      0.30,
-                                                                  decoration:
-                                                                      BoxDecoration(
+                                                                              24)),
+                                                              backgroundColor:
+                                                                  Colors.white,
+                                                              contentPadding:
+                                                                  const EdgeInsets
+                                                                      .fromLTRB(
+                                                                      24,
+                                                                      20,
+                                                                      24,
+                                                                      8),
+                                                              titlePadding:
+                                                                  const EdgeInsets
+                                                                      .only(
+                                                                      top: 16),
+                                                              title:
+                                                                  const Column(
+                                                                children: [
+                                                                  Icon(
+                                                                    Icons
+                                                                        .warning_rounded,
+                                                                    size: 48,
                                                                     color: Colors
-                                                                        .white,
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            20.0),
-                                                                    boxShadow: const [
-                                                                      BoxShadow(
-                                                                        color: Colors
-                                                                            .black12,
-                                                                        blurRadius:
-                                                                            10,
-                                                                        offset: Offset(
-                                                                            0,
-                                                                            5),
-                                                                      ),
-                                                                    ],
+                                                                        .redAccent,
                                                                   ),
-                                                                  child: Column(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceEvenly,
-                                                                    children: [
-                                                                      const Padding(
-                                                                        padding: EdgeInsets.only(
-                                                                            left:
-                                                                                12.0,
-                                                                            right:
-                                                                                12.0,
-                                                                            bottom:
-                                                                                20.0),
-                                                                        child:
-                                                                            Text(
-                                                                          "Retirer cet utilisateur\n        du groupe ?",
-                                                                          style: TextStyle(
-                                                                              fontSize: 22,
-                                                                              fontWeight: FontWeight.bold),
-                                                                        ),
-                                                                      ),
-                                                                      Row(
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment.spaceEvenly,
-                                                                        children: [
-                                                                          SizedBox(
-                                                                            height:
-                                                                                45,
-                                                                            child:
-                                                                                FittedBox(
-                                                                              child: FloatingActionButton.extended(
-                                                                                  extendedPadding: const EdgeInsets.only(left: 35.0, right: 35.0),
-                                                                                  backgroundColor: Colors.red[100],
-                                                                                  foregroundColor: Colors.black,
-                                                                                  onPressed: () {
-                                                                                    Navigator.of(context).pop();
-                                                                                  },
-                                                                                  label: const Text(
-                                                                                    'Annuler',
-                                                                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                                                                                  )),
-                                                                            ),
-                                                                          ),
-                                                                          SizedBox(
-                                                                            height:
-                                                                                45,
-                                                                            child:
-                                                                                FittedBox(
-                                                                              child: FloatingActionButton.extended(
-                                                                                  extendedPadding: const EdgeInsets.only(left: 35.0, right: 35.0),
-                                                                                  backgroundColor: Colors.teal[100],
-                                                                                  foregroundColor: Colors.black,
-                                                                                  onPressed: () {
-                                                                                    try {
-                                                                                      String deletedUser = participants[index];
-                                                                                      _groupsService.removeParticipantFromGroup(group['id'], deletedUser, () {
-                                                                                        setState(() {
-                                                                                          provider.fetchGroupData(group['id']);
-                                                                                        });
-                                                                                      });
-                                                                                      Navigator.of(context).pop();
-                                                                                    } catch (e) {
-                                                                                      print("L'utilisateur n'a pas pu être retiré du groupe : $e");
-                                                                                    }
-                                                                                  },
-                                                                                  label: const Text(
-                                                                                    'Retirer',
-                                                                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                                                                                  )),
-                                                                            ),
-                                                                          )
-                                                                        ],
-                                                                      )
-                                                                    ],
+                                                                  SizedBox(
+                                                                      height:
+                                                                          12),
+                                                                  Text(
+                                                                    "Retirer l'utilisateur du groupe ?",
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          20,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              content:
+                                                                  const Text(
+                                                                'Êtes-vous sûr de vouloir retirer cet utilisateur du groupe ?',
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .center,
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 16,
+                                                                  color: Colors
+                                                                      .black87,
+                                                                ),
+                                                              ),
+                                                              actionsPadding:
+                                                                  const EdgeInsets
+                                                                      .only(
+                                                                      bottom:
+                                                                          12,
+                                                                      right: 16,
+                                                                      left: 16),
+                                                              actionsAlignment:
+                                                                  MainAxisAlignment
+                                                                      .spaceBetween,
+                                                              actions: [
+                                                                OutlinedButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop(),
+                                                                  style: OutlinedButton
+                                                                      .styleFrom(
+                                                                    shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(12)),
+                                                                    side: const BorderSide(
+                                                                        color: Colors
+                                                                            .grey),
+                                                                    padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                        horizontal:
+                                                                            20,
+                                                                        vertical:
+                                                                            12),
+                                                                  ),
+                                                                  child:
+                                                                      const Text(
+                                                                    'Annuler',
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            16,
+                                                                        color: Colors
+                                                                            .black87),
                                                                   ),
                                                                 ),
-                                                              );
-                                                            });
+                                                                ElevatedButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    try {
+                                                                      String
+                                                                          deletedUser =
+                                                                          participants[
+                                                                              index];
+                                                                      _groupsService.removeParticipantFromGroup(
+                                                                          group[
+                                                                              'id'],
+                                                                          deletedUser,
+                                                                          () {
+                                                                        setState(
+                                                                            () {
+                                                                          provider
+                                                                              .fetchGroupData(group['id']);
+                                                                        });
+                                                                      });
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop();
+                                                                    } catch (e) {
+                                                                      print(
+                                                                          "L'utilisateur n'a pas pu être retiré du groupe : $e");
+                                                                    }
+                                                                  },
+                                                                  style: ElevatedButton
+                                                                      .styleFrom(
+                                                                    backgroundColor:
+                                                                        Colors
+                                                                            .redAccent,
+                                                                    shape: RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(12)),
+                                                                    padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                        horizontal:
+                                                                            20,
+                                                                        vertical:
+                                                                            12),
+                                                                  ),
+                                                                  child:
+                                                                      const Text(
+                                                                    'Supprimer',
+                                                                    style:
+                                                                        TextStyle(
+                                                                      fontSize:
+                                                                          16,
+                                                                      color: Colors
+                                                                          .black,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        );
                                                       },
                                                       child: Container(
                                                         width: 40,

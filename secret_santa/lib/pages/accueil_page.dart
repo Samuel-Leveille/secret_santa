@@ -205,121 +205,149 @@ class _AccueilPageState extends State<AccueilPage> {
                                                                     group?[
                                                                         'admin'];
                                                                 showDialog(
-                                                                    context:
-                                                                        context,
-                                                                    builder:
-                                                                        (context) {
-                                                                      return Dialog(
-                                                                        shape:
-                                                                            RoundedRectangleBorder(
-                                                                          borderRadius:
-                                                                              BorderRadius.circular(20.0),
-                                                                        ),
-                                                                        child:
-                                                                            Container(
-                                                                          height:
-                                                                              MediaQuery.of(context).size.height * 0.25,
-                                                                          width:
-                                                                              MediaQuery.of(context).size.width * 0.30,
-                                                                          decoration:
-                                                                              BoxDecoration(
+                                                                  context:
+                                                                      context,
+                                                                  builder:
+                                                                      (context) {
+                                                                    return AlertDialog(
+                                                                      shape:
+                                                                          RoundedRectangleBorder(
+                                                                        borderRadius:
+                                                                            BorderRadius.circular(24.0),
+                                                                      ),
+                                                                      contentPadding: const EdgeInsets
+                                                                          .fromLTRB(
+                                                                          24,
+                                                                          20,
+                                                                          24,
+                                                                          8),
+                                                                      titlePadding: const EdgeInsets
+                                                                          .only(
+                                                                          top:
+                                                                              16),
+                                                                      title:
+                                                                          Column(
+                                                                        children: [
+                                                                          const Icon(
+                                                                            Icons.warning_rounded,
+                                                                            size:
+                                                                                48,
                                                                             color:
-                                                                                Colors.white,
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(20.0),
-                                                                            boxShadow: const [
-                                                                              BoxShadow(
-                                                                                color: Colors.black12,
-                                                                                blurRadius: 10,
-                                                                                offset: Offset(0, 5),
+                                                                                Colors.redAccent,
+                                                                          ),
+                                                                          const SizedBox(
+                                                                              height: 12),
+                                                                          groupAdminEmail == _auth.currentUser!.email
+                                                                              ? const Text(
+                                                                                  "Supprimer le groupe ?",
+                                                                                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                                                                )
+                                                                              : const Text(
+                                                                                  "Quitter le groupe ?",
+                                                                                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                                                                ),
+                                                                        ],
+                                                                      ),
+                                                                      content: groupAdminEmail ==
+                                                                              _auth.currentUser!.email
+                                                                          ? const Text(
+                                                                              'Êtes-vous sûr de vouloir supprimer ce groupe ? Cette action est irréversible.',
+                                                                              textAlign: TextAlign.center,
+                                                                              style: TextStyle(
+                                                                                fontSize: 16,
+                                                                                color: Colors.black87,
                                                                               ),
-                                                                            ],
+                                                                            )
+                                                                          : const Text(
+                                                                              'Êtes-vous sûr de vouloir quitter ce groupe ?',
+                                                                              textAlign: TextAlign.center,
+                                                                              style: TextStyle(
+                                                                                fontSize: 16,
+                                                                                color: Colors.black87,
+                                                                              ),
+                                                                            ),
+                                                                      actionsPadding: const EdgeInsets
+                                                                          .only(
+                                                                          bottom:
+                                                                              12,
+                                                                          right:
+                                                                              16,
+                                                                          left:
+                                                                              16),
+                                                                      actionsAlignment:
+                                                                          MainAxisAlignment
+                                                                              .spaceBetween,
+                                                                      actions: [
+                                                                        OutlinedButton(
+                                                                          onPressed: () =>
+                                                                              Navigator.of(context).pop(),
+                                                                          style:
+                                                                              OutlinedButton.styleFrom(
+                                                                            shape:
+                                                                                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                                            side:
+                                                                                const BorderSide(color: Colors.grey),
+                                                                            padding:
+                                                                                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                                                                           ),
                                                                           child:
-                                                                              Column(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.spaceEvenly,
-                                                                            children: [
-                                                                              Padding(
-                                                                                padding: const EdgeInsets.only(left: 12.0, right: 12.0, bottom: 20.0),
-                                                                                child: groupAdminEmail == _auth.currentUser!.email
-                                                                                    ? const Text(
-                                                                                        "Supprimer le groupe ?",
-                                                                                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                                                                                      )
-                                                                                    : const Text(
-                                                                                        "Quitter le groupe ?",
-                                                                                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                                                                                      ),
-                                                                              ),
-                                                                              Row(
-                                                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                                                children: [
-                                                                                  SizedBox(
-                                                                                    height: 45,
-                                                                                    child: FittedBox(
-                                                                                      child: FloatingActionButton.extended(
-                                                                                          extendedPadding: const EdgeInsets.only(left: 35.0, right: 35.0),
-                                                                                          backgroundColor: Colors.red[100],
-                                                                                          foregroundColor: Colors.black,
-                                                                                          onPressed: () {
-                                                                                            Navigator.of(context).pop();
-                                                                                          },
-                                                                                          label: const Text(
-                                                                                            'Annuler',
-                                                                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                                                                                          )),
-                                                                                    ),
-                                                                                  ),
-                                                                                  SizedBox(
-                                                                                    height: 45,
-                                                                                    child: FittedBox(
-                                                                                      child: FloatingActionButton.extended(
-                                                                                          extendedPadding: const EdgeInsets.only(left: 35.0, right: 35.0),
-                                                                                          backgroundColor: Colors.teal[100],
-                                                                                          foregroundColor: Colors.black,
-                                                                                          onPressed: () {
-                                                                                            print(groupAdminEmail);
-                                                                                            if (groupAdminEmail == _auth.currentUser!.email) {
-                                                                                              try {
-                                                                                                String deletedGroupId = _groupsService.getGroupId(group);
-                                                                                                _groupsService.deleteGroup(deletedGroupId, () {
-                                                                                                  setState(() {
-                                                                                                    groupsProvider?.fetchGroupsData();
-                                                                                                  });
-                                                                                                });
-                                                                                                Navigator.of(context).pop();
-                                                                                              } catch (e) {
-                                                                                                print("Le groupe n'a pas pu être supprimé : $e");
-                                                                                              }
-                                                                                            } else {
-                                                                                              try {
-                                                                                                String groupId = _groupsService.getGroupId(group);
-                                                                                                String userWhoLeaveTheGroup = _auth.currentUser!.email as String;
-                                                                                                _groupsService.removeParticipantFromGroup(groupId, userWhoLeaveTheGroup, () {
-                                                                                                  setState(() {
-                                                                                                    groupsProvider?.fetchGroupsData();
-                                                                                                  });
-                                                                                                });
-                                                                                                Navigator.of(context).pop();
-                                                                                              } catch (e) {
-                                                                                                print("La tentative de quitter le groupe a échouée : $e");
-                                                                                              }
-                                                                                            }
-                                                                                          },
-                                                                                          label: const Text(
-                                                                                            'Confirmer',
-                                                                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                                                                                          )),
-                                                                                    ),
-                                                                                  )
-                                                                                ],
-                                                                              )
-                                                                            ],
+                                                                              const Text(
+                                                                            'Annuler',
+                                                                            style:
+                                                                                TextStyle(fontSize: 16, color: Colors.black87),
                                                                           ),
                                                                         ),
-                                                                      );
-                                                                    });
+                                                                        ElevatedButton(
+                                                                          onPressed:
+                                                                              () async {
+                                                                            if (groupAdminEmail ==
+                                                                                _auth.currentUser!.email) {
+                                                                              try {
+                                                                                String deletedGroupId = _groupsService.getGroupId(group);
+                                                                                _groupsService.deleteGroup(deletedGroupId, () {
+                                                                                  setState(() {
+                                                                                    groupsProvider?.fetchGroupsData();
+                                                                                  });
+                                                                                });
+                                                                                Navigator.of(context).pop();
+                                                                              } catch (e) {
+                                                                                print("Le groupe n'a pas pu être supprimé : $e");
+                                                                              }
+                                                                            } else {
+                                                                              try {
+                                                                                String groupId = _groupsService.getGroupId(group);
+                                                                                String userWhoLeaveTheGroup = _auth.currentUser!.email as String;
+                                                                                _groupsService.removeParticipantFromGroup(groupId, userWhoLeaveTheGroup, () {
+                                                                                  setState(() {
+                                                                                    groupsProvider?.fetchGroupsData();
+                                                                                  });
+                                                                                });
+                                                                                Navigator.of(context).pop();
+                                                                              } catch (e) {
+                                                                                print("La tentative de quitter le groupe a échouée : $e");
+                                                                              }
+                                                                            }
+                                                                          },
+                                                                          style:
+                                                                              ElevatedButton.styleFrom(
+                                                                            backgroundColor:
+                                                                                Colors.redAccent,
+                                                                            shape:
+                                                                                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                                            padding:
+                                                                                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                                                          ),
+                                                                          child:
+                                                                              const Text(
+                                                                            'Supprimer',
+                                                                            style:
+                                                                                TextStyle(fontSize: 16, color: Colors.black),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    );
+                                                                  },
+                                                                );
                                                               },
                                                               icon: const Icon(
                                                                 Icons
