@@ -105,7 +105,7 @@ class GiftsService {
         });
       }
 
-      uploadGiftImages(context, _userProvider);
+      await uploadGiftImages(context, _userProvider);
       return false;
     } else {
       return true;
