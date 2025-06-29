@@ -71,14 +71,16 @@ class GiftsService {
           'description': description,
           'links': links,
           'userEmail': _auth.currentUser!.email,
-          'groupId': groupId
+          'groupId': groupId,
+          'status': "ACTIVE"
         });
       } else {
         await _firestore.collection('gifts').add({
           'title': title,
           'description': description,
           'userEmail': _auth.currentUser!.email,
-          'groupId': groupId
+          'groupId': groupId,
+          'status': "ACTIVE"
         });
       }
 
@@ -133,6 +135,17 @@ class GiftsService {
       }
     } else {
       print("Données utilisateur non trouvées");
+    }
+  }
+
+  Future<void> deleteGift(String giftId) async {
+    if (giftId.isNotEmpty) {
+      await _firestore
+          .collection('gifts')
+          .doc(giftId)
+          .update({'status': "DELETE"});
+    } else {
+      print("Le cadeau n'a pas pu être supprimé : giftId est vide.");
     }
   }
 }
