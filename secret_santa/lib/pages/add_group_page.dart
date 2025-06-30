@@ -106,7 +106,7 @@ class _AddGroupPageState extends State<AddGroupPage> {
                             ),
                             const SizedBox(height: 20),
                             GestureDetector(
-                              onTap: () => _selectDate(context),
+                              onTap: () async => await _selectDate(context),
                               child: AbsorbPointer(
                                 child: TextFormField(
                                   controller: datePigeController,

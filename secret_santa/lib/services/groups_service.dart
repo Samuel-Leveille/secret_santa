@@ -186,4 +186,20 @@ class GroupsService {
     await userProvider.fetchUserData(adminEmail);
     return userProvider.userData?['friends'] ?? [];
   }
+
+  Future<void> updateGroupForm(String formContent, String controllerName,
+      User? user, String? groupId, BuildContext context) async {
+    if (formContent.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Veuillez remplir le champ avant d'enregistrer")),
+      );
+      return;
+    } else if (user != null && groupId != null) {
+      await _firestore
+          .collection('groups')
+          .doc(groupId)
+          .update({controllerName: formContent});
+    }
+  }
 }

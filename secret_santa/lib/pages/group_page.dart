@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/pages/gifts_page.dart';
+import 'package:secret_santa/pages/group_settings_page.dart';
 import 'package:secret_santa/providers/groups_firestore_provider.dart';
 import 'package:secret_santa/providers/users_firestore_provider.dart';
 import 'package:secret_santa/services/groups_service.dart';
@@ -24,10 +25,10 @@ class _GroupPageState extends State<GroupPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       _groupProvider =
           Provider.of<GroupsFirestoreProvider>(context, listen: false);
-      _groupProvider?.fetchGroupData(widget.groupId);
+      await _groupProvider?.fetchGroupData(widget.groupId);
 
       _userProvider =
           Provider.of<UsersFirestoreProvider>(context, listen: false);
@@ -74,57 +75,19 @@ class _GroupPageState extends State<GroupPage> {
                         const BackButton(
                           color: Colors.black,
                         ),
-                        IconButton(
-                            onPressed: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (context) {
-                                    return Dialog(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                        ),
-                                        child: Container(
-                                          height: MediaQuery.of(context)
-                                                  .size
-                                                  .height *
-                                              0.25,
-                                          width: MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              0.30,
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(20.0),
-                                            boxShadow: const [
-                                              BoxShadow(
-                                                color: Colors.black12,
-                                                blurRadius: 10,
-                                                offset: Offset(0, 5),
-                                              ),
-                                            ],
-                                          ),
-                                          child: const Column(
-                                            children: [
-                                              Padding(
-                                                padding: EdgeInsets.only(
-                                                    top: 14.0, bottom: 8.0),
-                                                child: Text(
-                                                  "Paramètre du groupe",
-                                                  style: TextStyle(
-                                                      fontSize: 22,
-                                                      fontWeight:
-                                                          FontWeight.w600),
-                                                ),
-                                              ),
-                                              Divider(),
-                                            ],
-                                          ),
-                                        ));
-                                  });
-                            },
-                            icon: const Icon(Icons.more_horiz))
+                        group['admin'] == _auth.currentUser?.email
+                            ? IconButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => GroupSettingsPage(
+                                          group: group,
+                                          groupId: widget.groupId),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.more_horiz))
+                            : Container(),
                       ],
                     ),
                   ),
