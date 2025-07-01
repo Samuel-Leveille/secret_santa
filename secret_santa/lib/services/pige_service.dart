@@ -6,6 +6,7 @@ class PigeService {
   Future<void> lancerPige(
       List<dynamic> participantsEmail, BuildContext context) async {
     try {
+      participantsEmail.shuffle();
       List<int> nombresDejaSorti = [];
       Map<String, String> dictEmails = {};
       if (participantsEmail.length <= 1) {
