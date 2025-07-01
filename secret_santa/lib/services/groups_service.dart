@@ -44,7 +44,7 @@ class GroupsService {
         onGroupDeleted();
       }
     } catch (e) {
-      print("Le groupe n'a pas pu être supprimé : $e");
+      print("Le groupe n'a pas pu être supprimé : ${e.toString()}");
     }
   }
 
@@ -73,7 +73,7 @@ class GroupsService {
         onParticipantAdded();
       }
     } catch (e) {
-      print("Failed to add participant: $e");
+      print("Failed to add participant: ${e.toString()}");
     }
   }
 
@@ -100,7 +100,7 @@ class GroupsService {
         onParticipantRemoved();
       }
     } catch (e) {
-      print("Failed to remove participant: $e");
+      print("Failed to remove participant: ${e.toString()}");
     }
   }
 

@@ -3,12 +3,17 @@ import 'package:secret_santa/services/groups_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:secret_santa/providers/groups_firestore_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:secret_santa/services/pige_service.dart';
 
 class GroupSettingsPage extends StatefulWidget {
   final Map<String, dynamic>? group;
   final String groupId;
+  final List<dynamic> participants;
   const GroupSettingsPage(
-      {super.key, required this.group, required this.groupId});
+      {super.key,
+      required this.group,
+      required this.participants,
+      required this.groupId});
 
   @override
   State<GroupSettingsPage> createState() => _GroupSettingsPageState();
@@ -23,6 +28,7 @@ class _GroupSettingsPageState extends State<GroupSettingsPage> {
 
   final GroupsService groupsService = GroupsService();
   final _auth = FirebaseAuth.instance;
+  final PigeService pigeService = PigeService();
 
   @override
   void initState() {
@@ -104,17 +110,198 @@ class _GroupSettingsPageState extends State<GroupSettingsPage> {
       backgroundColor: const Color(0xFFF7F9FB),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
-        title: const Text(
-          "Paramètres du groupe",
-          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
-        ),
+        scrolledUnderElevation: 0.0,
+        backgroundColor: const Color(0xFFF7F9FB),
         iconTheme: const IconThemeData(color: Colors.black87),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 8.0, right: 8.0),
+                    child: Text(
+                      "Paramètres du groupe",
+                      style: TextStyle(
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 28),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 30.0,
+            ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color.fromARGB(255, 142, 234, 255),
+                    Color(0xFF0083B0)
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(30),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24.0),
+                          ),
+                          contentPadding:
+                              const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                          titlePadding: const EdgeInsets.only(top: 16),
+                          title: Column(
+                            children: [
+                              widget.participants.length == 2
+                                  ? const Icon(
+                                      Icons.warning,
+                                      size: 48,
+                                      color: Colors.redAccent,
+                                    )
+                                  : const Icon(
+                                      Icons.auto_awesome,
+                                      size: 48,
+                                      color: Color.fromARGB(255, 3, 157, 208),
+                                    ),
+                              const SizedBox(height: 12),
+                              widget.participants.length == 2
+                                  ? const Text(
+                                      "Vous n'êtes que deux",
+                                      style: TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold),
+                                    )
+                                  : const Text(
+                                      "Lancer la pige ?",
+                                      style: TextStyle(
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold),
+                                    )
+                            ],
+                          ),
+                          content: Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: widget.participants.length == 2
+                                  ? const Text(
+                                      'Vous pouvez lancer la pige, mais il n\'y aura aucune surprise quant au résultat...',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black87,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Êtes-vous sûr de vouloir lancer la pige ? Vous pourrez annuler à tout moment',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black87,
+                                      ),
+                                    )),
+                          actionsPadding: const EdgeInsets.only(
+                              bottom: 12, right: 16, left: 16),
+                          actionsAlignment: MainAxisAlignment.spaceBetween,
+                          actions: [
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: OutlinedButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                style: OutlinedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                  side: const BorderSide(color: Colors.grey),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 12),
+                                ),
+                                child: const Text(
+                                  'Annuler',
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black87),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  Navigator.of(context).pop();
+                                  await pigeService.lancerPige(
+                                      widget.participants, context);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: widget.participants.length ==
+                                          2
+                                      ? Colors.redAccent
+                                      : const Color.fromARGB(255, 3, 157, 208),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 30, vertical: 12),
+                                ),
+                                child: const Text(
+                                  'Lancer',
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 65, vertical: 18),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.casino, color: Colors.white),
+                    SizedBox(width: 12),
+                    Text(
+                      "Lancer la pige",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(
+              height: 48.0,
+            ),
+            const Padding(
+              padding: EdgeInsets.only(bottom: 8.0),
+              child: Text(
+                "Modification du groupe",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
+              ),
+            ),
             _buildEditableField(
               label: "Nom du groupe",
               controllerName: 'name',
@@ -148,15 +335,18 @@ class _GroupSettingsPageState extends State<GroupSettingsPage> {
               onPickDate: () => _selectDate(context),
             ),
             const SizedBox(height: 20),
-            _buildEditableField(
-              label: "Description",
-              controllerName: 'description',
-              icon: Icons.description_outlined,
-              controller: descriptionController,
-              maxLines: 3,
-              isEditing: isEditingDescription,
-              onEdit: () => setState(() => isEditingDescription = true),
-              onSave: () => _save('description'),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 26.0),
+              child: _buildEditableField(
+                label: "Description",
+                controllerName: 'description',
+                icon: Icons.description_outlined,
+                controller: descriptionController,
+                maxLines: 3,
+                isEditing: isEditingDescription,
+                onEdit: () => setState(() => isEditingDescription = true),
+                onSave: () => _save('description'),
+              ),
             ),
           ],
         ),
@@ -210,8 +400,14 @@ class _GroupSettingsPageState extends State<GroupSettingsPage> {
                   onPressed: () {
                     onEdit();
                   },
-                  label: const Text("Éditer"),
-                  icon: const Icon(Icons.edit),
+                  label: const Text(
+                    "Éditer",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  icon: const Icon(
+                    Icons.edit,
+                    color: Colors.black,
+                  ),
                 ),
               if (isEditing)
                 ElevatedButton(
