@@ -39,8 +39,10 @@ class GroupsService {
           }
         }
 
-        await groupRef
-            .update({'participants': FieldValue.arrayRemove(participants)});
+        await groupRef.update({
+          'participants': FieldValue.arrayRemove(participants),
+          'status': 'DELETED'
+        });
         onGroupDeleted();
       }
     } catch (e) {
@@ -127,10 +129,12 @@ class GroupsService {
         'description': groupDescription,
         'admin': user.email,
         'participants': [user.email],
+        'status': 'ACTIVE',
         'dateCreation': DateTime.now().toString(),
         'moneyMax': moneyMax,
         'pigeDate': pigeDate,
-        'cadeauxParticipants': mapCadeauxParticipants
+        'cadeauxParticipants': mapCadeauxParticipants,
+        'pigeStatus': "INACTIVE"
       });
 
       await docRef.update({'id': docRef.id});

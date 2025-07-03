@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:secret_santa/providers/pige_provider.dart';
 import 'package:secret_santa/services/groups_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:secret_santa/providers/groups_firestore_provider.dart';
@@ -25,6 +26,7 @@ class _GroupSettingsPageState extends State<GroupSettingsPage> {
   late final TextEditingController moneyController;
   late final TextEditingController datePigeController;
   GroupsFirestoreProvider? _groupProvider;
+  PigeProvider? _pigeProvider;
 
   final GroupsService groupsService = GroupsService();
   final _auth = FirebaseAuth.instance;
@@ -33,9 +35,10 @@ class _GroupSettingsPageState extends State<GroupSettingsPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       _groupProvider =
           Provider.of<GroupsFirestoreProvider>(context, listen: false);
+      await _groupProvider?.fetchGroupData(widget.groupId);
     });
 
     nameController = TextEditingController(
@@ -138,159 +141,258 @@ class _GroupSettingsPageState extends State<GroupSettingsPage> {
             const SizedBox(
               height: 30.0,
             ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    Color.fromARGB(255, 142, 234, 255),
-                    Color(0xFF0083B0)
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.3),
-                    blurRadius: 10,
-                    offset: const Offset(0, 6),
+            Consumer<GroupsFirestoreProvider>(
+              builder: (context, provider, child) {
+                Map<String, dynamic>? group = provider.groupData;
+                return Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        group!['pigeStatus'] == 'INACTIVE'
+                            ? const Color.fromARGB(255, 142, 234, 255)
+                            : const Color.fromARGB(255, 255, 142, 142),
+                        group['pigeStatus'] == 'INACTIVE'
+                            ? const Color(0xFF0083B0)
+                            : const Color.fromARGB(255, 176, 0, 0)
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24.0),
-                          ),
-                          contentPadding:
-                              const EdgeInsets.fromLTRB(24, 20, 24, 8),
-                          titlePadding: const EdgeInsets.only(top: 16),
-                          title: Column(
-                            children: [
-                              widget.participants.length == 2
-                                  ? const Icon(
-                                      Icons.warning,
-                                      size: 48,
-                                      color: Colors.redAccent,
-                                    )
-                                  : const Icon(
-                                      Icons.auto_awesome,
-                                      size: 48,
-                                      color: Color.fromARGB(255, 3, 157, 208),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24.0),
+                              ),
+                              contentPadding:
+                                  const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                              titlePadding: const EdgeInsets.only(top: 16),
+                              title: Column(
+                                children: [
+                                  (group['pigeStatus'] == 'INACTIVE' &&
+                                              widget.participants.length ==
+                                                  2) ||
+                                          (group['pigeStatus'] == 'ACTIVE')
+                                      ? const Icon(
+                                          Icons.warning,
+                                          size: 48,
+                                          color: Colors.redAccent,
+                                        )
+                                      : const Icon(
+                                          Icons.auto_awesome,
+                                          size: 48,
+                                          color:
+                                              Color.fromARGB(255, 3, 157, 208),
+                                        ),
+                                  const SizedBox(height: 12),
+                                  group['pigeStatus'] == 'INACTIVE' &&
+                                          widget.participants.length == 2
+                                      ? const Text(
+                                          "Vous n'êtes que deux",
+                                          style: TextStyle(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold),
+                                        )
+                                      : group['pigeStatus'] == 'INACTIVE' &&
+                                              widget.participants.length > 2
+                                          ? const Text(
+                                              "Lancer la pige ?",
+                                              style: TextStyle(
+                                                  fontSize: 22,
+                                                  fontWeight: FontWeight.bold),
+                                            )
+                                          : const Text(
+                                              "Annuler la pige ?",
+                                              style: TextStyle(
+                                                  fontSize: 22,
+                                                  fontWeight: FontWeight.bold),
+                                            )
+                                ],
+                              ),
+                              content: Padding(
+                                  padding: const EdgeInsets.only(bottom: 12.0),
+                                  child: group['pigeStatus'] == 'INACTIVE' &&
+                                          widget.participants.length == 2
+                                      ? const Text(
+                                          'Vous pouvez lancer la pige, mais il n\'y aura aucune surprise quant au résultat...',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black87,
+                                          ),
+                                        )
+                                      : group['pigeStatus'] == 'INACTIVE' &&
+                                              widget.participants.length > 2
+                                          ? const Text(
+                                              'Êtes-vous sûr de vouloir lancer la pige ? Vous pourrez annuler à tout moment',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black87,
+                                              ),
+                                            )
+                                          : Container(
+                                              height: 150.0,
+                                              child: const Column(
+                                                children: [
+                                                  Text(
+                                                    'Êtes-vous sûr de vouloir annuler la pige ? Cette action est irréversible',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.black87,
+                                                    ),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 12,
+                                                  ),
+                                                  Text(
+                                                    'Appuyez sur « Confirmer » pour annuler la pige',
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.black87,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            )),
+                              actionsPadding: const EdgeInsets.only(
+                                  bottom: 12, right: 16, left: 16),
+                              actionsAlignment: MainAxisAlignment.spaceBetween,
+                              actions: [
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: OutlinedButton(
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
+                                    style: OutlinedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                      side:
+                                          const BorderSide(color: Colors.grey),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 12),
                                     ),
-                              const SizedBox(height: 12),
-                              widget.participants.length == 2
-                                  ? const Text(
-                                      "Vous n'êtes que deux",
+                                    child: const Text(
+                                      'Annuler',
                                       style: TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold),
-                                    )
-                                  : const Text(
-                                      "Lancer la pige ?",
-                                      style: TextStyle(
-                                          fontSize: 22,
-                                          fontWeight: FontWeight.bold),
-                                    )
+                                          fontSize: 16, color: Colors.black87),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 8.0),
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      Navigator.of(context).pop();
+                                      if (group['pigeStatus'] == 'INACTIVE') {
+                                        await pigeService.lancerPige(
+                                            widget.participants,
+                                            widget.groupId,
+                                            context);
+                                      } else if (group['pigeStatus'] ==
+                                          'ACTIVE') {
+                                        await pigeService
+                                            .cancelPige(widget.groupId);
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(const SnackBar(
+                                                content: Text(
+                                                    'Erreur: Aucune action n\'a été exécutée, veuillez réessayer ou nous contacter pour de l\'aide')));
+                                      }
+                                      await _groupProvider
+                                          ?.fetchGroupData(widget.groupId);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: (group['pigeStatus'] ==
+                                                      'INACTIVE' &&
+                                                  widget.participants.length ==
+                                                      2) ||
+                                              (group['pigeStatus'] == 'ACTIVE')
+                                          ? Colors.redAccent
+                                          : const Color.fromARGB(
+                                              255, 3, 157, 208),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(12)),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 22, vertical: 12),
+                                    ),
+                                    child: group['pigeStatus'] == 'INACTIVE'
+                                        ? const Text(
+                                            'Lancer',
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.white),
+                                          )
+                                        : const Text(
+                                            'Confirmer',
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.white),
+                                          ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 65, vertical: 18),
+                    ),
+                    child: group['pigeStatus'] == 'INACTIVE'
+                        ? const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.casino, color: Colors.white),
+                              SizedBox(width: 12),
+                              Text(
+                                "Lancer la pige",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.1,
+                                ),
+                              ),
+                            ],
+                          )
+                        : const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(width: 6),
+                              Text(
+                                "Annuler la pige",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.1,
+                                ),
+                              ),
+                              SizedBox(width: 6),
                             ],
                           ),
-                          content: Padding(
-                              padding: const EdgeInsets.only(bottom: 12.0),
-                              child: widget.participants.length == 2
-                                  ? const Text(
-                                      'Vous pouvez lancer la pige, mais il n\'y aura aucune surprise quant au résultat...',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.black87,
-                                      ),
-                                    )
-                                  : const Text(
-                                      'Êtes-vous sûr de vouloir lancer la pige ? Vous pourrez annuler à tout moment',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.black87,
-                                      ),
-                                    )),
-                          actionsPadding: const EdgeInsets.only(
-                              bottom: 12, right: 16, left: 16),
-                          actionsAlignment: MainAxisAlignment.spaceBetween,
-                          actions: [
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: OutlinedButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                style: OutlinedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12)),
-                                  side: const BorderSide(color: Colors.grey),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20, vertical: 12),
-                                ),
-                                child: const Text(
-                                  'Annuler',
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.black87),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  Navigator.of(context).pop();
-                                  await pigeService.lancerPige(
-                                      widget.participants, context);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: widget.participants.length ==
-                                          2
-                                      ? Colors.redAccent
-                                      : const Color.fromARGB(255, 3, 157, 208),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12)),
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 30, vertical: 12),
-                                ),
-                                child: const Text(
-                                  'Lancer',
-                                  style: TextStyle(
-                                      fontSize: 16, color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      });
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 65, vertical: 18),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.casino, color: Colors.white),
-                    SizedBox(width: 12),
-                    Text(
-                      "Lancer la pige",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.1,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             ),
             const SizedBox(
               height: 48.0,
