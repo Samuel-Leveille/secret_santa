@@ -188,7 +188,8 @@ class _GroupPageState extends State<GroupPage> {
                       ),
                     ],
                   ),
-                  group['admin'] == _auth.currentUser?.email
+                  (group['admin'] == _auth.currentUser?.email) &&
+                          (group['pigeStatus'] == "INACTIVE")
                       ? Padding(
                           padding: const EdgeInsets.symmetric(vertical: 10.0),
                           child: ElevatedButton(
@@ -461,6 +462,139 @@ class _GroupPageState extends State<GroupPage> {
                             ),
                             child: const Text(
                               "Ajouter des participants",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(),
+                  group['pigeStatus'] == 'ACTIVE'
+                      ? Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10.0),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return FutureBuilder<String>(
+                                    future: _groupsService.getMyDuo(
+                                        context, widget.groupId),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                            color: Colors.blue[300],
+                                          ),
+                                        );
+                                      } else if (snapshot.hasError) {
+                                        return const Text('Erreur',
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w500));
+                                      } else {
+                                        String myDuo = snapshot.data ?? "";
+                                        return StatefulBuilder(
+                                          builder: (context, setState) {
+                                            return Dialog(
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20.0),
+                                              ),
+                                              child: Container(
+                                                width: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.85,
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .width *
+                                                    0.5,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          20.0),
+                                                  boxShadow: const [
+                                                    BoxShadow(
+                                                      color: Colors.black12,
+                                                      blurRadius: 10,
+                                                      offset: Offset(0, 5),
+                                                    ),
+                                                  ],
+                                                ),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(
+                                                      16.0),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .start,
+                                                    children: [
+                                                      const Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                bottom: 10.0),
+                                                        child: Center(
+                                                          child: Text(
+                                                            "Ma pige",
+                                                            style: TextStyle(
+                                                                fontSize: 20,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox.shrink(),
+                                                      Expanded(
+                                                        child: Text(myDuo),
+                                                      ),
+                                                      ElevatedButton(
+                                                        style: ButtonStyle(
+                                                          backgroundColor:
+                                                              WidgetStateProperty
+                                                                  .all<Color>(Colors
+                                                                      .teal
+                                                                      .shade100),
+                                                          foregroundColor:
+                                                              WidgetStateProperty
+                                                                  .all<Color>(
+                                                                      Colors
+                                                                          .white),
+                                                        ),
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                        child: const Text(
+                                                            "Terminer"),
+                                                      )
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      }
+                                    },
+                                  );
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              backgroundColor: Colors.cyan[100],
+                            ),
+                            child: const Text(
+                              "Ma pige",
                               style: TextStyle(
                                 fontSize: 16,
                                 color: Colors.white,

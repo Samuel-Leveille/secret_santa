@@ -11,6 +11,7 @@ class PigeProvider extends ChangeNotifier {
     QuerySnapshot querySnapshot = await _firestore
         .collection('piges')
         .where('groupId', isEqualTo: groupId)
+        .where('status', isEqualTo: 'ACTIVE')
         .get();
     final pigeDoc = querySnapshot.docs.first;
     if (pigeDoc.exists) {

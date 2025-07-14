@@ -6,11 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/pages/group_page.dart';
 import 'package:secret_santa/providers/groups_firestore_provider.dart';
+import 'package:secret_santa/providers/pige_provider.dart';
 import 'package:secret_santa/providers/users_firestore_provider.dart';
+import 'package:secret_santa/services/users_service.dart';
 
 class GroupsService {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
+  final _usersService = UsersService();
 
   String getGroupId(Map<String, dynamic>? group) {
     return group?['id'];
@@ -205,5 +208,22 @@ class GroupsService {
           .doc(groupId)
           .update({controllerName: formContent});
     }
+  }
+
+  Future<String> getMyDuo(BuildContext context, String groupId) async {
+    String userEmail = _auth.currentUser?.email as String;
+    if (userEmail.isNotEmpty) {
+      final pigeProvider = Provider.of<PigeProvider>(context, listen: false);
+      await pigeProvider.fetchPigeData(groupId);
+      String duoEmail = pigeProvider.pige['duos'][userEmail] ?? "Aucune pige";
+      if (duoEmail.isNotEmpty) {
+        return _usersService.getUserName(duoEmail);
+      } else {
+        return "Aucune pige";
+      }
+    } else {
+      print("Aucun utilisateur connecté");
+    }
+    return "Aucune pige";
   }
 }

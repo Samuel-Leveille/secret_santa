@@ -42,6 +42,7 @@ class PigeService {
         QuerySnapshot querySnapshot = await _firestore
             .collection('piges')
             .where('groupId', isEqualTo: groupId)
+            .where('status', isEqualTo: 'ACTIVE')
             .get();
 
         if (querySnapshot.docs.first.exists) {
@@ -72,6 +73,7 @@ class PigeService {
       QuerySnapshot querySnapshot = await _firestore
           .collection('piges')
           .where('groupId', isEqualTo: groupId)
+          .where('status', isEqualTo: 'ACTIVE')
           .get();
 
       if (querySnapshot.docs.first.exists) {
