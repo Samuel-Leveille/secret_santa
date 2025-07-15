@@ -1,8 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:secret_santa/providers/pige_provider.dart';
+import 'package:secret_santa/services/users_service.dart';
 
 class PigeService {
   final _firestore = FirebaseFirestore.instance;
+  final _auth = FirebaseAuth.instance;
+  final _usersService = UsersService();
+
   Future<void> lancerPige(List<dynamic> participantsEmail, String groupId,
       BuildContext context) async {
     try {
@@ -90,5 +97,22 @@ class PigeService {
     } else {
       print("La pige n'a pas pu être canceled : Le id de groupe est vide");
     }
+  }
+
+  Future<String> getMyDuo(BuildContext context, String groupId) async {
+    String userEmail = _auth.currentUser?.email as String;
+    if (userEmail.isNotEmpty) {
+      final pigeProvider = Provider.of<PigeProvider>(context, listen: false);
+      await pigeProvider.fetchPigeData(groupId);
+      String duoEmail = pigeProvider.pige['duos'][userEmail] ?? "Aucune pige";
+      if (duoEmail.isNotEmpty) {
+        return _usersService.getUserName(duoEmail);
+      } else {
+        return "Aucune pige";
+      }
+    } else {
+      print("Aucun utilisateur connecté");
+    }
+    return "Aucune pige";
   }
 }

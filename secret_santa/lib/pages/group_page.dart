@@ -7,6 +7,7 @@ import 'package:secret_santa/providers/groups_firestore_provider.dart';
 import 'package:secret_santa/providers/users_firestore_provider.dart';
 import 'package:secret_santa/services/groups_service.dart';
 import 'package:secret_santa/pages/profile_page.dart';
+import 'package:secret_santa/services/pige_service.dart';
 
 class GroupPage extends StatefulWidget {
   final String groupId;
@@ -22,6 +23,9 @@ class _GroupPageState extends State<GroupPage> {
   final _auth = FirebaseAuth.instance;
 
   final GroupsService _groupsService = GroupsService();
+  final PigeService _pigeService = PigeService();
+
+  bool showDuo = false;
 
   @override
   void initState() {
@@ -475,11 +479,14 @@ class _GroupPageState extends State<GroupPage> {
                           padding: const EdgeInsets.symmetric(vertical: 10.0),
                           child: ElevatedButton(
                             onPressed: () {
+                              setState(() {
+                                showDuo = false;
+                              });
                               showDialog(
                                 context: context,
                                 builder: (context) {
                                   return FutureBuilder<String>(
-                                    future: _groupsService.getMyDuo(
+                                    future: _pigeService.getMyDuo(
                                         context, widget.groupId),
                                     builder: (context, snapshot) {
                                       if (snapshot.connectionState ==
@@ -508,10 +515,15 @@ class _GroupPageState extends State<GroupPage> {
                                                         .size
                                                         .width *
                                                     0.85,
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .width *
-                                                    0.5,
+                                                height: showDuo == true
+                                                    ? MediaQuery.of(context)
+                                                            .size
+                                                            .width *
+                                                        0.5
+                                                    : MediaQuery.of(context)
+                                                            .size
+                                                            .width *
+                                                        0.65,
                                                 decoration: BoxDecoration(
                                                   color: Colors.white,
                                                   borderRadius:
@@ -550,27 +562,76 @@ class _GroupPageState extends State<GroupPage> {
                                                       ),
                                                       const SizedBox.shrink(),
                                                       Expanded(
-                                                        child: Text(myDuo),
-                                                      ),
-                                                      ElevatedButton(
-                                                        style: ButtonStyle(
-                                                          backgroundColor:
-                                                              WidgetStateProperty
-                                                                  .all<Color>(Colors
-                                                                      .teal
-                                                                      .shade100),
-                                                          foregroundColor:
-                                                              WidgetStateProperty
-                                                                  .all<Color>(
+                                                          child: showDuo == true
+                                                              ? Row(
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .center,
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  children: [
+                                                                    Text(
+                                                                      myDuo,
+                                                                      style: const TextStyle(
+                                                                          fontWeight:
+                                                                              FontWeight.bold),
+                                                                    ),
+                                                                  ],
+                                                                )
+                                                              : const Text(
+                                                                  "Assurez-vous qu'aucun participant de la pige ne puisse voir votre appareil avant d'afficher votre pige")),
+                                                      Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
+                                                        children: [
+                                                          Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .only(
+                                                                    top: 8.0),
+                                                            child: ElevatedButton(
+                                                                style: ButtonStyle(
+                                                                  backgroundColor: WidgetStateProperty.all<
+                                                                          Color>(
                                                                       Colors
-                                                                          .white),
-                                                        ),
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                        child: const Text(
-                                                            "Terminer"),
+                                                                          .teal
+                                                                          .shade100),
+                                                                  foregroundColor:
+                                                                      WidgetStateProperty.all<
+                                                                              Color>(
+                                                                          Colors
+                                                                              .white),
+                                                                ),
+                                                                onPressed: () {
+                                                                  if (showDuo ==
+                                                                      true) {
+                                                                    Navigator.of(
+                                                                            context)
+                                                                        .pop();
+                                                                  }
+                                                                  setState(() {
+                                                                    if (showDuo ==
+                                                                        false) {
+                                                                      showDuo =
+                                                                          true;
+                                                                    }
+                                                                  });
+                                                                },
+                                                                child: showDuo == true
+                                                                    ? const Padding(
+                                                                        padding: EdgeInsets.only(
+                                                                            left:
+                                                                                28.0,
+                                                                            right:
+                                                                                28.0),
+                                                                        child: Text(
+                                                                            "Terminer"),
+                                                                      )
+                                                                    : const Text("Afficher ma pige")),
+                                                          ),
+                                                        ],
                                                       )
                                                     ],
                                                   ),
@@ -587,7 +648,7 @@ class _GroupPageState extends State<GroupPage> {
                             },
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 10),
+                                  horizontal: 60, vertical: 10),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(20),
                               ),
@@ -596,9 +657,9 @@ class _GroupPageState extends State<GroupPage> {
                             child: const Text(
                               "Ma pige",
                               style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                              ),
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold),
                             ),
                           ),
                         )
