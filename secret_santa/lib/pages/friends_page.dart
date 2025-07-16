@@ -80,6 +80,8 @@ class _FriendsPageState extends State<FriendsPage>
           onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
           child: Scaffold(
             body: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
               color: Colors.white,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,

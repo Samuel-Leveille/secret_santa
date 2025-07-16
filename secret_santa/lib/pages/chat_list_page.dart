@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:secret_santa/pages/group_chat_page.dart';
 import 'package:secret_santa/providers/groups_firestore_provider.dart';
 import 'package:secret_santa/providers/pige_provider.dart';
 import 'package:secret_santa/services/groups_service.dart';
 import 'package:secret_santa/services/users_service.dart';
 
-class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+class ChatListPage extends StatefulWidget {
+  const ChatListPage({super.key});
 
   @override
-  State<ChatPage> createState() => _ChatPageState();
+  State<ChatListPage> createState() => _ChatPageState();
 }
 
-class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
+class _ChatPageState extends State<ChatListPage> with TickerProviderStateMixin {
   TabController? _tabController;
   PageController? _pageController;
   PigeProvider? pigeProvider;
@@ -56,6 +57,8 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
       child: SafeArea(
         child: Scaffold(
           body: Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
               color: Colors.white,
               child: Column(
                 children: [
@@ -164,8 +167,19 @@ class GroupChatList extends StatelessWidget {
                       width: 70,
                       child: IconButton(
                         onPressed: () {
-                          //friendsService.acceptFriendRequest(
-                          //items[index], onRequestHandled);
+                          groups[index].isNotEmpty
+                              ? Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => GroupChatPage(
+                                        group: groups[index],
+                                      )))
+                              : ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    padding: EdgeInsets.only(
+                                        top: 20.0, bottom: 20.0, left: 15),
+                                    content: Text(
+                                        "Le clavardage de ce groupe n'est pas accessible"),
+                                  ),
+                                );
                         },
                         icon: const Icon(Icons.chat_rounded),
                         iconSize: 30,
@@ -176,7 +190,14 @@ class GroupChatList extends StatelessWidget {
                 ),
               );
             })
-        : Container();
+        : const Center(
+            child: Padding(
+            padding: EdgeInsets.only(bottom: 40.0),
+            child: Text(
+              "Vous ne faites parti d'aucun groupe",
+              style: TextStyle(fontSize: 24),
+            ),
+          ));
   }
 }
 
@@ -254,6 +275,13 @@ class PigeChatList extends StatelessWidget {
                 ),
               );
             })
-        : Container();
+        : const Center(
+            child: Padding(
+            padding: EdgeInsets.only(bottom: 40.0),
+            child: Text(
+              "Vous ne faites parti d'aucune pige",
+              style: TextStyle(fontSize: 24),
+            ),
+          ));
   }
 }

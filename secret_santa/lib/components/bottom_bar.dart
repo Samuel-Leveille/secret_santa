@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:secret_santa/pages/accueil_page.dart';
 import 'package:secret_santa/pages/add_group_page.dart';
-import 'package:secret_santa/pages/chat_page.dart';
+import 'package:secret_santa/pages/chat_list_page.dart';
 import 'package:secret_santa/pages/friends_page.dart';
 import 'package:secret_santa/pages/profile_page.dart';
 
@@ -57,7 +57,7 @@ class _BottomBarState extends State<BottomBar> {
           ProfilePage(email: currentUserEmail),
           const AddGroupPage(),
           const FriendsPage(),
-          const ChatPage(),
+          const ChatListPage(),
         ];
 
         return Scaffold(
