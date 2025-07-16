@@ -207,4 +207,28 @@ class GroupsService {
           .update({controllerName: formContent});
     }
   }
+
+  Future<String> getGroupNameById(String groupId) async {
+    if (groupId.isNotEmpty) {
+      DocumentSnapshot snapshot =
+          await _firestore.collection('groups').doc(groupId).get();
+      if (snapshot.exists) {
+        Map<String, dynamic> groupData =
+            snapshot.data() as Map<String, dynamic>;
+        if (groupData.isNotEmpty) {
+          return groupData['name'];
+        } else {
+          print(
+              "Erreur : Le nom du groupe n'a pas pu être obtenu : Celui-ci est vide");
+        }
+      } else {
+        print(
+            "Erreur: Le nom du groupe n'a pas pu être obtenu : Le groupe relié au ID fourni n'existe pas");
+      }
+    } else {
+      print(
+          "Erreur: Le nom du groupe n'a pas pu être obtenu : Le ID du groupe est inexistant");
+    }
+    return "Groupe inexistant";
+  }
 }

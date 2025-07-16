@@ -256,8 +256,11 @@ class Friends extends StatelessWidget {
             itemCount: friends.length,
             itemBuilder: (context, index) {
               return Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                padding: EdgeInsets.only(
+                    top: index == 0 ? 16.0 : 8.0,
+                    bottom: 8.0,
+                    left: 16.0,
+                    right: 16.0),
                 child: GestureDetector(
                   onTap: () {
                     Navigator.of(context).push(
@@ -269,7 +272,7 @@ class Friends extends StatelessWidget {
                   child: Card(
                     elevation: 3,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: ListTile(
                       leading: FutureBuilder<String>(
@@ -358,12 +361,15 @@ class Requests extends StatelessWidget {
             itemCount: items.length,
             itemBuilder: (context, index) {
               return Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                padding: EdgeInsets.only(
+                    top: index == 0 ? 16.0 : 8.0,
+                    bottom: 8.0,
+                    left: 16.0,
+                    right: 16.0),
                 child: Card(
                   elevation: 4,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: ListTile(
                     title: FutureBuilder<String>(
