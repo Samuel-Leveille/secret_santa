@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import 'package:secret_santa/pages/group_page.dart';
 import 'package:secret_santa/providers/groups_firestore_provider.dart';
 import 'package:secret_santa/providers/users_firestore_provider.dart';
-import 'package:secret_santa/services/users_service.dart';
 
 class GroupsService {
   final _firestore = FirebaseFirestore.instance;

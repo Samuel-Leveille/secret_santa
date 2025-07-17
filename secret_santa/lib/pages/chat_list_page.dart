@@ -25,6 +25,8 @@ class _ChatPageState extends State<ChatListPage> with TickerProviderStateMixin {
       groupsProvider =
           Provider.of<GroupsFirestoreProvider>(context, listen: false);
       pigeProvider = Provider.of<PigeProvider>(context, listen: false);
+      pigeProvider!.emptyPigeDuoMap();
+      groupsProvider!.emptyGroupsData();
       await groupsProvider?.fetchGroupsData();
       await pigeProvider?.fetchAllPigeDuos();
     });
@@ -193,9 +195,18 @@ class GroupChatList extends StatelessWidget {
         : const Center(
             child: Padding(
             padding: EdgeInsets.only(bottom: 40.0),
-            child: Text(
-              "Vous ne faites parti d'aucun groupe",
-              style: TextStyle(fontSize: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Vous ne faites parti",
+                  style: TextStyle(fontSize: 24),
+                ),
+                Text(
+                  "d'aucun groupe",
+                  style: TextStyle(fontSize: 24),
+                ),
+              ],
             ),
           ));
   }
@@ -278,9 +289,18 @@ class PigeChatList extends StatelessWidget {
         : const Center(
             child: Padding(
             padding: EdgeInsets.only(bottom: 40.0),
-            child: Text(
-              "Vous ne faites parti d'aucune pige",
-              style: TextStyle(fontSize: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "Vous ne faites parti",
+                  style: TextStyle(fontSize: 24),
+                ),
+                Text(
+                  "d'aucune pige",
+                  style: TextStyle(fontSize: 24),
+                )
+              ],
             ),
           ));
   }

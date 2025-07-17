@@ -98,4 +98,9 @@ class GroupsFirestoreProvider extends ChangeNotifier {
     _giftsIdOfAParticipant.clear();
     notifyListeners();
   }
+
+  void emptyGroupsData() {
+    _groupsData.clear();
+    notifyListeners();
+  }
 }

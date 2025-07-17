@@ -1205,6 +1205,8 @@ class _GiftsPageState extends State<GiftsPage> {
                                             ],
                                           )),
                                     );
+                                  } else {
+                                    return Container();
                                   }
                                 },
                               ),

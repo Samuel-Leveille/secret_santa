@@ -780,7 +780,9 @@ class _GroupPageState extends State<GroupPage> {
                                                             group['admin'] &&
                                                         _auth.currentUser
                                                                 ?.email ==
-                                                            group['admin']
+                                                            group['admin'] &&
+                                                        group['pigeStatus'] ==
+                                                            'INACTIVE'
                                                     ? GestureDetector(
                                                         onTap: () {
                                                           showDialog(

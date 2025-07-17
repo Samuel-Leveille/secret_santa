@@ -57,4 +57,9 @@ class PigeProvider extends ChangeNotifier {
           "Erreur: Les duos de pige de l'utilisateur n'ont pas pu être récupérés : ${e.toString()}");
     }
   }
+
+  void emptyPigeDuoMap() {
+    _pigeDuoMap.clear();
+    notifyListeners();
+  }
 }

@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:secret_santa/services/messages_service.dart';
 
 class GroupChatPage extends StatefulWidget {
   final Map<String, dynamic> group;
@@ -9,6 +11,9 @@ class GroupChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<GroupChatPage> {
+  TextEditingController messageController = TextEditingController();
+  MessagesService messagesService = MessagesService();
+  User? currentUser = FirebaseAuth.instance.currentUser;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -40,11 +45,12 @@ class _ChatPageState extends State<GroupChatPage> {
                                 left: 16.0, right: 16.0, top: 8.0, bottom: 8.0),
                             child: Row(
                               children: [
-                                const Expanded(
+                                Expanded(
                                   child: TextField(
+                                    controller: messageController,
                                     minLines: 1,
                                     maxLines: 5,
-                                    decoration: InputDecoration(
+                                    decoration: const InputDecoration(
                                       contentPadding: EdgeInsets.symmetric(
                                           vertical: 8, horizontal: 12),
                                       hintText: "Message",
@@ -63,7 +69,13 @@ class _ChatPageState extends State<GroupChatPage> {
                                   minWidth: 67,
                                   color: Colors.blueAccent,
                                   elevation: 0,
-                                  onPressed: () {},
+                                  onPressed: () async {
+                                    await messagesService.sendMessage(
+                                        messageController.text,
+                                        widget.group['id'],
+                                        currentUser?.email);
+                                    messageController.clear();
+                                  },
                                   child: const Icon(
                                     Icons.send,
                                     color: Colors.white,
