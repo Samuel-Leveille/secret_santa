@@ -17,6 +17,7 @@ class _ChatPageState extends State<GroupChatPage> {
   MessagesService messagesService = MessagesService();
   User? currentUser = FirebaseAuth.instance.currentUser;
   MessagesProvider? messagesProvider;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -24,6 +25,11 @@ class _ChatPageState extends State<GroupChatPage> {
       messagesProvider = Provider.of<MessagesProvider>(context, listen: false);
       messagesProvider?.clearMessages();
       await messagesProvider?.getAllMessagesByGroupId(widget.group['id']);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.jumpTo(_scrollController.position.minScrollExtent);
+        }
+      });
     });
     super.initState();
   }
@@ -36,6 +42,10 @@ class _ChatPageState extends State<GroupChatPage> {
         child: Scaffold(
             resizeToAvoidBottomInset: true,
             appBar: AppBar(
+              title: Text(
+                widget.group['name'],
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
               backgroundColor: Colors.white,
               scrolledUnderElevation: 0.0,
             ),
@@ -52,17 +62,67 @@ class _ChatPageState extends State<GroupChatPage> {
                           builder: (context, provider, child) {
                             List<Map<String, dynamic>> messages =
                                 provider.messages;
-                            print(messages);
                             return Container(
-                              height: MediaQuery.of(context).size.height * 0.78,
-                              width: MediaQuery.of(context).size.width,
-                              child: ListView.builder(
-                                  itemCount: messages.length,
-                                  itemBuilder:
-                                      (BuildContext context, int index) {
-                                    return Text(messages[index]['message']);
-                                  }),
-                            );
+                                height:
+                                    MediaQuery.of(context).size.height * 0.78,
+                                width: MediaQuery.of(context).size.width,
+                                child: ListView.builder(
+                                    reverse: true,
+                                    controller: _scrollController,
+                                    itemCount: messages.length,
+                                    itemBuilder:
+                                        (BuildContext context, int index) {
+                                      return Row(
+                                        mainAxisAlignment: currentUser?.email ==
+                                                messages[index]['senderEmail']
+                                            ? MainAxisAlignment.end
+                                            : MainAxisAlignment.start,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                right: 16.0,
+                                                left: 16.0,
+                                                top: 6.0,
+                                                bottom: 6.0),
+                                            child: Container(
+                                                constraints: BoxConstraints(
+                                                  maxWidth:
+                                                      MediaQuery.of(context)
+                                                              .size
+                                                              .width *
+                                                          0.70,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                    color: currentUser?.email ==
+                                                            messages[index]
+                                                                ['senderEmail']
+                                                        ? Colors.blueAccent
+                                                        : Colors.grey[200],
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20.0)),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 10.0,
+                                                          bottom: 10.0,
+                                                          left: 14.0,
+                                                          right: 14.0),
+                                                  child: Text(
+                                                    messages[index]['message'],
+                                                    style: TextStyle(
+                                                        color: currentUser
+                                                                    ?.email ==
+                                                                messages[index][
+                                                                    'senderEmail']
+                                                            ? Colors.white
+                                                            : Colors.black),
+                                                  ),
+                                                )),
+                                          ),
+                                        ],
+                                      );
+                                    }));
                           },
                         ),
                         Container(
@@ -77,15 +137,18 @@ class _ChatPageState extends State<GroupChatPage> {
                                     controller: messageController,
                                     minLines: 1,
                                     maxLines: 5,
-                                    decoration: const InputDecoration(
-                                      contentPadding: EdgeInsets.symmetric(
-                                          vertical: 8, horizontal: 12),
+                                    decoration: InputDecoration(
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 8, horizontal: 12),
                                       hintText: "Message",
-                                      hintStyle:
-                                          TextStyle(color: Colors.blueAccent),
+                                      hintStyle: const TextStyle(
+                                          color: Colors.blueAccent),
                                       border: OutlineInputBorder(
-                                          borderSide:
-                                              BorderSide(color: Colors.blue)),
+                                          borderRadius:
+                                              BorderRadius.circular(20.0),
+                                          borderSide: const BorderSide(
+                                              color: Colors.blue)),
                                     ),
                                   ),
                                 ),
@@ -108,6 +171,16 @@ class _ChatPageState extends State<GroupChatPage> {
                                     await messagesProvider
                                         .getAllMessagesByGroupId(
                                             widget.group['id']);
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                      _scrollController.animateTo(
+                                        _scrollController
+                                            .position.minScrollExtent,
+                                        duration:
+                                            const Duration(milliseconds: 100),
+                                        curve: Curves.easeOut,
+                                      );
+                                    });
                                   },
                                   child: const Icon(
                                     Icons.send,

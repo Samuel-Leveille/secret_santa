@@ -15,7 +15,7 @@ class MessagesProvider extends ChangeNotifier {
         QuerySnapshot querySnapshot = await _firestore
             .collection('messages')
             .where('groupId', isEqualTo: groupId)
-            .orderBy('date', descending: false)
+            .orderBy('date', descending: true)
             .get();
         if (querySnapshot.docs.isNotEmpty) {
           _messages = querySnapshot.docs
