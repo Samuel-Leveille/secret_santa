@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:secret_santa/pages/login_page.dart';
 import 'package:secret_santa/providers/gifts_provider.dart';
 import 'package:secret_santa/providers/groups_firestore_provider.dart';
+import 'package:secret_santa/providers/messages_provider.dart';
 import 'package:secret_santa/providers/pige_provider.dart';
 import 'package:secret_santa/providers/users_firestore_provider.dart';
 import 'package:secret_santa/providers/gift_images_provider.dart';
@@ -25,7 +26,8 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GroupsFirestoreProvider()),
         ChangeNotifierProvider(create: (_) => GiftImagesProvider()),
         ChangeNotifierProvider(create: (_) => GiftsProvider()),
-        ChangeNotifierProvider(create: (_) => PigeProvider())
+        ChangeNotifierProvider(create: (_) => PigeProvider()),
+        ChangeNotifierProvider(create: (_) => MessagesProvider())
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

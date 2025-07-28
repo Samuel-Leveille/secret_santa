@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:secret_santa/providers/messages_provider.dart';
 import 'package:secret_santa/services/messages_service.dart';
 
 class GroupChatPage extends StatefulWidget {
@@ -14,6 +16,18 @@ class _ChatPageState extends State<GroupChatPage> {
   TextEditingController messageController = TextEditingController();
   MessagesService messagesService = MessagesService();
   User? currentUser = FirebaseAuth.instance.currentUser;
+  MessagesProvider? messagesProvider;
+
+  @override
+  void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      messagesProvider = Provider.of<MessagesProvider>(context, listen: false);
+      messagesProvider?.clearMessages();
+      await messagesProvider?.getAllMessagesByGroupId(widget.group['id']);
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -34,9 +48,22 @@ class _ChatPageState extends State<GroupChatPage> {
                   child: SingleChildScrollView(
                     child: Column(
                       children: [
-                        Container(
-                          height: MediaQuery.of(context).size.height * 0.78,
-                          width: MediaQuery.of(context).size.width,
+                        Consumer<MessagesProvider>(
+                          builder: (context, provider, child) {
+                            List<Map<String, dynamic>> messages =
+                                provider.messages;
+                            print(messages);
+                            return Container(
+                              height: MediaQuery.of(context).size.height * 0.78,
+                              width: MediaQuery.of(context).size.width,
+                              child: ListView.builder(
+                                  itemCount: messages.length,
+                                  itemBuilder:
+                                      (BuildContext context, int index) {
+                                    return Text(messages[index]['message']);
+                                  }),
+                            );
+                          },
                         ),
                         Container(
                           width: MediaQuery.of(context).size.width,
@@ -70,11 +97,17 @@ class _ChatPageState extends State<GroupChatPage> {
                                   color: Colors.blueAccent,
                                   elevation: 0,
                                   onPressed: () async {
+                                    final messagesProvider =
+                                        Provider.of<MessagesProvider>(context,
+                                            listen: false);
                                     await messagesService.sendMessage(
                                         messageController.text,
                                         widget.group['id'],
                                         currentUser?.email);
                                     messageController.clear();
+                                    await messagesProvider
+                                        .getAllMessagesByGroupId(
+                                            widget.group['id']);
                                   },
                                   child: const Icon(
                                     Icons.send,

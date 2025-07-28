@@ -14,7 +14,8 @@ class MessagesService {
             await _firestore.collection('messages').add({
               'groupId': groupId,
               'senderEmail': senderEmail,
-              'message': message
+              'message': message,
+              'date': DateTime.now()
             });
           } else {
             print(
