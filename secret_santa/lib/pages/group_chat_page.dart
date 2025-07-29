@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:secret_santa/providers/messages_provider.dart';
 import 'package:secret_santa/services/messages_service.dart';
+import 'package:secret_santa/services/users_service.dart';
 
 class GroupChatPage extends StatefulWidget {
   final Map<String, dynamic> group;
@@ -18,9 +19,13 @@ class _ChatPageState extends State<GroupChatPage> {
   User? currentUser = FirebaseAuth.instance.currentUser;
   MessagesProvider? messagesProvider;
   final ScrollController _scrollController = ScrollController();
+  final UsersService usersService = UsersService();
 
   @override
   void initState() {
+    messageController.addListener(() {
+      setState(() {});
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       messagesProvider = Provider.of<MessagesProvider>(context, listen: false);
       messagesProvider?.clearMessages();
@@ -79,46 +84,112 @@ class _ChatPageState extends State<GroupChatPage> {
                                             : MainAxisAlignment.start,
                                         children: [
                                           Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 16.0,
-                                                left: 16.0,
-                                                top: 6.0,
-                                                bottom: 6.0),
-                                            child: Container(
-                                                constraints: BoxConstraints(
-                                                  maxWidth:
-                                                      MediaQuery.of(context)
-                                                              .size
-                                                              .width *
-                                                          0.70,
-                                                ),
-                                                decoration: BoxDecoration(
-                                                    color: currentUser?.email ==
+                                            padding: index == 0
+                                                ? const EdgeInsets.only(
+                                                    right: 16.0,
+                                                    left: 16.0,
+                                                    top: 1.0,
+                                                    bottom: 10.0)
+                                                : index < messages.length - 1 &&
+                                                        (messages[index + 1][
+                                                                'senderEmail'] ==
                                                             messages[index]
-                                                                ['senderEmail']
-                                                        ? Colors.blueAccent
-                                                        : Colors.grey[200],
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            20.0)),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          top: 10.0,
-                                                          bottom: 10.0,
-                                                          left: 14.0,
-                                                          right: 14.0),
-                                                  child: Text(
-                                                    messages[index]['message'],
-                                                    style: TextStyle(
+                                                                ['senderEmail'])
+                                                    ? const EdgeInsets.only(
+                                                        right: 16.0,
+                                                        left: 16.0,
+                                                        top: 1.0,
+                                                        bottom: 1.0)
+                                                    : const EdgeInsets.only(
+                                                        right: 16.0,
+                                                        left: 16.0,
+                                                        top: 12.0,
+                                                        bottom: 1.0),
+                                            child: Column(
+                                              crossAxisAlignment: currentUser
+                                                          ?.email ==
+                                                      messages[index]
+                                                          ['senderEmail']
+                                                  ? CrossAxisAlignment.end
+                                                  : CrossAxisAlignment.start,
+                                              children: [
+                                                (index < messages.length - 1 &&
+                                                            (messages[index][
+                                                                    'senderEmail'] !=
+                                                                messages[index +
+                                                                        1][
+                                                                    'senderEmail']) &&
+                                                            (messages[index][
+                                                                    'senderEmail'] !=
+                                                                currentUser
+                                                                    ?.email)) ||
+                                                        (index ==
+                                                                messages.length -
+                                                                    1) &&
+                                                            (messages[index][
+                                                                    'senderEmail'] !=
+                                                                currentUser
+                                                                    ?.email)
+                                                    ? FutureBuilder<String>(
+                                                        future: usersService
+                                                            .getUserNameByEmail(
+                                                                messages[index][
+                                                                    'senderEmail']),
+                                                        builder: (context,
+                                                            snapshot) {
+                                                          return Text(
+                                                            snapshot.data ??
+                                                                "Utilisateur",
+                                                            style: const TextStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w400),
+                                                          );
+                                                        },
+                                                      )
+                                                    : Container(),
+                                                Container(
+                                                    constraints: BoxConstraints(
+                                                      maxWidth:
+                                                          MediaQuery.of(context)
+                                                                  .size
+                                                                  .width *
+                                                              0.70,
+                                                    ),
+                                                    decoration: BoxDecoration(
                                                         color: currentUser
                                                                     ?.email ==
                                                                 messages[index][
                                                                     'senderEmail']
-                                                            ? Colors.white
-                                                            : Colors.black),
-                                                  ),
-                                                )),
+                                                            ? Colors.blueAccent
+                                                            : Colors.grey[200],
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                                    20.0)),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 10.0,
+                                                              bottom: 10.0,
+                                                              left: 14.0,
+                                                              right: 14.0),
+                                                      child: Text(
+                                                        messages[index]
+                                                            ['message'],
+                                                        style: TextStyle(
+                                                            color: currentUser
+                                                                        ?.email ==
+                                                                    messages[
+                                                                            index]
+                                                                        [
+                                                                        'senderEmail']
+                                                                ? Colors.white
+                                                                : Colors.black),
+                                                      ),
+                                                    )),
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       );
@@ -129,65 +200,71 @@ class _ChatPageState extends State<GroupChatPage> {
                           width: MediaQuery.of(context).size.width,
                           child: Padding(
                             padding: const EdgeInsets.only(
-                                left: 16.0, right: 16.0, top: 8.0, bottom: 8.0),
+                                left: 18.0,
+                                right: 18.0,
+                                top: 18.0,
+                                bottom: 8.0),
                             child: Row(
                               children: [
                                 Expanded(
-                                  child: TextField(
-                                    controller: messageController,
-                                    minLines: 1,
-                                    maxLines: 5,
-                                    decoration: InputDecoration(
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              vertical: 8, horizontal: 12),
-                                      hintText: "Message",
-                                      hintStyle: const TextStyle(
-                                          color: Colors.blueAccent),
-                                      border: OutlineInputBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                          borderSide: const BorderSide(
-                                              color: Colors.blue)),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color: Colors.grey[200],
+                                        borderRadius:
+                                            BorderRadius.circular(20.0)),
+                                    child: TextField(
+                                      textCapitalization:
+                                          TextCapitalization.sentences,
+                                      controller: messageController,
+                                      minLines: 1,
+                                      maxLines: 5,
+                                      decoration: InputDecoration(
+                                          isDense: true,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                  vertical: 8, horizontal: 16),
+                                          hintText: "Message",
+                                          hintStyle: TextStyle(
+                                              color: Colors.grey[600]),
+                                          border: InputBorder.none),
                                     ),
                                   ),
                                 ),
                                 const SizedBox(
-                                  width: 15,
+                                  width: 6,
                                 ),
-                                MaterialButton(
-                                  minWidth: 67,
-                                  color: Colors.blueAccent,
-                                  elevation: 0,
-                                  onPressed: () async {
-                                    final messagesProvider =
-                                        Provider.of<MessagesProvider>(context,
-                                            listen: false);
-                                    await messagesService.sendMessage(
-                                        messageController.text,
-                                        widget.group['id'],
-                                        currentUser?.email);
-                                    messageController.clear();
-                                    await messagesProvider
-                                        .getAllMessagesByGroupId(
-                                            widget.group['id']);
-                                    WidgetsBinding.instance
-                                        .addPostFrameCallback((_) {
-                                      _scrollController.animateTo(
-                                        _scrollController
-                                            .position.minScrollExtent,
-                                        duration:
-                                            const Duration(milliseconds: 100),
-                                        curve: Curves.easeOut,
-                                      );
-                                    });
-                                  },
-                                  child: const Icon(
-                                    Icons.send,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
-                                ),
+                                messageController.value.text.isNotEmpty
+                                    ? IconButton(
+                                        onPressed: () async {
+                                          final messagesProvider =
+                                              Provider.of<MessagesProvider>(
+                                                  context,
+                                                  listen: false);
+                                          await messagesService.sendMessage(
+                                              messageController.text,
+                                              widget.group['id'],
+                                              currentUser?.email);
+                                          messageController.clear();
+                                          await messagesProvider
+                                              .getAllMessagesByGroupId(
+                                                  widget.group['id']);
+                                          WidgetsBinding.instance
+                                              .addPostFrameCallback((_) {
+                                            _scrollController.animateTo(
+                                              _scrollController
+                                                  .position.minScrollExtent,
+                                              duration: const Duration(
+                                                  milliseconds: 100),
+                                              curve: Curves.easeOut,
+                                            );
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.send,
+                                          color: Colors.blueAccent,
+                                          size: 28,
+                                        ))
+                                    : Container()
                               ],
                             ),
                           ),
