@@ -18,9 +18,11 @@ class MessagesProvider extends ChangeNotifier {
             .orderBy('date', descending: true)
             .get();
         if (querySnapshot.docs.isNotEmpty) {
-          _messages = querySnapshot.docs
-              .map((doc) => doc.data() as Map<String, dynamic>)
-              .toList();
+          _messages = querySnapshot.docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            data['id'] = doc.id;
+            return data;
+          }).toList();
         }
         notifyListeners();
       }

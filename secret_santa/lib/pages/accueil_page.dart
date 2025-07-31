@@ -240,11 +240,11 @@ class _AccueilPageState extends State<AccueilPage> {
                                                                             groupAdminEmail == _auth.currentUser!.email
                                                                                 ? const Text(
                                                                                     "Supprimer le groupe ?",
-                                                                                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                                                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                                                                                   )
                                                                                 : const Text(
                                                                                     "Quitter le groupe ?",
-                                                                                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                                                                                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                                                                                   ),
                                                                           ],
                                                                         ),
@@ -298,7 +298,7 @@ class _AccueilPageState extends State<AccueilPage> {
                                                                               if (groupAdminEmail == _auth.currentUser!.email) {
                                                                                 try {
                                                                                   String deletedGroupId = _groupsService.getGroupId(group);
-                                                                                  _groupsService.deleteGroup(deletedGroupId, () {
+                                                                                  await _groupsService.deleteGroup(deletedGroupId, () {
                                                                                     setState(() {
                                                                                       groupsProvider?.fetchGroupsData();
                                                                                     });
@@ -311,7 +311,7 @@ class _AccueilPageState extends State<AccueilPage> {
                                                                                 try {
                                                                                   String groupId = _groupsService.getGroupId(group);
                                                                                   String userWhoLeaveTheGroup = _auth.currentUser!.email as String;
-                                                                                  _groupsService.removeParticipantFromGroup(groupId, userWhoLeaveTheGroup, () {
+                                                                                  await _groupsService.removeParticipantFromGroup(groupId, userWhoLeaveTheGroup, () {
                                                                                     setState(() {
                                                                                       groupsProvider?.fetchGroupsData();
                                                                                     });
